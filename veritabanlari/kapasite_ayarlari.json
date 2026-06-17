@@ -1,0 +1,21 @@
+{
+    "varsayilan_gunluk_saat": 9,
+    "istasyonlar": {
+        "CY": {
+            "gunluk_saat": 9,
+            "makine_sayisi": 3
+        },
+        "QUASER": {
+            "gunluk_saat": 9,
+            "makine_sayisi": 3
+        },
+        "3D PRINT": {
+            "gunluk_saat": 22,
+            "makine_sayisi": 15
+        },
+        "3D YAZICI GRUBU": {
+            "gunluk_saat": 22,
+            "makine_sayisi": 15
+        }
+    }
+}

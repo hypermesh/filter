@@ -1,0 +1,67 @@
+{
+    "3D YAZICI": [
+        "3D YAZICI"
+    ],
+    "TIM": [
+        "TALAŞLI İMALAT",
+        "TORNA + DELİK DELME + DİŞ AÇMA",
+        "FREZE + DELİK DELME + DİŞ AÇMA",
+        "DELİK DELME - DİŞ AÇMA",
+        "TORNA",
+        "FREZE",
+        "KAMA KANALI",
+        "CNC DİK PLANYA",
+        "EBATLAMA",
+        "DÖKÜM",
+        "NEXT 110",
+        "QUASER - 3"
+    ],
+    "BUKUM": [
+        "BÜKÜM"
+    ],
+    "KAYNAK": [
+        "KAYNAK"
+    ],
+    "LAZER KESIM": [
+        "LAZER KESİM",
+        "LAZER PROFİL KESİM"
+    ],
+    "LAZER MARKALAMA": [
+        "LAZER MARKALAMA"
+    ],
+    "ELEKTRIK": [
+        "ELEKTRİK TESİSAT",
+        "PANO MONTAJ"
+    ],
+    "MONTAJ OTOMASYON": [
+        "MONTAJ OTOMASYONU"
+    ],
+    "FINAL MONTAJ": [
+        "FİNAL MONTAJ",
+        "MONTAJ"
+    ],
+    "ORNEK_GRUP": [
+        "TESTERE",
+        "DİŞLİ AZDIRMA",
+        "ISLAH",
+        "BORVERK",
+        "YATAK ÇAKMA",
+        "BOYAMA",
+        "ELOKSAL KAPLAMA",
+        "KAUÇUK KAPLAMA",
+        "NİKELAJ KAPLAMA",
+        "NİTRASYON",
+        "OKSİDASYON",
+        "ÇİNKO KAPLAMA",
+        "BALANS",
+        "BORU BÜKÜM",
+        "ELOKSAL KAPLAMA ( SARI )",
+        "ELOKSAL KAPLAMA ( SİYAH )",
+        "KATAFOREZ",
+        "KISMİ BOYAMA",
+        "KROM KAPLAMA",
+        "TAŞLAMA - SİLİNDİRİK",
+        "ÇİNKO KAPLAMA ( SARI )",
+        "İNDÜKSİYON"
+    ]
+}

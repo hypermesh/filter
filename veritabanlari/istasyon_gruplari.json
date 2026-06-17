@@ -1,0 +1,160 @@
+{
+    "TIM": {
+        "HAMMADDE": [
+            "TESTERE",
+            "EBATLAMA",
+            "DAİRE TESTERE",
+            "TOS2:1",
+            "TOS3:1",
+            "NEXT110Y:1",
+            "TS4000Y-1:1",
+            "TS4000Y-2:1",
+            "NEXT110:1",
+            "NEXT 110:1",
+            "QUASER-1:1",
+            "QUASER-2:1",
+            "QUASER-3:1",
+            "QUASER - 1:1",
+            "QUASER - 2:1",
+            "QUASER - 3:1",
+            "PHOEBUS:1",
+            "ARİON2142KÖPRÜ:1",
+            "ARION2142KOPRU:1",
+            "ARİONGSM2000:1",
+            "ARIONGSM2000:1",
+            "MATKAP+KILAVUZ:1",
+            "KILAVUZ:1",
+            "MATKAP:1",
+            "TMX2000S:1",
+            "PLANYA:1",
+            "NEXTURNSA32B:1"
+        ],
+        "SN50": [
+            "TOS2"
+        ],
+        "SN71": [
+            "TOS3"
+        ],
+        "CY": [
+            "NEXT110Y",
+            "TS4000Y-1",
+            "TS4000Y-2"
+        ],
+        "NEX110": [
+            "NEXT110",
+            "NEXT 110"
+        ],
+        "QUASER": [
+            "QUASER-1",
+            "QUASER-2",
+            "QUASER-3",
+            "QUASER - 1",
+            "QUASER - 2",
+            "QUASER - 3"
+        ],
+        "PHOEBUS": [
+            "PHOEBUS"
+        ],
+        "ARION2142": [
+            "ARİON2142KÖPRÜ",
+            "ARION2142KOPRU"
+        ],
+        "ARION2000S": [
+            "ARİONGSM2000",
+            "ARIONGSM2000"
+        ],
+        "MATKAP&KILAVUZ": [
+            "MATKAP+KILAVUZ",
+            "KILAVUZ",
+            "MATKAP",
+            "MATKAP+KILAVUZ"
+        ],
+        "TMX2000S": [
+            "TMX2000S"
+        ],
+        "PLANYA": [
+            "PLANYA"
+        ],
+        "SA32B": [
+            "NEXTURNSA32B"
+        ]
+    },
+    "BUKUM": {
+        "HAMMADDE": [],
+        "BÜKÜM 3MT": [
+            "BÜKÜM - 3MT"
+        ],
+        "BÜKÜM 4MT": [
+            "BÜKÜM - 4MT"
+        ]
+    },
+    "KAYNAK": {
+        "HAMMADDE": [
+            "TESTERE"
+        ],
+        "SAC KAYNAGI": [
+            "SAC KAYNAĞI - 1",
+            "SAC KAYNAĞI - 2"
+        ],
+        "PASLANMAZ KAYNAGI": [
+            "PASLANMAZ KAYNAĞI"
+        ],
+        "UNİTE/FLANS KAYNAGI": [
+            "ÜNİTE - FLANŞ KAYNAĞI"
+        ],
+        "SASE KAYNAGI": [
+            "ŞASE KAYNAĞI"
+        ]
+    },
+    "LAZER KESIM": {
+        "HAMMADDE": [
+            "LAZER KESİM",
+            "LAZER PROFİL KESİM"
+        ],
+        "LAZER KESIM": [
+            "LAZER KESİM",
+            "LAZER PROFİL KESİM"
+        ]
+    },
+    "LAZER MARKALAMA": {
+        "LAZER MARKALAMA GRUBU": [
+            "LAZER MARKALAMA"
+        ]
+    },
+    "MONTAJ OTOMASYON": {
+        "MONTAJ OTO - 1": [
+            "MONTAJ OTOMASYONU - 1"
+        ],
+        "MONTAJ OTO - 2": [
+            "MONTAJ OTOMASYONU - 2"
+        ],
+        "MONTAJ OTO - 3": [
+            "MONTAJ OTOMASYONU - 3"
+        ],
+        "MONTAJ OTO - 4": [
+            "MONTAJ OTOMASYONU - 4"
+        ]
+    },
+    "3D YAZICI": {
+        "HAMMADDE": [
+            "3D YAZICI"
+        ],
+        "3D YAZICI GRUBU": [
+            "3D YAZICI - 1",
+            "3D YAZICI - 2",
+            "3D YAZICI - 3",
+            "3D YAZICI - 4",
+            "3D YAZICI - 5",
+            "3D YAZICI - 6",
+            "3D YAZICI - 7",
+            "3D YAZICI - 8",
+            "3D YAZICI - 9",
+            "3D YAZICI - 10",
+            "3D YAZICI - 11",
+            "3D YAZICI - 12",
+            "3D YAZICI - 13",
+            "3D YAZICI - 14",
+            "3D YAZICI - 15"
+        ]
+    }
+}

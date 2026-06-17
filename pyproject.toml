@@ -1,0 +1,42 @@
+[project]
+name = "recipe-automation"
+version = "0.1.0"
+description = "Excel BOM / Reçete filtreleme ve operasyon analiz aracı"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.2.0",
+    "openpyxl>=3.1.0",
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "pydantic-settings>=2.0.0"
+]
+
+[project.scripts]
+recipe-automation = "recipe_automation.main:app"
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.3.0",
+    "mypy>=1.9.0",
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pre-commit>=3.6.0"
+]
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B", "UP", "C4"]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

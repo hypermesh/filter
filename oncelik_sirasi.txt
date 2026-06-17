@@ -1,0 +1,55 @@
+# Bu dosyaya öncelikli kaynak kodlarını sıralı bir şekilde yazın.
+# Her satıra tırnaksız, virgülsüz tek bir kod yazılmalıdır.
+# Listenin en üstündeki kod en yüksek önceliğe (1) sahip olur.
+# '#' ile başlayan satırlar açıklama satırıdır ve yoksayılır.
+1111
+2254
+2235
+2273
+2238
+2267
+2272
+2255
+2166
+2228
+2245
+2258
+2256
+2274
+2264
+2237
+2059
+2224
+2270
+2227
+2261
+2230
+2263
+2257
+2269
+2225
+2234
+2226
+2231
+2244
+2233
+2223
+2229
+2168
+2271
+2169
+2268
+2240
+2266
+2236
+2167
+2165
+2262
+2239
+2265
+2232
+2243
+2241
+2242
+2260
+2259

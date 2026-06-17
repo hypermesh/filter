@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reçete Ağacı Görüntüleyici (BOM Tree)</title>
+    <!-- D3.js Kütüphanesi -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- SheetJS (xlsx.js) Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        #sidebar-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            bottom: 20px;
+            width: 380px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-sizing: border-box;
+        }
+
+        #toolbar {
+            background: rgba(30, 30, 30, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00d2ff;
+            margin: 0 0 5px 0;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #888;
+            margin: 0;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 0;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #00d2ff;
+        }
+
+        button {
+            background: #00d2ff;
+            color: #000;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        button:hover {
+            background: #00a8cc;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 210, 255, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #444;
+        }
+        .btn-secondary:hover {
+            background: #3a3a3a;
+            border-color: #666;
+            color: #00d2ff;
+            box-shadow: 0 2px 5px rgba(255, 255, 255, 0.05);
+        }
+
+        /* SVG Styles */
+        .node circle {
+            fill: #1e1e1e;
+            stroke: #00d2ff;
+            stroke-width: 2.5px;
+            transition: all 0.3s ease;
+        }
+
+        .node text {
+            font: 13px sans-serif;
+            fill: #e0e0e0;
+            /* Yazıların arkasındaki çizgiyi silmek için arka plan renginde bir dış hat (stroke) ekliyoruz */
+            paint-order: stroke;
+            stroke: #121212;
+            stroke-width: 4px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .node--internal text {
+            font-weight: bold;
+        }
+
+        .node.matched circle {
+            fill: #ff3b30 !important;
+            stroke: #ff3b30 !important;
+            r: 8 !important;
+        }
+
+
+        .node.group circle {
+            fill: #ff9500 !important;
+            stroke: #cc7700 !important;
+            r: 6 !important;
+        }
+
+        .node.highlight-blue circle {
+            fill: #00f0ff !important;
+            stroke: #00f0ff !important;
+            r: 8 !important;
+        }
+        .node.highlight-blue text {
+            fill: #00f0ff !important;
+            font-weight: bold;
+            stroke: #121212 !important;
+            stroke-width: 5px !important;
+        }
+        .node.highlight-green circle {
+            fill: #32cd32 !important;
+            stroke: #32cd32 !important;
+            r: 8 !important;
+        }
+        .node.highlight-green text {
+            fill: #32cd32 !important;
+            font-weight: bold;
+            stroke: #121212 !important;
+            stroke-width: 5px !important;
+        }
+
+        /* Vurgulanmış Mavi (Montaj Otomasyonu) düğümler için durum kombinasyonları */
+        .node.highlight-blue.prod-red circle {
+            fill: #ff3b30 !important;
+            stroke: #00f0ff !important;
+            stroke-width: 3px !important;
+        }
+        .node.highlight-blue.prod-yellow circle {
+            fill: #ffd700 !important;
+            stroke: #00f0ff !important;
+            stroke-width: 3px !important;
+        }
+        .node.highlight-blue.prod-green circle {
+            fill: #32cd32 !important;
+            stroke: #00f0ff !important;
+            stroke-width: 3px !important;
+        }
+
+        /* Vurgulanmış Yeşil (Final Montaj) düğümler için durum kombinasyonları */
+        .node.highlight-green.prod-red circle {
+            fill: #ff3b30 !important;
+            stroke: #32cd32 !important;
+            stroke-width: 3px !important;
+        }
+        .node.highlight-green.prod-yellow circle {
+            fill: #ffd700 !important;
+            stroke: #32cd32 !important;
+            stroke-width: 3px !important;
+        }
+        .node.highlight-green.prod-green circle {
+            fill: #32cd32 !important;
+            stroke: #32cd32 !important;
+            stroke-width: 3px !important;
+        }
+
+        .node.group text {
+            fill: #ff9500 !important;
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        .node.matched text {
+            fill: #ff3b30 !important;
+            font-weight: bold;
+            font-size: 15px;
+            stroke: #121212 !important;
+            stroke-width: 5px !important;
+        }
+
+        /* Üretim Takip Durum Stilleri (Yalnızca vurgulanmamış düğümler için geçerlidir) */
+        .node.prod-red:not(.highlight-blue):not(.highlight-green) circle {
+            fill: #ff3b30 !important;
+            stroke: #ff3b30 !important;
+        }
+        .node.prod-red:not(.highlight-blue):not(.highlight-green) text {
+            fill: #ff8882 !important;
+        }
+        .node.prod-yellow:not(.highlight-blue):not(.highlight-green) circle {
+            fill: #ffd700 !important;
+            stroke: #ffd700 !important;
+        }
+        .node.prod-yellow:not(.highlight-blue):not(.highlight-green) text {
+            fill: #ffe875 !important;
+        }
+        .node.prod-green:not(.highlight-blue):not(.highlight-green) circle {
+            fill: #32cd32 !important;
+            stroke: #32cd32 !important;
+        }
+        .node.prod-green:not(.highlight-blue):not(.highlight-green) text {
+            fill: #9bf69b !important;
+        }
+
+        .link {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.25);
+            stroke-width: 1.5px;
+            transition: stroke 0.3s ease, stroke-width 0.3s ease;
+        }
+
+        .link.matched {
+            stroke: #ff3b30 !important;
+            stroke-width: 3.5px !important;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            text-align: left;
+            padding: 10px;
+            font: 13px sans-serif;
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid #444;
+            border-radius: 6px;
+            pointer-events: none;
+            opacity: 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.7);
+            color: #fff;
+            transition: opacity 0.2s;
+            z-index: 2000;
+        }
+
+        .tt-title { font-weight: bold; color: #00d2ff; margin-bottom: 5px; font-size: 14px;}
+        .tt-row { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 3px; }
+        .tt-label { color: #888; }
+        .tt-val { font-weight: 500; }
+        
+        #chart-container {
+            width: 100vw;
+            height: 100vh;
+            cursor: grab;
+        }
+        #chart-container:active {
+            cursor: grabbing;
+        }
+
+        #code-list-panel {
+            flex: 1;
+            min-height: 0;
+            background: rgba(30, 30, 30, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-sizing: border-box;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #code-list-items {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 5px;
+            padding-right: 5px;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        #code-list-items::-webkit-scrollbar {
+            width: 6px;
+        }
+        #code-list-items::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+        #code-list-items::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 3px;
+        }
+        #code-list-items::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="sidebar-container">
+        <div id="toolbar">
+            <p class="title">Makine Reçete Ağacı</p>
+            <p id="file-name" style="color: #00d2ff; font-weight: bold; font-size: 14px; margin-top: 5px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+            <div id="recipe-selector-container" style="display:none; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 10px;">
+                <label style="font-size: 13px; color: #aaa; font-weight: 500; white-space: nowrap;">Reçete Seç:</label>
+                <select id="recipe-selector" onchange="switchRecipe(this.value)" style="flex: 1; min-width: 0; background:#2a2a2a; color:#00d2ff; border:1px solid #555; padding:5px 10px; border-radius:4px; font-size:13px; font-weight:bold; cursor:pointer; outline:none; text-overflow: ellipsis;">
+                </select>
+            </div>
+            <div class="search-container">
+                <input type="text" id="search-box" placeholder="Parça Kodu veya Adı ile ara...">
+                <button onclick="searchNode()">Bul</button>
+                <button class="btn-secondary" onclick="resetTree()">Sıfırla</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+                <button class="btn-secondary" onclick="filterDepth(2, 'FINAL_MONTAJ', 'highlight-green')" style="font-size: 12px; padding: 8px 5px; font-weight: bold; border-radius: 4px; cursor: pointer; border: none; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">Final Montaj</button>
+                <div style="position:relative; width: 100%;">
+                    <button class="btn-secondary" id="btn-montaj" onclick="toggleMontajMenu()" style="width: 100%; font-size: 12px; padding: 8px 5px; font-weight: bold; border-radius: 4px; cursor: pointer; border: none; text-align: center; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">Montaj Otomasyon ▾</button>
+                    <div id="montaj-menu" style="display:none; position:absolute; top:110%; left:0; background:#2a2a2a; border:1px solid #555; border-radius:6px; padding:5px; z-index:999; flex-direction:column; gap:5px; min-width:160px; box-shadow: 0 4px 12px rgba(0,0,0,0.6);">
+                        <button style="background:#0099aa; color:#fff; border:none; padding:7px 12px; border-radius:4px; cursor:pointer; font-weight:bold; text-align:left; font-size:12px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" onclick="filterDepth(3, 'MONTAJ_OTOMASYONU', 'highlight-blue'); closeMontajMenu()">Kırılıma Göre</button>
+                        <button style="background:#00f0ff; color:#000; border:none; padding:7px 12px; border-radius:4px; cursor:pointer; font-weight:bold; text-align:left; font-size:12px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" onclick="filterByOpOnly('MONTAJ_OTOMASYONU', 'highlight-blue'); closeMontajMenu()">Yalnız İlgililer</button>
+                    </div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+                <button class="btn-secondary" onclick="filterDepth(999, null, null)" style="font-size: 12px; padding: 8px 5px; font-weight: bold; border-radius: 4px; cursor: pointer; border: none; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">Tümünü Aç</button>
+                <button id="btn-toggle-list" style="background:#00d2ff; color:#000; font-size: 12px; padding: 8px 5px; font-weight: bold; border-radius: 4px; cursor: pointer; border: none; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" onclick="toggleCodeList()">Listeyi Gizle</button>
+            </div>
+            <p id="total-count" style="font-size: 11px; color: #888; margin: 4px 0 0 0;"></p>
+            <p id="search-result" style="font-size: 11px; color: #ffd700; margin: 4px 0 0 0; display: none;"></p>
+        </div>
+
+        <div id="code-list-panel" style="display: flex;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #333; padding-bottom: 8px;">
+                <span style="font-weight:bold; color:#00d2ff; font-size:14px;" id="panel-title">Filtreli Parça Listesi</span>
+                <span id="panel-count" style="font-size:12px; color:#888;">(0 Kalem)</span>
+            </div>
+            <div id="code-list-items"></div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+    <div id="chart-container"></div>
+
+    <script>
+        // Python tarafından gömülen tüm ağaç verileri
+        const allTreesData = __ALL_TREES_PLACEHOLDER__;
+        let currentTreeIndex = 0;
+
+        // İlk ağaç verisi (başlangıç için)
+        let treeData = allTreesData[0].tree;
+        const fileName = allTreesData[0].name;
+        const fileEl = document.getElementById("file-name");
+        fileEl.innerText = "Dosya: " + fileName;
+        fileEl.title = fileName;
+
+        // Çoklu reçete varsa select box'ı doldur ve göster
+        if (allTreesData.length > 1) {
+            const sel = document.getElementById("recipe-selector");
+            allTreesData.forEach((item, idx) => {
+                const opt = document.createElement("option");
+                opt.value = idx;
+                opt.text = item.name;
+                sel.appendChild(opt);
+            });
+            document.getElementById("recipe-selector-container").style.display = "flex";
+        }
+
+        const container = document.getElementById("chart-container");
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+
+        const margin = {top: 20, right: 120, bottom: 20, left: 120};
+        const dy = 280; // DİKKAT: Yatay genişlik artırıldı (Eski: 160)
+        const dx = 32;  // Satırlar arası dikey genişlik (üst üste binmeyi önlemek için artırıldı)
+
+        const tree = d3.tree().nodeSize([dx, dy]);
+        const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+
+        const svg = d3.select("#chart-container").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+            
+        const g = svg.append("g");
+
+        // Zoom & Pan
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 3])
+            .on("zoom", (event) => {
+                g.attr("transform", event.transform);
+            });
+        
+        svg.call(zoom);
+
+        let root = d3.hierarchy(treeData);
+        root.x0 = height / 2;
+        root.y0 = 0;
+
+        let totalNodes = 0;
+        
+        // Başlangıçta Ana Makine haricindeki her şeyi kapat ve toplam sayıyı hesapla
+        root.descendants().forEach((d, i) => {
+            d.id = i;
+            d._children = d.children;
+            if (d.depth > 0) d.children = null;
+            
+            totalNodes++;
+        });
+
+        function markDuplicates(hierarchyRoot) {
+            const counts = {};
+            
+            function countNodes(d) {
+                const k = d.data.kod;
+                if (k && k !== "" && k !== "GROUP" && k !== "ROOT") {
+                    counts[k] = (counts[k] || 0) + 1;
+                }
+                const kids = d.children || d._children;
+                if (kids) kids.forEach(countNodes);
+            }
+            
+            function setDuplicateFlags(d) {
+                const k = d.data.kod;
+                d.isDuplicate = (k && k !== "" && k !== "GROUP" && k !== "ROOT" && counts[k] > 1);
+                const kids = d.children || d._children;
+                if (kids) kids.forEach(setDuplicateFlags);
+            }
+
+            countNodes(hierarchyRoot);
+            setDuplicateFlags(hierarchyRoot);
+        }
+        markDuplicates(root);
+        
+        // Sadece ANA MAKİNE yazısını saymaya gerek yok, o yüzden -1 yapıyoruz
+        document.getElementById("total-count").innerText = `Reçetedeki Toplam Parça Sayısı: ${totalNodes - 1} adet`;
+
+        const tooltip = d3.select("#tooltip");
+
+        function update(source) {
+            const duration = 250;
+            const nodes = root.descendants().reverse();
+            const links = root.links();
+
+            tree(root);
+
+            let left = root;
+            let right = root;
+            root.eachBefore(node => {
+                if (node.x < left.x) left = node;
+                if (node.x > right.x) right = node;
+            });
+
+            const transition = svg.transition()
+                .duration(duration);
+
+            // GÜNCELLE NODELAR
+            const node = g.selectAll("g.node")
+                .data(nodes, d => d.id);
+
+            const nodeEnter = node.enter().append("g")
+                .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
+                .attr("transform", d => `translate(${source.y0},${source.x0})`)
+                .on("click", (event, d) => {
+                    if (d.children) {
+                        d._children = d.children;
+                        d.children = null;
+                    } else {
+                        d.children = d._children;
+                    }
+                    update(d);
+                })
+                .on("mouseover", function(event, d) {
+                    tooltip.transition().duration(200).style("opacity", 1);
+                    const dt = d.data;
+                    let html = `<div class='tt-title'>${dt.kod || dt.name}</div>`;
+                    if (dt.ad) html += `<div class='tt-row'><span class='tt-label'>Ad:</span><span class='tt-val'>${dt.ad}</span></div>`;
+                    if (dt.sira) html += `<div class='tt-row'><span class='tt-label'>Sıra:</span><span class='tt-val'>${dt.sira}</span></div>`;
+                    if (dt.miktar) html += `<div class='tt-row'><span class='tt-label'>Miktar:</span><span class='tt-val'>${dt.miktar}</span></div>`;
+                    
+                    tooltip.html(html)
+                        .style("left", (event.pageX + 15) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function(d) {
+                    tooltip.transition().duration(500).style("opacity", 0);
+                });
+
+            nodeEnter.append("circle")
+                .attr("r", 1e-6)
+                .style("fill", d => d._children ? "#00d2ff" : "#1e1e1e");
+
+            nodeEnter.append("text")
+                .attr("dy", ".35em");
+
+            const nodeUpdate = nodeEnter.merge(node);
+
+            // Arama/Eşleşme ve Üretim Takip Stilleri
+            nodeUpdate.classed("matched", d => d.matched);
+            nodeUpdate.classed("group", d => d.data.is_group);
+            nodeUpdate.classed("highlight-blue", d => d.highlight_class === "highlight-blue");
+            nodeUpdate.classed("highlight-green", d => d.highlight_class === "highlight-green");
+            nodeUpdate.classed("prod-red", d => !d.data.is_group && d.prodStatus === 'red');
+            nodeUpdate.classed("prod-yellow", d => !d.data.is_group && d.prodStatus === 'yellow');
+            nodeUpdate.classed("prod-green", d => !d.data.is_group && d.prodStatus === 'green');
+
+            nodeUpdate.transition(transition)
+                .attr("transform", d => `translate(${d.y},${d.x})`);
+
+            nodeUpdate.select("circle")
+                .attr("r", d => (d.prodStatus && d.prodStatus !== 'none') ? 7 : 5)
+                .style("fill", d => {
+                    if (d.data.is_group) return "#ff9500"; // Grup klasör düğümleri her zaman turuncu kalır
+                    if (d.prodStatus === 'red') return "#ff3b30";
+                    if (d.prodStatus === 'yellow') return "#ffd700";
+                    if (d.prodStatus === 'green') return "#32cd32";
+                    if (d.matched) return "#ff3b30";
+                    return d._children ? "#00d2ff" : "#1e1e1e";
+                });
+
+            // Metinleri dinamik güncelle (Excel yüklendiğinde adetlerin değişebilmesi için)
+            nodeUpdate.select("text")
+                .attr("x", d => {
+                    if (d.data.is_group) return 13;
+                    return d._children ? -13 : 13;
+                })
+                .attr("text-anchor", d => {
+                    if (d.data.is_group) return "start";
+                    return d._children ? "end" : "start";
+                })
+                .each(function(d) {
+                    let txt = d.data.name;
+                    if(txt.length > 30) txt = txt.substring(0,27) + "...";
+                    
+                    if (d.prodStatus && d.prodStatus !== 'none' && d.data.uretilecek !== undefined && d.data.uretilecek > 0) {
+                        const reqVal = d.data.uretilecek;
+                        const prodVal = d.data.uretilen;
+                        const reqStr = Number.isInteger(reqVal) ? reqVal.toString() : reqVal.toFixed(1);
+                        const prodStr = Number.isInteger(prodVal) ? prodVal.toString() : prodVal.toFixed(1);
+                        txt += ` [${prodStr} / ${reqStr} Adet]`;
+                    } else if(d.data.miktar && d.data.miktar !== "" && d.data.miktar !== "nan") {
+                        txt += ` [${d.data.miktar} Adet]`;
+                    }
+                    
+                    const textEl = d3.select(this);
+                    textEl.text(""); // Önceki metni temizle
+                    
+                    if (d.isDuplicate) {
+                        textEl.append("tspan")
+                            .style("fill", "#ffb300")
+                            .text("★ ");
+                    }
+                    
+                    textEl.append("tspan").text(txt);
+                });
+
+            const nodeExit = node.exit().transition(transition).remove()
+                .attr("transform", d => `translate(${source.y},${source.x})`);
+
+            nodeExit.select("circle").attr("r", 1e-6);
+            nodeExit.select("text").style("fill-opacity", 1e-6);
+
+            // GÜNCELLE LİNKLER
+            const link = g.selectAll("path.link")
+                .data(links, d => d.target.id);
+
+            const linkEnter = link.enter().insert("path", "g")
+                .attr("class", "link")
+                .attr("d", d => {
+                    const o = {x: source.x0, y: source.y0};
+                    return diagonal({source: o, target: o});
+                });
+
+            const linkUpdate = linkEnter.merge(link);
+            
+            linkUpdate.classed("matched", d => d.target.matched);
+
+            linkUpdate.transition(transition)
+                .attr("d", diagonal);
+
+            link.exit().transition(transition).remove()
+                .attr("d", d => {
+                    const o = {x: source.x, y: source.y};
+                    return diagonal({source: o, target: o});
+                });
+
+            nodes.forEach(d => {
+                d.x0 = d.x;
+                d.y0 = d.y;
+            });
+            
+            // Eğer root update ediliyorsa merkeze al
+            if(source === root && document.getElementById("search-box").value === "") {
+               centerNode(root);
+            }
+            
+            // Kod listesini güncelle
+            updateCodeList();
+        }
+        
+        function centerNode(source) {
+            const scale = 0.8;
+            // Sol paneli (380px + boşluk) hesaba katarak sağdaki görünür alanın merkezini bul
+            const targetX = (width > 600) ? (width - 410) / 2 + 410 : width / 2;
+            
+            // Zıplamayı önlemek için geçici y0/x0 yerine hedeflenen güncel y/x koordinatlarını kullan
+            const x = -source.y * scale + targetX;
+            const y = -source.x * scale + height / 2;
+            
+            svg.transition()
+                .duration(750)
+                .call(zoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
+        }
+
+        function expandAll(d) {
+            if (d._children) {
+                d.children = d._children;
+                d.children.forEach(expandAll);
+            }
+        }
+
+        function collapseAll(d) {
+            if (d.children) {
+                d._children = d.children;
+                d._children.forEach(collapseAll);
+                d.children = null;
+            }
+        }
+        function traverseAll(d, callback, visited = new Set()) {
+            if (!d || visited.has(d)) return;
+            visited.add(d);
+            callback(d);
+            // Hem açık (children) hem kapalı (_children) düğümleri dolaş
+            if(d.children) d.children.forEach(c => traverseAll(c, callback, visited));
+            if(d._children) d._children.forEach(c => traverseAll(c, callback, visited));
+        }
+
+        // Tüm ağacı aç (güvenli - _children ve _hidden -> children)
+        function fullyOpen(d) {
+            // Önce gizlenmiş (filterByOpOnly tarafından saklanan) çocukları geri yükle
+            if(d._hidden) {
+                if(!d.children) d.children = [];
+                d.children = d.children.concat(d._hidden);
+                d._hidden = null;
+            }
+            if(d._children) { d.children = d._children; d._children = null; }
+            if(d.children) d.children.forEach(fullyOpen);
+        }
+
+        // Belirli derinlikten sonrasını kapat
+        function collapseAtDepth(d, maxDepth) {
+            if(d.children) {
+                d.children.forEach(c => collapseAtDepth(c, maxDepth));
+                if(d.depth >= maxDepth - 1) { d._children = d.children; d.children = null; }
+            }
+        }
+
+        // Buton ile filtreleme ve Vurgulama
+        window.filterDepth = function(maxDepth, opKeyword, colorClass) {
+            if(!root) return;
+
+            // 1. Tüm ağacı aç ki traverseAll tüm node'lara erişebilsin
+            fullyOpen(root);
+
+            // 2. Tüm node'ların highlight'ını ayarla
+            traverseAll(root, function(d) {
+                d.highlight_class = null;
+                if (opKeyword && d.data.ops && d.data.ops.length > 0) {
+                    let hasOp = false;
+                    if (opKeyword === 'FINAL_MONTAJ') {
+                        hasOp = d.data.ops.some(op => op.includes('FINAL') || op.includes('FİNAL'));
+                    } else if (opKeyword === 'MONTAJ_OTOMASYONU') {
+                        hasOp = d.data.ops.some(op => op.includes('OTOMASYON'));
+                    }
+                    if (hasOp) d.highlight_class = colorClass;
+                }
+            });
+
+            // 3. Derinliğe göre kapat (999 = tümünü açık bırak)
+            if(maxDepth < 999) {
+                collapseAtDepth(root, maxDepth);
+            }
+
+            update(root);
+            centerNode(root);
+        };
+
+        // Reçete değiştirme: select box'tan seçilince ağacı sıfırla ve yeni veriyle yükle
+        window.switchRecipe = function(idx) {
+            const newData = allTreesData[parseInt(idx)];
+            if(!newData) return;
+
+            // SVG içeriğini temizle
+            g.selectAll("*").remove();
+
+            // Yeni D3 hiyerarşi nesnesi oluştur
+            const newRoot = d3.hierarchy(newData.tree);
+            newRoot.x0 = height / 2;
+            newRoot.y0 = 0;
+            let nodeCounter = 0;
+            newRoot.descendants().forEach(d => {
+                d.id = nodeCounter++;
+                d._children = d.children;
+                if(d.depth > 0) d.children = null;
+            });
+            markDuplicates(newRoot);
+
+            // Root referansını güncelle
+            root = newRoot;
+
+            const fileEl = document.getElementById("file-name");
+            fileEl.innerText = "Dosya: " + newData.name;
+            fileEl.title = newData.name;
+            document.getElementById("total-count").innerText = "";
+            document.getElementById("search-result").style.display = "none";
+            document.getElementById("search-box").value = "";
+
+            // Ebeveyn durumlarını güncelle
+            if (excelDataMap) {
+                applyExcelDataToTree();
+            } else {
+                initTreeStatuses();
+            }
+
+            // Final Montaj görünümüyle yükle
+            filterDepth(2, 'FINAL_MONTAJ', 'highlight-green');
+        };
+
+        // Montaj Otomasyon dropdown menü kontrolü
+        function toggleMontajMenu() {
+            const menu = document.getElementById('montaj-menu');
+            const isOpen = menu.style.display === 'flex';
+            menu.style.display = isOpen ? 'none' : 'flex';
+        }
+        function closeMontajMenu() {
+            document.getElementById('montaj-menu').style.display = 'none';
+        }
+        // Menü dışına tıklayınca kapat
+        document.addEventListener('click', function(e) {
+            const btn = document.getElementById('btn-montaj');
+            const menu = document.getElementById('montaj-menu');
+            if(btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+
+        // YALNIZ İLGİLİLER - Sadece ilgili op. kodlarını ve ata yollarını göster
+        window.filterByOpOnly = function(opKeyword, colorClass) {
+            if(!root) return;
+
+            // 1. Her şeyi aç (_hidden dahil)
+            fullyOpen(root);
+
+            // 2. Bayrakları sıfırla
+            traverseAll(root, d => {
+                d.highlight_class = null;
+                d.opMatch = false;
+                d.hasOpDescendant = false;
+            });
+
+            // 3. Eşleşen node'ları işaretle ve ataları işaretle
+            traverseAll(root, function(d) {
+                if (d.data.ops && d.data.ops.length > 0) {
+                    let hasOp = false;
+                    if (opKeyword === 'MONTAJ_OTOMASYONU') {
+                        hasOp = d.data.ops.some(op => op.includes('OTOMASYON'));
+                    }
+                    if (hasOp) {
+                        d.highlight_class = colorClass;
+                        d.opMatch = true;
+                        let par = d.parent;
+                        while(par) { par.hasOpDescendant = true; par = par.parent; }
+                    }
+                }
+            });
+
+            // Bir alt ağacı tamamen kapat (her düğüm kendi altını _children'a taşısın)
+            function collapseSubtree(node) {
+                if(node.children) {
+                    node.children.forEach(collapseSubtree);
+                    node._children = node.children;
+                    node.children = null;
+                }
+            }
+
+            // 4. İlgisiz node'ları gizle (_hidden'a taşı)
+            function hideIrrelevant(d) {
+                if(!d.children) return;
+
+                // Pembe (opMatch) node: alt ağacı önce tamamen kapat, sonra _children'a koy
+                // Böylece tıklayınca sadece bir sonraki katman açılır
+                if(d.opMatch) {
+                    d.children.forEach(collapseSubtree);
+                    d._children = d.children;
+                    d.children = null;
+                    return;
+                }
+
+                d.children.forEach(hideIrrelevant);
+                const relevant = d.children.filter(c => c.opMatch || c.hasOpDescendant);
+                const hidden = d.children.filter(c => !c.opMatch && !c.hasOpDescendant);
+                if(hidden.length > 0) {
+                    d._hidden = (d._hidden || []).concat(hidden);
+                    d.children = relevant.length > 0 ? relevant : null;
+                }
+            }
+            hideIrrelevant(root);
+
+            update(root);
+            centerNode(root);
+        };
+
+        function searchNode() {
+            const query = document.getElementById("search-box").value.toLowerCase().trim();
+            if(!query) {
+                resetTree();
+                return;
+            }
+
+            // 1. Temizle
+            traverseAll(root, d => {
+                d.matched = false;
+                d.hasMatchedDescendant = false;
+            });
+
+            let matchCount = 0;
+            let lastMatchedNode = null;
+
+            // 2. Eşleşmeleri bul ve işaretle
+            traverseAll(root, d => {
+                const dt = d.data;
+                const kod = dt.kod != null ? String(dt.kod).toLowerCase() : "";
+                const ad = dt.ad != null ? String(dt.ad).toLowerCase() : "";
+                const name = dt.name != null ? String(dt.name).toLowerCase() : "";
+                
+                if(kod.includes(query) || ad.includes(query) || name.includes(query)) {
+                    d.matched = true;
+                    matchCount++;
+                    lastMatchedNode = d;
+                    
+                    // Ana makineye kadar tüm üst ebeveynleri işaretle
+                    let parent = d.parent;
+                    while(parent) {
+                        parent.hasMatchedDescendant = true;
+                        parent = parent.parent;
+                    }
+                }
+            });
+
+            if(matchCount === 0) {
+                alert("Eşleşme bulunamadı!");
+                document.getElementById("search-result").style.display = "none";
+                return;
+            } else {
+                document.getElementById("search-result").innerText = `Arama Sonucu: Aradığınız parça reçetede ${matchCount} farklı yerde kullanılıyor.`;
+                document.getElementById("search-result").style.display = "block";
+            }
+
+            // 3. SADECE eşleşenleri göster (Kardeşleri/diğer kolları gizle)
+            traverseAll(root, d => {
+                if(d._children) {
+                    if(d.hasMatchedDescendant) {
+                        // Altında eşleşen var, sadece eşleşen yolundakileri açık bırak
+                        d.children = d._children.filter(c => c.matched || c.hasMatchedDescendant);
+                    } else {
+                        // Kendisi eşleşmişse veya hiç eşleşmemişse altını kapat
+                        d.children = null;
+                    }
+                }
+            });
+
+            update(root);
+            
+            if (lastMatchedNode) {
+                setTimeout(() => centerNode(lastMatchedNode), 300);
+            }
+        }
+
+        function resetTree() {
+            document.getElementById("search-box").value = "";
+            document.getElementById("search-result").style.display = "none";
+            // Tüm highlight ve eşleşme durumlarını temizle
+            traverseAll(root, d => {
+                d.matched = false;
+                d.hasMatchedDescendant = false;
+                d.highlight_class = null;
+            });
+            // Final Montaj görünümüne dön (varsayılan)
+            filterDepth(2, 'FINAL_MONTAJ', 'highlight-green');
+        }
+
+        // Enter tuşu ile arama
+        document.getElementById("search-box").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                searchNode();
+            }
+        });
+
+        function updateCodeList() {
+            const panel = document.getElementById("code-list-panel");
+            if (!panel || panel.style.display === "none") return;
+            
+            // 1. Tüm node'ları tara ve highlight_class olanları (veya matched olanları) bul
+            const filteredNodes = [];
+            traverseAll(root, d => {
+                const dt = d.data;
+                if (dt.kod && dt.kod !== "" && dt.kod !== "ROOT" && dt.kod !== "GROUP") {
+                    if (d.highlight_class || d.matched) {
+                        filteredNodes.push(d);
+                    }
+                }
+            });
+            
+            // 2. Kod bazında grupla ve miktarları topla
+            const groups = {};
+            filteredNodes.forEach(d => {
+                const kod = d.data.kod;
+                const ad = d.data.ad || d.data.name;
+                
+                // Miktar parse et
+                let qty = 1.0;
+                if (d.data.miktar) {
+                    try {
+                        qty = parseFloat(String(d.data.miktar).replace(",", "."));
+                        if (isNaN(qty)) qty = 1.0;
+                    } catch (e) {
+                        qty = 1.0;
+                    }
+                }
+                
+                // Excel verisi varsa uretilecek ve uretilen'i kullan
+                let reqQty = qty;
+                let prodQty = 0;
+                let hasExcel = false;
+                if (excelDataMap && excelDataMap[kod]) {
+                    reqQty = excelDataMap[kod].uretilecek;
+                    prodQty = excelDataMap[kod].uretilen;
+                    hasExcel = true;
+                }
+                
+                if (!groups[kod]) {
+                    groups[kod] = {
+                        kod: kod,
+                        ad: ad,
+                        count: 0,
+                        total_qty: 0,
+                        total_prod: 0,
+                        hasExcel: hasExcel,
+                        color: d.highlight_class === "highlight-blue" ? "#00f0ff" : (d.highlight_class === "highlight-green" ? "#32cd32" : "#ff3b30")
+                    };
+                }
+                groups[kod].count += 1;
+                if (!hasExcel) {
+                    groups[kod].total_qty += qty;
+                } else {
+                    // Excel yüklüyse kümülatif zaten excelDataMap'te hesaplandığı için doğrudan atayabiliriz
+                    groups[kod].total_qty = reqQty;
+                    groups[kod].total_prod = prodQty;
+                }
+            });
+            
+            // 3. Listeyi doldur
+            const container = document.getElementById("code-list-items");
+            container.innerHTML = "";
+            
+            const sortedKeys = Object.keys(groups).sort();
+            
+            let totalItems = 0;
+            sortedKeys.forEach(kod => {
+                const item = groups[kod];
+                totalItems++;
+                
+                const itemEl = document.createElement("div");
+                itemEl.style.background = "rgba(50,50,50,0.5)";
+                itemEl.style.padding = "6px 10px";
+                itemEl.style.borderRadius = "4px";
+                
+                // Excel varsa duruma göre, yoksa varsayılan filtre rengine boya
+                let itemColor = item.color;
+                if (item.hasExcel) {
+                    if (item.total_prod >= item.total_qty && item.total_qty > 0) {
+                        itemColor = "#32cd32"; // Green
+                    } else if (item.total_prod > 0 && item.total_prod < item.total_qty) {
+                        itemColor = "#ffd700"; // Yellow
+                    } else {
+                        itemColor = "#ff3b30"; // Red
+                    }
+                }
+                
+                itemEl.style.borderLeft = `3px solid ${itemColor}`;
+                itemEl.style.display = "flex";
+                itemEl.style.justifyContent = "space-between";
+                itemEl.style.alignItems = "center";
+                itemEl.style.cursor = "pointer";
+                itemEl.style.transition = "background 0.2s";
+                
+                itemEl.onmouseover = () => itemEl.style.background = "rgba(70,70,70,0.7)";
+                itemEl.onmouseout = () => itemEl.style.background = "rgba(50,50,50,0.5)";
+                
+                // Tıklayınca ağaçtaki ilgili parçaya odaklansın
+                itemEl.onclick = () => {
+                    let targetNode = null;
+                    traverseAll(root, d => {
+                        if (d.data.kod === kod && (d.highlight_class || d.matched)) {
+                            targetNode = d;
+                        }
+                    });
+                    if (targetNode) {
+                        let p = targetNode.parent;
+                        while(p) {
+                            if(p._children) {
+                                p.children = p._children;
+                                p._children = null;
+                            }
+                            p = p.parent;
+                        }
+                        update(root);
+                        setTimeout(() => centerNode(targetNode), 100);
+                    }
+                };
+                
+                const leftDiv = document.createElement("div");
+                leftDiv.style.flex = "1";
+                leftDiv.style.marginRight = "10px";
+                leftDiv.style.whiteSpace = "nowrap";
+                leftDiv.style.overflow = "hidden";
+                leftDiv.style.textOverflow = "ellipsis";
+                
+                const kodSpan = document.createElement("span");
+                kodSpan.style.fontWeight = "bold";
+                kodSpan.style.color = "#fff";
+                
+                // Mükerrer ise başına sarı yıldız ekle
+                if (item.count > 1) {
+                    const starSpan = document.createElement("span");
+                    starSpan.style.color = "#ffd700";
+                    starSpan.innerText = "★ ";
+                    kodSpan.appendChild(starSpan);
+                }
+                
+                const kodText = document.createTextNode(kod);
+                kodSpan.appendChild(kodText);
+                leftDiv.appendChild(kodSpan);
+                
+                const adDiv = document.createElement("div");
+                adDiv.style.color = "#888";
+                adDiv.style.fontSize = "11px";
+                adDiv.style.whiteSpace = "nowrap";
+                adDiv.style.overflow = "hidden";
+                adDiv.style.textOverflow = "ellipsis";
+                adDiv.innerText = item.ad;
+                leftDiv.appendChild(adDiv);
+                
+                itemEl.appendChild(leftDiv);
+                
+                const qtySpan = document.createElement("span");
+                qtySpan.style.background = itemColor;
+                qtySpan.style.color = "#000";
+                qtySpan.style.padding = "2px 6px";
+                qtySpan.style.borderRadius = "10px";
+                qtySpan.style.fontWeight = "bold";
+                qtySpan.style.fontSize = "10px";
+                qtySpan.style.whiteSpace = "nowrap";
+                
+                if (item.hasExcel) {
+                    const reqStr = Number.isInteger(item.total_qty) ? item.total_qty.toString() : item.total_qty.toFixed(1);
+                    const prodStr = Number.isInteger(item.total_prod) ? item.total_prod.toString() : item.total_prod.toFixed(1);
+                    qtySpan.innerText = `${prodStr} / ${reqStr} Adet`;
+                } else {
+                    const qtyVal = item.total_qty;
+                    const qtyStr = Number.isInteger(qtyVal) ? qtyVal.toString() : qtyVal.toFixed(1);
+                    qtySpan.innerText = `${qtyStr} Adet`;
+                }
+                
+                itemEl.appendChild(qtySpan);
+                container.appendChild(itemEl);
+            });
+            
+            document.getElementById("panel-count").innerText = `(${totalItems} Kalem)`;
+            
+            if (totalItems === 0) {
+                container.innerHTML = `<div style="color:#666; text-align:center; padding:20px 0;">Aktif filtreye uygun parça bulunamadı.</div>`;
+            }
+        }
+
+        let excelDataMap = null; // Kod -> { uretilecek, uretilen }
+
+        function handleExcelUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const status = document.getElementById("upload-status");
+            status.innerText = "Okunuyor...";
+            status.style.color = "#ffd700";
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    // "Üretim Takip" sayfasını bul
+                    let sheetName = "Üretim Takip";
+                    if (!workbook.SheetNames.includes(sheetName)) {
+                        // Eğer yoksa ilk sayfayı dene
+                        sheetName = workbook.SheetNames[0];
+                    }
+                    
+                    const worksheet = workbook.Sheets[sheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    // Sütunları analiz et
+                    let kodCol = null;
+                    let reqCol = null;
+                    let prodCol = null;
+                    
+                    if (json.length > 0) {
+                        const firstRow = json[0];
+                        for (let key in firstRow) {
+                            const keyNorm = key.trim().toLowerCase().replace("ı","i").replace("ş","s").replace("ç","c").replace("ğ","g");
+                            if (keyNorm === "kod") kodCol = key;
+                            else if (keyNorm.includes("uretilecek") || keyNorm.includes("gereken") || keyNorm === "uretilecekmiktar" || keyNorm.includes("miktar")) {
+                                // Miktar ve Kod eşleşmesi
+                                if (keyNorm !== "kod") reqCol = key;
+                            }
+                            else if (keyNorm.includes("uretilen") || keyNorm === "uretilenmiktar") prodCol = key;
+                        }
+                    }
+                    
+                    // "Üretilen Miktar" varsayılan arama
+                    if (!prodCol) {
+                        for (let key in json[0]) {
+                            const k = key.trim().toLowerCase();
+                            if (k.includes("uretilen") || k.includes("üretilen")) {
+                                prodCol = key;
+                                break;
+                            }
+                        }
+                    }
+                    // "Üretilecek Miktar" varsayılan arama
+                    if (!reqCol) {
+                        for (let key in json[0]) {
+                            const k = key.trim().toLowerCase();
+                            if (k.includes("uretilecek") || k.includes("üretilecek") || k.includes("gereken")) {
+                                reqCol = key;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!kodCol || !reqCol || !prodCol) {
+                        throw new Error("Gerekli sütunlar (Kod, Üretilecek Miktar, Üretilen Miktar) bulunamadı. Lütfen 'Üretim Takip' sayfasını içeren Excel'i yükleyin.");
+                    }
+                    
+                    // Map oluştur
+                    excelDataMap = {};
+                    json.forEach(row => {
+                        const kod = String(row[kodCol] || "").trim().toUpperCase();
+                        if (kod && kod !== "NAN" && kod !== "") {
+                            // Ondalık sayıları ve virgülleri temizle
+                            let req = 0;
+                            let prod = 0;
+                            try {
+                                req = parseFloat(String(row[reqCol] || 0).replace(",", "."));
+                                if (isNaN(req)) req = 0;
+                            } catch(e) {}
+                            try {
+                                prod = parseFloat(String(row[prodCol] || 0).replace(",", "."));
+                                if (isNaN(prod)) prod = 0;
+                            } catch(e) {}
+                            
+                            if (!excelDataMap[kod]) {
+                                excelDataMap[kod] = { uretilecek: 0, uretilen: 0 };
+                            }
+                            excelDataMap[kod].uretilecek += req;
+                            excelDataMap[kod].uretilen += prod;
+                        }
+                    });
+                    
+                    status.innerText = "Excel Başarıyla Eşleşti!";
+                    status.style.color = "#32cd32";
+                    
+                    // Ağaç verilerini güncelle ve çizimi yenile
+                    applyExcelDataToTree();
+                    update(root);
+                    updateCodeList();
+                    
+                } catch(err) {
+                    status.innerText = "Hata: " + err.message;
+                    status.style.color = "#ff3b30";
+                    console.error(err);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function applyExcelDataToTree() {
+            if (!excelDataMap) return;
+            
+            // Rekürsif olarak durum belirle ve parent'lara yay
+            function evaluateStatus(d) {
+                const kids = d.children || d._children;
+                const dt = d.data;
+                const kod = dt.kod != null ? String(dt.kod).toUpperCase().trim() : "";
+                
+                if (kids && kids.length > 0) {
+                    // Parent Node
+                    kids.forEach(evaluateStatus);
+                    
+                    let hasRed = false;
+                    let hasYellow = false;
+                    let hasGreen = false;
+                    let hasNone = false;
+                    
+                    kids.forEach(c => {
+                        if (c.prodStatus === 'red') hasRed = true;
+                        else if (c.prodStatus === 'yellow') hasYellow = true;
+                        else if (c.prodStatus === 'green') hasGreen = true;
+                        else hasNone = true;
+                    });
+                    
+                    if (hasRed && !hasGreen && !hasYellow) {
+                        d.prodStatus = 'red';
+                    } else if (hasGreen && !hasRed && !hasYellow) {
+                        d.prodStatus = 'green';
+                    } else if (hasYellow || (hasGreen && hasRed)) {
+                        d.prodStatus = 'yellow';
+                    } else {
+                        d.prodStatus = 'none';
+                    }
+                } else {
+                    // Leaf Node
+                    if (kod && excelDataMap[kod]) {
+                        const info = excelDataMap[kod];
+                        dt.uretilecek = info.uretilecek;
+                        dt.uretilen = info.uretilen;
+                        
+                        if (info.uretilecek > 0) {
+                            if (info.uretilen >= info.uretilecek) {
+                                d.prodStatus = 'green';
+                            } else if (info.uretilen > 0) {
+                                d.prodStatus = 'yellow';
+                            } else {
+                                d.prodStatus = 'red';
+                            }
+                        } else {
+                            d.prodStatus = 'none';
+                        }
+                    } else {
+                        d.prodStatus = 'none'; // Üretim kapsamı dışındaki parçalar
+                    }
+                }
+            }
+            evaluateStatus(root);
+        }
+
+        function initTreeStatuses() {
+            function evaluateStatus(d) {
+                const kids = d.children || d._children;
+                const dt = d.data;
+                
+                if (kids && kids.length > 0) {
+                    kids.forEach(evaluateStatus);
+                    
+                    let hasRed = false;
+                    let hasYellow = false;
+                    let hasGreen = false;
+                    let hasNone = false;
+                    
+                    kids.forEach(c => {
+                        if (c.prodStatus === 'red') hasRed = true;
+                        else if (c.prodStatus === 'yellow') hasYellow = true;
+                        else if (c.prodStatus === 'green') hasGreen = true;
+                        else hasNone = true;
+                    });
+                    
+                    if (hasRed && !hasGreen && !hasYellow) {
+                        d.prodStatus = 'red';
+                    } else if (hasGreen && !hasRed && !hasYellow) {
+                        d.prodStatus = 'green';
+                    } else if (hasYellow || (hasGreen && hasRed)) {
+                        d.prodStatus = 'yellow';
+                    } else {
+                        d.prodStatus = 'none';
+                    }
+                } else {
+                    d.prodStatus = dt.prodStatus || 'none';
+                }
+            }
+            evaluateStatus(root);
+        }
+
+        function toggleCodeList() {
+            const panel = document.getElementById("code-list-panel");
+            const btn = document.getElementById("btn-toggle-list");
+            if (panel.style.display === "none") {
+                panel.style.display = "flex";
+                btn.innerText = "Listeyi Gizle";
+                btn.style.background = "#00d2ff";
+                updateCodeList();
+            } else {
+                panel.style.display = "none";
+                btn.innerText = "Listeyi Göster";
+                btn.style.background = "#444";
+                btn.style.color = "#fff";
+            }
+        }
+
+        // Başlangıçta durumları hesapla
+        initTreeStatuses();
+
+        // Başlangıçta Final Montaj görünümüyle aç
+        filterDepth(2, 'FINAL_MONTAJ', 'highlight-green');
+        setTimeout(() => {
+            centerNode(root);
+            updateCodeList();
+        }, 150);
+
+        // Otomatik Yenileme Sunucusu Kontrolü
+        if (window.location.protocol.startsWith("http")) {
+            let lastModified = null;
+            setInterval(() => {
+                fetch("/status")
+                    .then(res => res.json())
+                    .then(data => {
+                        if (lastModified === null) {
+                            lastModified = data.last_modified;
+                        } else if (data.last_modified !== lastModified) {
+                            console.log("Excel dosyasında değişiklik algılandı, sayfa yenileniyor...");
+                            location.reload();
+                        }
+                    })
+                    .catch(err => console.warn("İzleme sunucusu bağlantı hatası:", err));
+            }, 1500);
+        }
+
+    </script>
+</body>
+</html>
