@@ -10,8 +10,8 @@
 
 ---
 ## 📍 Progress Summary
-**Aktif Phase:** Geliştirmeler ve Hata Düzeltmeleri (Phase 4) Tamamlandı
-**Durum:** Dinamik kapasite ayarları, mükerrer kaynak birleştirme düzeltmesi, Excel formül wildcard ve limit hatalarının çözümü, terminal log iyileştirmeleri ve kolay öncelik güncelleme aracı başarıyla tamamlandı.
+**Aktif Phase:** Stok Rezervasyon Sistemi (Phase 5) Tamamlandı
+**Durum:** Öncelik sırasına göre FIFO stok rezervasyonu yapan `8_Stok_Rezerve.bat` ve `reserve` CLI komutu eklendi. StokListesi.xlsx'ten ham stok değeri alınarak kısmi rezervasyon (Seçenek A) mantığı uygulandı. Şirket bilgisayarı uyumu için bat dosyalarındaki Türkçe karakter sorunu giderildi.
 
 ---
 ## Phase 0 — Kurulum
@@ -49,3 +49,14 @@
 - [x] txt dosyasından json formatına öncelik listesini dönüştüren `7_Oncelik_Guncelle.bat` ve `update_priority.py` araçlarını hazırlama (sürükle-bırak desteği dahil).
 - [x] Koşullu biçimlendirme üst limitinin (`global_max_row`) dinamik satır sayısına göre (`max_df_len + 2000`) ayarlanması.
 - [x] Hazır ve Eksik kalem sayımlarının statik değerler yerine Excel formülleriyle (`COUNTIFS` ve `MAX`) dinamikleştirilmesi.
+
+## Phase 5 — Stok Rezervasyon Sistemi
+- [x] `8_Stok_Rezerve.bat` sürükle-bırak destekli başlatıcı oluşturuldu.
+- [x] `src/recipe_automation/utils/stock_reserver.py` — FIFO stok rezervasyon motoru yazıldı.
+- [x] `reserve` CLI komutu `main.py`'ye eklendi.
+- [x] `StokListesi.xlsx`'ten ham stok değeri okunuyor (Rezerve çıkarma yok — hesap kaynak dosyalarda yapılıyor).
+- [x] Kısmi rezervasyon (Seçenek A): Stok yeterliyse tamamı, kısmen yeterliyse olan kadarı rezerve ediliyor.
+- [x] Öncelik sırası (`oncelik_sirasi.json`) ile FIFO dağıtım: Aynı parça birden fazla dosyada gerekiyorsa önce sıradaki dosya stok alıyor.
+- [x] 5 birim test yazıldı ve tüm testler geçiyor.
+- [x] Şirket bilgisayarı uyumu: Tüm `.bat` `echo` satırları ASCII karakterlere dönüştürüldü (S11 — Türkçe karakter sorunu).
+- [x] Tüm değişiklikler GitHub'a push edildi.
