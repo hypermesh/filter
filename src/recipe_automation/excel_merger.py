@@ -1,7 +1,9 @@
+import datetime
 import os
 import sys
-import datetime
+
 import pandas as pd
+
 
 def merge_excels(folder_path):
     # 1. Klasör kontrolü
@@ -16,19 +18,21 @@ def merge_excels(folder_path):
         print(f"\n[HATA] Klasör içeriği okunamadı: {e}")
         return
 
-    excel_files = [f for f in all_files if f.lower().endswith(('.xlsx', '.xls'))]
-    
+    excel_files = [f for f in all_files if f.lower().endswith((".xlsx", ".xls"))]
+
     # Çıktı dosyasını hariç tut
     output_filename = "BIRLESTIRILMIS_EXCEL.xlsx"
     log_filename = "birlesme_raporu.txt"
-    
+
     excel_files = [f for f in excel_files if f != output_filename]
-    
+
     if not excel_files:
         print(f"\n[UYARI] Klasörde birleştirilecek excel dosyası bulunamadı: {folder_path}")
         return
 
-    print(f"\nToplam {len(excel_files)} adet Excel dosyası bulundu. Birleştirme işlemi başlatılıyor...")
+    print(
+        f"\nToplam {len(excel_files)} adet Excel dosyası bulundu. Birleştirme işlemi başlatılıyor..."
+    )
     print("=" * 70)
     print(f"{'Dosya Adı':<50} | {'Satır Sayısı':<15}")
     print("-" * 70)
@@ -44,10 +48,10 @@ def merge_excels(folder_path):
             # header=2 ile ilk 2 satırı (0 ve 1. indeks) atlayıp 3. satırı başlık olarak kullanıyoruz
             df = pd.read_excel(file_path, header=2)
             row_count = len(df)
-            
+
             print(f"{file_name:<50} | {row_count:<15}")
             log_entries.append((file_name, row_count))
-            
+
             if row_count > 0:
                 # Dosya adını bir kolon olarak eklemek verinin nereden geldiğini izlemek açısından çok faydalıdır.
                 # Ancak bunu kullanıcı istemediyse opsiyonel tutabiliriz. Şimdilik sadece veriyi ekleyelim.
@@ -62,7 +66,9 @@ def merge_excels(folder_path):
             log_entries.append((file_name, f"HATA: {e}"))
 
     print("=" * 70)
-    print(f"Başarılı: {success_count}/{len(excel_files)} dosya okundu. Toplam veri satırı: {total_rows}")
+    print(
+        f"Başarılı: {success_count}/{len(excel_files)} dosya okundu. Toplam veri satırı: {total_rows}"
+    )
     print("=" * 70)
 
     if not dfs:
@@ -82,7 +88,9 @@ def merge_excels(folder_path):
         combined_df.to_excel(output_path, index=False)
         print(f"\n[BAŞARILI] Birleştirilmiş Excel kaydedildi: {output_path}")
     except PermissionError:
-        print(f"\n[HATA] Kayıt Başarısız! '{output_filename}' dosyası şu an açık olduğu için üzerine yazılamıyor.")
+        print(
+            f"\n[HATA] Kayıt Başarısız! '{output_filename}' dosyası şu an açık olduğu için üzerine yazılamıyor."
+        )
         print("Lütfen dosyayı kapatıp tekrar deneyin.")
         return
     except Exception as e:
@@ -113,10 +121,11 @@ def merge_excels(folder_path):
     except Exception as e:
         print(f"[UYARI] Rapor dosyası oluşturulamadı: {e}")
 
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("[HATA] Lütfen hedef klasör yolunu argüman olarak verin.")
         sys.exit(1)
-        
+
     target_folder = sys.argv[1]
     merge_excels(target_folder)

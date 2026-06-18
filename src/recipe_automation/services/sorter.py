@@ -1,8 +1,11 @@
 import json
-import re
 import os
+import re
+
 import pandas as pd
+
 from recipe_automation.core.config import settings
+
 
 def load_priority_mapping(db_dir: str) -> dict:
     """
@@ -12,15 +15,16 @@ def load_priority_mapping(db_dir: str) -> dict:
     json_path = os.path.join(db_dir, "oncelik_sirasi.json")
     if not os.path.exists(json_path):
         return {}
-    
+
     try:
-        with open(json_path, 'r', encoding='utf-8') as f:
+        with open(json_path, encoding="utf-8") as f:
             mapping = json.load(f)
             # Tüm anahtarları string olarak tut ve boşlukları temizle
             return {str(k).strip(): int(v) for k, v in mapping.items()}
     except Exception as e:
         print(f"Uyarı: Öncelik sırası dosyası okunamadı: {e}")
         return {}
+
 
 def extract_file_names(kaynak_metin: str) -> list[str]:
     """
@@ -29,26 +33,32 @@ def extract_file_names(kaynak_metin: str) -> list[str]:
     """
     if pd.isna(kaynak_metin):
         return []
-        
+
     metin = str(kaynak_metin)
     # Virgülle ayır
-    parts = metin.split(',')
-    
+    parts = metin.split(",")
+
     names = []
     for part in parts:
         part = part.strip()
         if not part:
             continue
-            
+
         # Parantez içindeki sayıları temizle: '2241 (4)' -> '2241'
         # Regex: boşluk ve ardından gelen parantez içindeki her şeyi sil
-        clean_name = re.sub(r'\s*\([^)]*\)', '', part).strip()
-        
+        clean_name = re.sub(r"\s*\([^)]*\)", "", part).strip()
+
         # Eğer 'Sadece_TIM_2241' veya '.xlsx' varsa onları da temizle
-        clean_name = clean_name.replace('Sadece_TIM_', '').replace('Sadece_KZM5_', '').replace('.xlsx', '').strip()
+        clean_name = (
+            clean_name.replace("Sadece_TIM_", "")
+            .replace("Sadece_KZM5_", "")
+            .replace(".xlsx", "")
+            .strip()
+        )
         names.append(clean_name)
-        
+
     return names
+
 
 def calculate_row_priority(kaynak_metin: str, mapping: dict) -> int:
     """
@@ -57,10 +67,10 @@ def calculate_row_priority(kaynak_metin: str, mapping: dict) -> int:
     Hiçbiri bulunamazsa 9999 döner.
     """
     names = extract_file_names(kaynak_metin)
-    
+
     if not names:
         return 9999
-        
+
     min_priority = 9999
     for name in names:
         # Tam eşleşme (Örn: '2241')
@@ -74,8 +84,9 @@ def calculate_row_priority(kaynak_metin: str, mapping: dict) -> int:
                 if k in name or name in k:
                     if v < min_priority:
                         min_priority = v
-                        
+
     return min_priority
+
 
 def sort_dataframe(df: pd.DataFrame, mapping: dict) -> pd.DataFrame:
     """
@@ -83,22 +94,24 @@ def sort_dataframe(df: pd.DataFrame, mapping: dict) -> pd.DataFrame:
     """
     if df is None or df.empty:
         return df
-        
+
     if "KAYNAK DOSYA" not in df.columns:
         return df
-        
+
     # Her satırın önceliğini hesapla
     df_sorted = df.copy()
-    oncelik_degerleri = df_sorted['KAYNAK DOSYA'].apply(lambda x: calculate_row_priority(x, mapping))
-    
+    oncelik_degerleri = df_sorted["KAYNAK DOSYA"].apply(
+        lambda x: calculate_row_priority(x, mapping)
+    )
+
     # "Öncelik Sırası" sütununu uygun konuma ekle (Örn: Kod sütununun soluna)
     hedef_index = 1  # Varsayılan olarak KAYNAK DOSYA'dan hemen sonra
     if settings.col_depo_kod in df_sorted.columns:
         hedef_index = df_sorted.columns.get_loc(settings.col_depo_kod)
-        
+
     df_sorted.insert(hedef_index, "Öncelik Sırası", oncelik_degerleri)
-    
+
     # Öncelik Sırası'na ve Kaynak Dosya adına göre sırala
-    df_sorted = df_sorted.sort_values(by=['Öncelik Sırası', 'KAYNAK DOSYA'])
-    
+    df_sorted = df_sorted.sort_values(by=["Öncelik Sırası", "KAYNAK DOSYA"])
+
     return df_sorted

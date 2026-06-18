@@ -1,6 +1,5 @@
-from typer.testing import CliRunner
-
 from recipe_automation.main import app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

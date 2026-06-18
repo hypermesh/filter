@@ -1,5 +1,5 @@
 import pandas as pd
-import math
+
 
 def build_bom_tree(df: pd.DataFrame, filename: str = "", initial_reqs: dict = None) -> dict:
     """Excel DataFrame'ini Sira sütununu baz alarak içiçe (nested) JSON (dict) yapısına çevirir.
@@ -17,7 +17,15 @@ def build_bom_tree(df: pd.DataFrame, filename: str = "", initial_reqs: dict = No
     for c in df.columns:
         c_norm = str(c).strip().lower()
         # Türkçe karakterleri normalize et
-        c_norm = c_norm.replace("ı", "i").replace("ş", "s").replace("ç", "c").replace("ğ", "g").replace("ü", "u").replace("ö", "o").replace("İ", "i")
+        c_norm = (
+            c_norm.replace("ı", "i")
+            .replace("ş", "s")
+            .replace("ç", "c")
+            .replace("ğ", "g")
+            .replace("ü", "u")
+            .replace("ö", "o")
+            .replace("İ", "i")
+        )
 
         if c_norm in ["sira", "sira no"]:
             sira_col = c
@@ -27,7 +35,12 @@ def build_bom_tree(df: pd.DataFrame, filename: str = "", initial_reqs: dict = No
             ad_col = c
         elif c_norm in ["carpilmis miktar", "carpılmıs miktar", "miktar"]:
             miktar_col = c
-        elif "operasyon" in c_norm and "adi" not in c_norm and "sira" not in c_norm and "no" not in c_norm:
+        elif (
+            "operasyon" in c_norm
+            and "adi" not in c_norm
+            and "sira" not in c_norm
+            and "no" not in c_norm
+        ):
             op_cols.append(c)
 
     if not sira_col:
@@ -38,14 +51,7 @@ def build_bom_tree(df: pd.DataFrame, filename: str = "", initial_reqs: dict = No
 
     # Kök Node oluştur — dosya adını başlık olarak kullan
     title = filename if filename else "ANA MAKİNE"
-    root = {
-        "name": title,
-        "kod": "ROOT",
-        "ad": title,
-        "miktar": "",
-        "ops": [],
-        "children": []
-    }
+    root = {"name": title, "kod": "ROOT", "ad": title, "miktar": "", "ops": [], "children": []}
 
     nodes = {"0": root}
 
@@ -85,13 +91,13 @@ def build_bom_tree(df: pd.DataFrame, filename: str = "", initial_reqs: dict = No
         uretilecek_val = 0.0
         uretilen_val = 0.0
         prod_status = "none"
-        
+
         kod_upper = kod.strip().upper() if kod else ""
         if initial_reqs is not None and kod_upper:
             if kod_upper in initial_reqs:
                 uretilecek_val = initial_reqs[kod_upper]
                 prod_status = "red" if uretilecek_val > 0 else "none"
-        
+
         node = {
             "name": kod if kod else ad,
             "kod": kod,
@@ -102,11 +108,11 @@ def build_bom_tree(df: pd.DataFrame, filename: str = "", initial_reqs: dict = No
             "uretilecek": uretilecek_val,
             "uretilen": uretilen_val,
             "prodStatus": prod_status,
-            "children": []
+            "children": [],
         }
 
         # Parent bulma: "1.1.2" nin parentı "1.1" dir, "1" in parentı "0" dır (Root)
-        parts = sira.split('.')
+        parts = sira.split(".")
 
         if len(parts) == 1:
             parent_id = "0"
@@ -118,11 +124,11 @@ def build_bom_tree(df: pd.DataFrame, filename: str = "", initial_reqs: dict = No
         if parent_id not in nodes:
             # Pandas kesurat düzeltmesi: "1.010" → float "1.01" olarak okunabilir
             found = False
-            if parent_id.count('.') <= 1:
+            if parent_id.count(".") <= 1:
                 try:
                     p_val = float(parent_id)
                     for k in nodes.keys():
-                        if k.count('.') <= 1:
+                        if k.count(".") <= 1:
                             try:
                                 if float(k) == p_val:
                                     parent_id = k
@@ -139,7 +145,6 @@ def build_bom_tree(df: pd.DataFrame, filename: str = "", initial_reqs: dict = No
                 nodes[parent_id]["children"].append(node)
         else:
             nodes[parent_id]["children"].append(node)
-
 
     def paginate_children(node, limit=5):
         if not node.get("children"):
@@ -162,14 +167,14 @@ def build_bom_tree(df: pd.DataFrame, filename: str = "", initial_reqs: dict = No
 
         if len(leaves) > limit:
             group_node = {
-                "name": f"\U0001F4E6 [{len(leaves)} Tekil Par\u00e7ay\u0131 G\u00f6ster]",
+                "name": f"\U0001f4e6 [{len(leaves)} Tekil Par\u00e7ay\u0131 G\u00f6ster]",
                 "kod": "GROUP",
                 "ad": "",
                 "miktar": "",
                 "sira": "",
                 "ops": [],
                 "is_group": True,
-                "children": leaves
+                "children": leaves,
             }
             new_children.append(group_node)
         else:
