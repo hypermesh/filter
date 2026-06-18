@@ -7,7 +7,7 @@ color 0B
 title Stok Rezervasyon Sistemi
 
 echo ====================================================
-echo   STOK REZERVASYON SİSTEMİ
+echo   STOK REZERVASYON SISTEMI
 echo   Klasoru bu dosyanin uzerine surukleme-birakma ile
 echo   oncelik sirasina gore stok dagitimi yapilir.
 echo ====================================================
