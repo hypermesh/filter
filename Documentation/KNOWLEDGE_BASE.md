@@ -61,6 +61,12 @@ Tarihsel alınan kararlar ve gerekçeleri.
 * **Sorun:** Üretim Takip sayfasındaki "HAZIR (Kalem)" ve "EKSİK (Kalem)" sütunlarındaki değerler, Excel ilk oluşturulduğunda hesaplanan statik tam sayılar olarak kalıyordu. Kullanıcı parça kodu girdikçe bu sayılar güncellenmiyordu.
 * **Çözüm:** `EKSİK (Kalem)` hücresi için dinamik `COUNTIFS` formülü entegre edildi. `HAZIR (Kalem)` hücresi için ise `MAX(0, N{i}-P{i})` çıkarma formülü entegre edildi.
 
+### S11: Şirket Bilgisayarında `.bat` Dosyalarında Türkçe Karakter Sorunu
+* **Sorun:** Şirket bilgisayarında `1_Kurulum_Yap.bat` çalıştırıldığında `echo` komutlarındaki Türkçe karakterler (`ş`, `ç`, `ğ`, `İ`, `ü`, `ö` vb.) bozuk görünüyor ve bazı durumlarda komut hata vererek duruyor. Kendi bilgisayarında sorunsuz çalışan dosya, şirket bilgisayarının farklı Windows dil/code page veya terminal font ayarları nedeniyle Türkçe karakterleri düzgün işleyemiyor.
+* **Kök Neden:** Windows `cmd.exe`'nin varsayılan karakter kod sayfası (`code page`) şirket bilgisayarlarında farklı olabilir. `chcp 65001` komutu UTF-8'e geçiş sağlasa da bazı eski Windows sürümleri veya kısıtlı ortamlarda `echo` içindeki özel karakterler yine de hatalı render edilebilir.
+* **Çözüm:** Tüm `.bat` dosyalarındaki `echo` komutlarında Türkçe özel karakterler ASCII karşılıklarıyla değiştirildi (örn: `Bilgisayarda` yerine `Bilgisayarda`, `İ` → `I`, `ş` → `s` vb.). Fonksiyonel içerik (Python kodu, dosya yolları) değiştirilmedi — yalnızca kullanıcıya görünen `echo` mesajları ASCII'ye indirildi.
+* **Önlem:** Bundan sonra yazılacak tüm `.bat` `echo` satırlarında Türkçe özel karakter **kullanılmamalıdır**. Sadece `@echo off`, dosya yolları ve Python/uv komutlarında Türkçe karakter kabul edilebilir.
+
 ## FAILED (Başarısız Denemeler)
 *(Boş)*
 
