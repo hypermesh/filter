@@ -96,9 +96,9 @@ def load_stok_dict(stok_xlsx_path: str) -> dict[str, float]:
     for _, row in df_stok.iterrows():
         k = safe_kod(row[kod_col])
         if k and k.lower() != "nan":
-            fiziki = safe_float(row[stok_col])
-            rezerve = safe_float(row[rezerve_col]) if rezerve_col else 0.0
-            stok_dict[k] = max(0.0, fiziki - rezerve)
+            # Sadece fiziki stok değerini alıyoruz.
+            # Rezerve hesabı yapılmıyor — tüm işlemler kaynak dosyalar üzerinde gerçekleşecek.
+            stok_dict[k] = safe_float(row[stok_col])
 
     return stok_dict
 
