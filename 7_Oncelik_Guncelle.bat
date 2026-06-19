@@ -10,9 +10,11 @@ echo.
 if "%~1"=="" (
     echo 'oncelik_sirasi.txt' dosyasindaki listeye gore
     echo 'veritabanlari/oncelik_sirasi.json' guncelleniyor...
+    for %%F in ("oncelik_sirasi.txt") do echo Son kayit: %%~tF
 ) else (
     echo Suruklenen dosya: '%~1'
     echo Bu dosya okunarak 'veritabanlari/oncelik_sirasi.json' guncelleniyor...
+    for %%F in ("%~1") do echo Son kayit: %%~tF
 )
 echo.
 
