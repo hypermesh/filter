@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İnteraktif Üretim ve Montaj Takip Sistemi</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS (xlsx.full.min.js) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="drop-zone" class="drop-zone">
+        <div class="drop-zone-content">
+            <div class="glow-icon">
+                <i class="fa-solid fa-file-excel"></i>
+            </div>
+            <h2>Takip Etmek İstediğiniz Excel Dosyasını Sürükle ve Bırak</h2>
+            <p>veya bilgisayarınızdan seçmek için tıklayın</p>
+            <input type="file" id="file-input" accept=".xlsx, .xls" style="display: none;">
+            <button class="btn btn-primary btn-lg" id="select-file-btn">
+                <i class="fa-solid fa-folder-open"></i> Dosya Seç
+            </button>
+            <div class="sample-info">
+                <i class="fa-solid fa-circle-info"></i> Excel dosyasındaki formüller korunur ve tüm hesaplamalar anlık olarak güncellenir.
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="app-container" style="display: none;">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="logo-icon"><i class="fa-solid fa-gears"></i></div>
+                <div class="logo-text">
+                    <h1>ÜRETİM & MONTAJ TAKİP</h1>
+                    <span id="loaded-file-name">Yüklenen Dosya: -</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="change-file-btn">
+                    <i class="fa-solid fa-file-import"></i> Yeni Dosya Yükle
+                </button>
+                <button class="btn btn-success" id="export-btn">
+                    <i class="fa-solid fa-file-export"></i> Güncel Excel Olarak İndir
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="app-content-wrapper">
+            <!-- Left Sidebar Navigation -->
+            <aside class="app-sidebar">
+                <nav class="sidebar-nav">
+                    <button class="nav-item active" data-tab="dashboard">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Genel Durum</span>
+                    </button>
+                    <button class="nav-item" data-tab="production">
+                        <i class="fa-solid fa-industry"></i>
+                        <span>Üretim Takip & Giriş</span>
+                    </button>
+                    <button class="nav-item" data-tab="uretim-listesi">
+                        <i class="fa-solid fa-list-ol"></i>
+                        <span>Üretim Listesi</span>
+                    </button>
+                    <button class="nav-item" data-tab="assembly">
+                        <i class="fa-solid fa-puzzle-piece"></i>
+                        <span>Montaj İzleme</span>
+                    </button>
+                    <button class="nav-item" data-tab="rotasizlar">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>Rotasızlar</span>
+                    </button>
+                    <button class="nav-item" data-tab="stations">
+                        <i class="fa-solid fa-microchip"></i>
+                        <span>İstasyon İş Listeleri</span>
+                    </button>
+                </nav>
+                <div class="sidebar-footer">
+                    <div class="version">v1.2.0 • Antigravity Engine</div>
+                </div>
+            </aside>
+
+            <!-- Main Panel -->
+            <main class="app-main-panel">
+                <!-- TAB: Dashboard -->
+                <section class="tab-content active" id="tab-dashboard">
+                    <div class="kpi-grid">
+                        <div class="kpi-card glass">
+                            <div class="kpi-icon icon-blue"><i class="fa-solid fa-boxes-stacked"></i></div>
+                            <div class="kpi-info">
+                                <h3>Toplam Parça Kalemi</h3>
+                                <div class="value" id="kpi-total-parts">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass">
+                            <div class="kpi-icon icon-green"><i class="fa-solid fa-circle-check"></i></div>
+                            <div class="kpi-info">
+                                <h3>Hazır Parça Kalemi</h3>
+                                <div class="value" id="kpi-ready-parts">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass">
+                            <div class="kpi-icon icon-orange"><i class="fa-solid fa-hourglass-half"></i></div>
+                            <div class="kpi-info">
+                                <h3>Eksik Parça Kalemi</h3>
+                                <div class="value" id="kpi-missing-parts">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass">
+                            <div class="kpi-icon icon-purple"><i class="fa-solid fa-file-invoice"></i></div>
+                            <div class="kpi-info">
+                                <h3>Toplam Kaynak Dosya</h3>
+                                <div class="value" id="kpi-total-files">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card glass mt-4">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-file-zipper text-blue"></i> Kaynak Dosya Durumları</h2>
+                            <div class="search-bar">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="dashboard-search" placeholder="Kaynak dosya ara...">
+                            </div>
+                        </div>
+                        <div class="dashboard-files-container" id="dashboard-files-list">
+                            <!-- Kaynak Dosya Kartları Buraya Gelecek -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: Production -->
+                <section class="tab-content" id="tab-production">
+                    <!-- Quick Entry & Info Grid -->
+                    <div class="grid-2-1">
+                        <div class="section-card glass">
+                            <div class="card-header">
+                                <h2><i class="fa-solid fa-plus-circle text-green"></i> Yeni Üretim Girişi</h2>
+                            </div>
+                            <form id="production-form" class="production-form">
+                                <div class="form-group relative">
+                                    <label for="prod-code">Parça Kodu</label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-solid fa-barcode"></i>
+                                        <input type="text" id="prod-code" placeholder="Parça kodunu yazın..." required autocomplete="off">
+                                    </div>
+                                    <div id="autocomplete-list" class="autocomplete-items"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="prod-qty">Üretim Adedi</label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-solid fa-calculator"></i>
+                                        <input type="number" id="prod-qty" min="1" placeholder="Miktar girin..." required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fa-solid fa-check"></i> Üretim Girişini Kaydet
+                                </button>
+                            </form>
+                        </div>
+                        <div class="section-card glass flex-col">
+                            <div class="card-header">
+                                <h2><i class="fa-solid fa-circle-info text-blue"></i> Hızlı Parça Bilgisi</h2>
+                            </div>
+                            <div class="part-info-box" id="quick-part-info">
+                                <div class="info-placeholder">
+                                    <i class="fa-solid fa-search-plus"></i>
+                                    <p>Durumunu ve detaylarını incelemek için bir parça kodu arayın veya tablodan seçin.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Split List & Log -->
+                    <div class="grid-1-2 mt-4">
+                        <!-- Production Log -->
+                        <div class="section-card glass flex-col">
+                            <div class="card-header">
+                                <h2><i class="fa-solid fa-history text-orange"></i> Üretim Giriş Günlüğü</h2>
+                                <span class="badge" id="prod-log-count">0 Kayıt</span>
+                            </div>
+                            <div class="table-wrapper flex-1">
+                                <table class="table" id="production-log-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Sıra</th>
+                                            <th>Parça Kodu</th>
+                                            <th>Adet</th>
+                                            <th>Fazla</th>
+                                            <th>İşlem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="production-log-body">
+                                        <!-- Giriş günlükleri buraya listelenecek -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Requirements Table -->
+                        <div class="section-card glass flex-col">
+                            <div class="card-header">
+                                <h2><i class="fa-solid fa-table-list text-blue"></i> Üretim Takip Listesi (Gereksinimler)</h2>
+                                <div class="header-filters">
+                                    <div class="search-bar">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <input type="text" id="takip-search" placeholder="Kod veya Kaynak ara...">
+                                    </div>
+                                    <select id="takip-filter-status" class="select-input">
+                                        <option value="all">Tüm Durumlar</option>
+                                        <option value="complete">Tamamlananlar</option>
+                                        <option value="partial">Kısmi Üretilenler</option>
+                                        <option value="missing">Hiç Üretilmeyenler</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-wrapper flex-1">
+                                <table class="table" id="takip-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Kaynak Dosya</th>
+                                            <th>Öncelik</th>
+                                            <th>Parça Kodu</th>
+                                            <th class="text-right">Üretilecek</th>
+                                            <th class="text-right">Üretilen</th>
+                                            <th class="text-right">Kalan</th>
+                                            <th>İlerleme</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="takip-table-body">
+                                        <!-- Takip tablosu buraya gelecek -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="pagination-footer">
+                                <span class="page-info" id="takip-page-info">Gösterilen: 0 - 0 / Toplam: 0</span>
+                                <div class="pagination-buttons">
+                                    <button class="btn btn-sm btn-secondary" id="takip-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                                    <button class="btn btn-sm btn-secondary" id="takip-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: Assembly -->
+                <section class="tab-content" id="tab-assembly">
+                    <div class="assembly-tabs">
+                        <button class="assembly-tab-btn active" data-assembly="otomasyon">
+                            <i class="fa-solid fa-robot"></i> Montaj Otomasyon İzleme
+                        </button>
+                        <button class="assembly-tab-btn" data-assembly="final">
+                            <i class="fa-solid fa-flag-checkered"></i> Final Montaj İzleme
+                        </button>
+                    </div>
+
+                    <div class="mt-3">
+                        <!-- Assembly Right: Parents -->
+                        <div class="section-card glass flex-col">
+                            <div class="card-header">
+                                <h2><i class="fa-solid fa-cubes text-purple"></i> Üst Montaj & Set Limitleri</h2>
+                                <div class="header-filters">
+                                    <div class="search-bar">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <input type="text" id="assembly-right-search" placeholder="Ara...">
+                                    </div>
+                                    <select id="assembly-right-filter-status" class="select-input">
+                                        <option value="all">Tüm Montajlar</option>
+                                        <option value="missing">Eksikli Montajlar</option>
+                                        <option value="complete">Eksiksiz (Hazır) Olanlar</option>
+                                    </select>
+                                    <select id="assembly-right-sort" class="select-input">
+                                        <option value="priority">Öncelik Sırası</option>
+                                        <option value="completion-desc">Tamamlanma % (Azalan)</option>
+                                        <option value="limit-desc">Ek Set Limiti (Azalan)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-wrapper flex-1">
+                                <table class="table" id="assembly-right-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Kaynak Dosya</th>
+                                            <th>Üst Montaj Kodu</th>
+                                            <th>Üst Montaj Adı</th>
+                                            <th class="text-right">Çeşit (T/E)</th>
+                                            <th>Tamamlanma %</th>
+                                            <th class="text-right">Toplam Parça</th>
+                                            <th class="text-right highlight-column">Ek Toplanabilir (Set)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="assembly-right-body">
+                                        <!-- Sağ tablo içerik -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="pagination-footer">
+                                <span class="page-info" id="assembly-right-page-info">Gösterilen: 0 / 0</span>
+                                <div class="pagination-buttons">
+                                    <button class="btn btn-sm btn-secondary" id="assembly-right-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                                    <button class="btn btn-sm btn-secondary" id="assembly-right-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: Rotasizlar -->
+                <section class="tab-content" id="tab-rotasizlar">
+                    <div class="section-card glass flex-col">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-triangle-exclamation text-orange"></i> Rota Tanımı Bulunmayan Parçalar</h2>
+                            <div class="header-actions">
+                                <span class="badge badge-orange" id="rotasiz-count">0 Kalem</span>
+                                <div class="search-bar">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="rotasiz-search" placeholder="Parça kodu ara...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-wrapper flex-1">
+                            <table class="table" id="rotasiz-table">
+                                <thead id="rotasiz-thead">
+                                    <tr>
+                                        <th>Kaynak Dosya</th>
+                                        <th>Sıra No</th>
+                                        <th>Öncelik Sırası</th>
+                                        <th>Kod</th>
+                                        <th>Malzeme</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rotasiz-tbody">
+                                    <!-- Rotasızlar buraya yüklenecek -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: Üretim Listesi -->
+                <section class="tab-content" id="tab-uretim-listesi">
+                    <div class="section-card glass flex-col">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-list-ol text-blue"></i> Üretim Listesi (Ana Üretim Miktarları)</h2>
+                            <div class="header-filters">
+                                <div class="search-bar">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="ul-search" placeholder="Kod veya malzeme ara...">
+                                </div>
+                                <select id="ul-sort" class="select-input">
+                                    <option value="priority-asc">Öncelik (Artan)</option>
+                                    <option value="priority-desc">Öncelik (Azalan)</option>
+                                    <option value="code-asc">Kod (A-Z)</option>
+                                    <option value="uretilecek-desc">Üretilecek (Azalan)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-wrapper flex-1">
+                            <table class="table" id="ul-table">
+                                <thead>
+                                    <tr>
+                                        <th>Kaynak Dosya(lar)</th>
+                                        <th>Öncelik</th>
+                                        <th>Parça Kodu</th>
+                                        <th>Malzeme Adı</th>
+                                        <th>Hammadde Kod</th>
+                                        <th>Hammadde</th>
+                                        <th class="text-right" style="width: 120px;">Üretilecek Miktar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ul-table-body">
+                                    <!-- Üretim Listesi satırları buraya gelecek -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination-footer">
+                            <span class="page-info" id="ul-page-info">Gösterilen: 0 / 0</span>
+                            <div class="pagination-buttons">
+                                <button class="btn btn-sm btn-secondary" id="ul-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                                <button class="btn btn-sm btn-secondary" id="ul-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: Stations -->
+                <section class="tab-content" id="tab-stations">
+                    <div class="grid-1-4">
+                        <!-- Station Selection List -->
+                        <div class="section-card glass flex-col">
+                            <div class="card-header">
+                                <h2><i class="fa-solid fa-list-check text-blue"></i> İstasyonlar</h2>
+                            </div>
+                            <div class="stations-list-group" id="stations-list">
+                                <!-- İstasyon isimleri listesi -->
+                            </div>
+                        </div>
+
+                        <!-- Station Data Details -->
+                        <div class="section-card glass flex-col">
+                            <div class="card-header">
+                                <h2 id="current-station-title"><i class="fa-solid fa-industry text-green"></i> İstasyon Detayları</h2>
+                                <div class="header-filters">
+                                    <div class="search-bar">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <input type="text" id="station-search" placeholder="Kod veya malzeme ara...">
+                                    </div>
+                                    <select id="station-filter-status" class="select-input">
+                                        <option value="all">Tüm Durumlar</option>
+                                        <option value="missing">Eksik Olanlar</option>
+                                        <option value="production">Üretimde Olanlar</option>
+                                        <option value="ready">Hazır (Eksiksiz) Olanlar</option>
+                                    </select>
+                                    <select id="station-sort" class="select-input">
+                                        <option value="priority-asc">Öncelik (Artan)</option>
+                                        <option value="priority-desc">Öncelik (Azalan)</option>
+                                        <option value="code-asc">Kod (A-Z)</option>
+                                        <option value="uretilecek-desc">Üretilecek (Azalan)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-wrapper flex-1">
+                                <table class="table" id="station-table">
+                                    <thead id="station-thead">
+                                        <!-- Dinamik olarak doldurulacak -->
+                                    </thead>
+                                    <tbody id="station-tbody">
+                                        <!-- İstasyon satırları buraya gelecek -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="pagination-footer">
+                                <span class="page-info" id="station-page-info">Gösterilen: 0 / 0</span>
+                                <div class="pagination-buttons">
+                                    <button class="btn btn-sm btn-secondary" id="station-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                                    <button class="btn btn-sm btn-secondary" id="station-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Notification system -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

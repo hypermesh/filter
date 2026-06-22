@@ -416,6 +416,7 @@ def filter_id(
                 if not res.empty:
                     kaynak_metin = os.path.splitext(os.path.basename(file))[0]
                     from recipe_automation.services.sorter import load_priority_mapping
+
                     priority_mapping = load_priority_mapping(db_dir)
                     clean_name = (
                         kaynak_metin.replace("Sadece_TIM_", "")
@@ -596,6 +597,7 @@ def filter_stock(
                 if not res.empty:
                     kaynak_metin = os.path.splitext(os.path.basename(file))[0]
                     from recipe_automation.services.sorter import load_priority_mapping
+
                     priority_mapping = load_priority_mapping(db_dir)
                     clean_name = (
                         kaynak_metin.replace("Sadece_TIM_", "")
@@ -1020,6 +1022,7 @@ def do_match_depo(
 
         # 3. matched_df'deki 'Üretilecek Miktar'ı net eksik ile güncelle (Sadece Kapasite Modunda)
         if is_capacity_mode and "Üretilecek Miktar" in matched_df.columns:
+
             def get_net_qty(row):
                 k = str(row.get(settings.col_depo_kod, "")).strip().upper()
                 if k.endswith(".0"):
@@ -1274,8 +1277,8 @@ def do_match_depo(
                         if not part:
                             continue
                         if "(" in part and part.endswith(")"):
-                            name = part[:part.find("(")].strip()
-                            qty_str = part[part.find("(")+1:-1].strip()
+                            name = part[: part.find("(")].strip()
+                            qty_str = part[part.find("(") + 1 : -1].strip()
                             try:
                                 qty = float(qty_str.replace(",", "."))
                                 res[name] = qty
@@ -1305,7 +1308,7 @@ def do_match_depo(
                         if k_val and k_val != "nan":
                             k_dosya_str = str(r.get(kaynak_col, "")).strip() if kaynak_col else ""
                             parsed_sources = parse_kaynak_dosya_miktar(k_dosya_str)
-                            
+
                             if parsed_sources:
                                 for src_name, qty_val in parsed_sources.items():
                                     if src_name.endswith(".0"):
@@ -2593,7 +2596,7 @@ def do_match_depo(
                     # Benzersiz Üst Montajları sırayla topla
                     unique_parents = []
                     seen_parents = set()
-                    
+
                     # 1. Önce sol tablodaki (eksikleri olan) parent'ları topla (sıralamayı korumak için)
                     for row_idx in range(2, ws_format.max_row + 1):
                         k_dosya = ws_format[f"A{row_idx}"].value
@@ -2608,12 +2611,16 @@ def do_match_depo(
                     # 2. Sonra bu sayfaya ait olan ama eksik parçası olmadığı için sol tabloda yer almayan parent'ları ekle
                     for rel in matched_tim_relations:
                         if rel.get("target_sheet") == sheet_name:
-                            k_dosya = str(rel["row_ref"].get("KAYNAK DOSYA", kaynak_metin_kisa)).strip()
+                            k_dosya = str(
+                                rel["row_ref"].get("KAYNAK DOSYA", kaynak_metin_kisa)
+                            ).strip()
                             if k_dosya.endswith(".0"):
                                 k_dosya = k_dosya[:-2]
-                            p_kod = str(rel["p_row"].get("Kod", rel["p_row"].get(sira_col, ""))).strip()
+                            p_kod = str(
+                                rel["p_row"].get("Kod", rel["p_row"].get(sira_col, ""))
+                            ).strip()
                             p_ad = rel["p_row"].get("Malzeme", rel["p_row"].get("Malzeme Adı", ""))
-                            
+
                             key = (k_dosya, p_kod)
                             if key not in seen_parents:
                                 seen_parents.add(key)
@@ -3182,7 +3189,9 @@ def do_match_depo(
 
 @app.command()
 def reserve(
-    path: str = typer.Argument(..., help="İşlenecek Excel klasörünün yolu (sürükle-bırak desteklenir)"),
+    path: str = typer.Argument(
+        ..., help="İşlenecek Excel klasörünün yolu (sürükle-bırak desteklenir)"
+    ),
 ) -> None:
     """
     Öncelik sırasına göre klasördeki Excel reçetelerine stok rezervasyonu uygular.
@@ -3190,7 +3199,6 @@ def reserve(
     Çıktı dosyaları orijinal adın sonuna '_' eklenerek aynı klasöre kaydedilir.
     """
     from recipe_automation.utils.stock_reserver import load_stok_dict, reserve_single_file
-    from recipe_automation.services.sorter import load_priority_mapping
 
     # ── Yol doğrulama ────────────────────────────────────────────────────────
     if not os.path.isdir(path):
@@ -3208,7 +3216,9 @@ def reserve(
         with open(priority_file, encoding="utf-8") as f:
             prio_mapping = json.load(f)
     else:
-        console.print(f"[yellow]Uyarı:[/yellow] {priority_file} bulunamadı. Dosyalar alfabetik sırayla işlenecek.")
+        console.print(
+            f"[yellow]Uyarı:[/yellow] {priority_file} bulunamadı. Dosyalar alfabetik sırayla işlenecek."
+        )
 
     # ── Excel dosyalarını bul ve sırala ──────────────────────────────────────
     all_xlsx = [
@@ -3217,9 +3227,8 @@ def reserve(
         if f.lower().endswith(".xlsx")
         and not f.startswith("~$")
         and not f.lower().endswith("_.xlsx")  # Zaten işlenmiş _ uzantılıları atla
-        and os.path.basename(f) not in [
-            "StokListesi.xlsx", "TumRotaBilgileri.xlsx", "ReceteTumRotaListe.xlsx"
-        ]
+        and os.path.basename(f)
+        not in ["StokListesi.xlsx", "TumRotaBilgileri.xlsx", "ReceteTumRotaListe.xlsx"]
     ]
 
     if not all_xlsx:
@@ -3231,7 +3240,7 @@ def reserve(
         # Olası ön ekleri temizle (Filtered_TIM_ vb.)
         for prefix in ["Filtered_TIM_", "Filtered_", "TIM_"]:
             if base.startswith(prefix):
-                base = base[len(prefix):]
+                base = base[len(prefix) :]
                 break
         if base in prio_mapping:
             return prio_mapping[base]
@@ -3248,13 +3257,19 @@ def reserve(
     if os.path.exists(stok_path):
         console.print(f"[cyan]📦 Stok listesi yükleniyor:[/cyan] {stok_path}")
         stok_dict = load_stok_dict(stok_path)
-        console.print(f"[green]✅ {len(stok_dict)} parça kodu için stok bilgisi yüklendi.[/green]\n")
+        console.print(
+            f"[green]✅ {len(stok_dict)} parça kodu için stok bilgisi yüklendi.[/green]\n"
+        )
     else:
         console.print(f"[yellow]⚠️  StokListesi.xlsx bulunamadı ({stok_path}).[/yellow]")
-        console.print("[yellow]   Stok kontrolü yapılmadan tüm ihtiyaçlar 'Rezerve Edilecek' olarak işaretlenecek.[/yellow]\n")
+        console.print(
+            "[yellow]   Stok kontrolü yapılmadan tüm ihtiyaçlar 'Rezerve Edilecek' olarak işaretlenecek.[/yellow]\n"
+        )
         stok_dict = {}
 
-    console.print(f"[bold white]{len(all_xlsx)} dosya öncelik sırasına göre işlenecek:[/bold white]")
+    console.print(
+        f"[bold white]{len(all_xlsx)} dosya öncelik sırasına göre işlenecek:[/bold white]"
+    )
     for i, f in enumerate(all_xlsx, 1):
         base = os.path.basename(f)
         prio = get_priority(f)
@@ -3291,7 +3306,9 @@ def reserve(
                 if stats.get("eksik_olan", 0) > 0
                 else ""
             )
-            console.print(f"  ✅ {rezerve_str}{eksik_str} → [bold]{os.path.basename(out_path)}[/bold]")
+            console.print(
+                f"  ✅ {rezerve_str}{eksik_str} → [bold]{os.path.basename(out_path)}[/bold]"
+            )
 
             for u in stats.get("uyari", []):
                 console.print(f"  [yellow]⚠️  {u}[/yellow]")
@@ -3305,6 +3322,7 @@ def reserve(
     # ── Özet rapor ───────────────────────────────────────────────────────────
     console.print()
     from rich.table import Table as RTable
+
     ozet = RTable(show_header=False, box=None)
     ozet.add_column("K", style="cyan")
     ozet.add_column("V", style="magenta")
@@ -3325,7 +3343,6 @@ def reserve(
 
 
 @app.command()
-
 def agac(
     path: str = typer.Argument(..., help="Makine Reçetesi Excel dosyası veya klasörü"),
 ) -> None:

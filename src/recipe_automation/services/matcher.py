@@ -194,7 +194,7 @@ def append_carpimis_miktar(matched_df: pd.DataFrame, filtered_df: pd.DataFrame) 
                     continue
                 mikt = row[carpimis_col]
                 source_to_qty[k_isim] = source_to_qty.get(k_isim, 0) + mikt
-            
+
             for k_isim, mikt in source_to_qty.items():
                 if mikt > 0:
                     mikt_str = f"{mikt:g}"
@@ -202,15 +202,14 @@ def append_carpimis_miktar(matched_df: pd.DataFrame, filtered_df: pd.DataFrame) 
                 else:
                     kaynak_list.append(k_isim)
 
-        res_row = {
-            "_JOIN_KEY": k,
-            carpimis_col: group[carpimis_col].sum()
-        }
+        res_row = {"_JOIN_KEY": k, carpimis_col: group[carpimis_col].sum()}
         if "KAYNAK DOSYA" in extra_cols:
             res_row["KAYNAK DOSYA"] = ", ".join(kaynak_list) if kaynak_list else ""
         res_rows.append(res_row)
 
-    df_grouped = pd.DataFrame(res_rows) if res_rows else pd.DataFrame(columns=["_JOIN_KEY", carpimis_col])
+    df_grouped = (
+        pd.DataFrame(res_rows) if res_rows else pd.DataFrame(columns=["_JOIN_KEY", carpimis_col])
+    )
 
     matched_df["_JOIN_KEY"] = matched_df[depo_kod_sutunu].astype(str).str.strip().str.upper()
     result_df = pd.merge(matched_df, df_grouped, on="_JOIN_KEY", how="left")
