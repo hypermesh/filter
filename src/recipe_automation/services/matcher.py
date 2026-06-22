@@ -156,6 +156,8 @@ def append_carpimis_miktar(matched_df: pd.DataFrame, filtered_df: pd.DataFrame) 
 
     carpimis_col = None
     exact_targets = [
+        "Üretilecek Miktar",
+        "Uretilecek Miktar",
         "Çarpılmış Miktar",
         "Carpilmis Miktar",
         settings.col_rezerve_miktar,
@@ -181,19 +183,34 @@ def append_carpimis_miktar(matched_df: pd.DataFrame, filtered_df: pd.DataFrame) 
         df_sub[carpimis_col].astype(str).str.replace(",", "."), errors="coerce"
     ).fillna(0)
 
-    def combine_sources(series):
-        items = []
-        for val in series.dropna():
-            val_str = str(val).strip()
-            if val_str and val_str not in items:
-                items.append(val_str)
-        return ", ".join(items)
+    res_rows = []
+    for k, group in df_sub.groupby("_JOIN_KEY", dropna=False):
+        kaynak_list = []
+        if "KAYNAK DOSYA" in extra_cols:
+            source_to_qty = {}
+            for _, row in group.iterrows():
+                k_isim = str(row.get("KAYNAK DOSYA", "")).strip()
+                if not k_isim or k_isim.lower() == "nan":
+                    continue
+                mikt = row[carpimis_col]
+                source_to_qty[k_isim] = source_to_qty.get(k_isim, 0) + mikt
+            
+            for k_isim, mikt in source_to_qty.items():
+                if mikt > 0:
+                    mikt_str = f"{mikt:g}"
+                    kaynak_list.append(f"{k_isim} ({mikt_str})")
+                else:
+                    kaynak_list.append(k_isim)
 
-    agg_dict = {carpimis_col: "sum"}
-    if "KAYNAK DOSYA" in extra_cols:
-        agg_dict["KAYNAK DOSYA"] = combine_sources
+        res_row = {
+            "_JOIN_KEY": k,
+            carpimis_col: group[carpimis_col].sum()
+        }
+        if "KAYNAK DOSYA" in extra_cols:
+            res_row["KAYNAK DOSYA"] = ", ".join(kaynak_list) if kaynak_list else ""
+        res_rows.append(res_row)
 
-    df_grouped = df_sub.groupby("_JOIN_KEY", as_index=False).agg(agg_dict)
+    df_grouped = pd.DataFrame(res_rows) if res_rows else pd.DataFrame(columns=["_JOIN_KEY", carpimis_col])
 
     matched_df["_JOIN_KEY"] = matched_df[depo_kod_sutunu].astype(str).str.strip().str.upper()
     result_df = pd.merge(matched_df, df_grouped, on="_JOIN_KEY", how="left")

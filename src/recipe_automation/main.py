@@ -126,6 +126,8 @@ def aggregate_toplu_liste(df: pd.DataFrame) -> pd.DataFrame:
 
     carp_col = None
     exact_targets = [
+        "Üretilecek Miktar",
+        "Uretilecek Miktar",
         "Çarpılmış Miktar",
         "Carpilmis Miktar",
         settings.col_rezerve_miktar,
@@ -413,12 +415,27 @@ def filter_id(
                 print_report(os.path.basename(file), meta)
                 if not res.empty:
                     kaynak_metin = os.path.splitext(os.path.basename(file))[0]
+                    from recipe_automation.services.sorter import load_priority_mapping
+                    priority_mapping = load_priority_mapping(db_dir)
+                    clean_name = (
+                        kaynak_metin.replace("Sadece_TIM_", "")
+                        .replace("Sadece_KZM5_", "")
+                        .replace(".xlsx", "")
+                        .strip()
+                    )
+                    prio = priority_mapping.get(clean_name)
+                    if prio is not None:
+                        kaynak_metin = f"{prio} - {clean_name}"
+                    else:
+                        kaynak_metin = clean_name
                     carp_col = None
                     exact_targets = [
                         "Çarpılmış Miktar",
                         "Carpilmis Miktar",
                         settings.col_rezerve_miktar,
                         settings.col_kullanilabilir_stok,
+                        "Üretilecek Miktar",
+                        "Uretilecek Miktar",
                     ]
                     for target in exact_targets:
                         if target in res.columns:
@@ -578,12 +595,27 @@ def filter_stock(
                 print_report(os.path.basename(file), meta)
                 if not res.empty:
                     kaynak_metin = os.path.splitext(os.path.basename(file))[0]
+                    from recipe_automation.services.sorter import load_priority_mapping
+                    priority_mapping = load_priority_mapping(db_dir)
+                    clean_name = (
+                        kaynak_metin.replace("Sadece_TIM_", "")
+                        .replace("Sadece_KZM5_", "")
+                        .replace(".xlsx", "")
+                        .strip()
+                    )
+                    prio = priority_mapping.get(clean_name)
+                    if prio is not None:
+                        kaynak_metin = f"{prio} - {clean_name}"
+                    else:
+                        kaynak_metin = clean_name
                     carp_col = None
                     exact_targets = [
                         "Çarpılmış Miktar",
                         "Carpilmis Miktar",
                         settings.col_rezerve_miktar,
                         settings.col_kullanilabilir_stok,
+                        "Üretilecek Miktar",
+                        "Uretilecek Miktar",
                     ]
                     for target in exact_targets:
                         if target in res.columns:
@@ -676,6 +708,9 @@ def do_match_depo(
     """Core logic for match_depo, isolated to support dict arguments which Typer rejects."""
     parent_stats = {}
     stok_dict_kullanilabilir = {}
+    matched_tim_relations = []
+    tim_relations_by_parent = {}
+    tim_relations_by_child = {}
     if not os.path.exists(path) or not os.path.isfile(path):
         console.print(f"[red]Hata:[/red] Geçerli bir dosya sürüklemediniz: {path}")
         raise typer.Exit(1)
@@ -704,7 +739,11 @@ def do_match_depo(
     console.print("\n[bold blue]1. Veritabanı:[/bold blue] TumRotaBilgileri.xlsx")
     console.print("[bold blue]2. Veritabanı:[/bold blue] ReceteTumRotaListe.xlsx")
 
-    filtered_df = read_excel_safe(path, headers_to_try=(0, 2))
+    # Öncelikle RAW_DATA sayfasını okumaya çalış (toplu listede virgüllü birleştirmeden önceki temiz miktarları almak için)
+    try:
+        filtered_df = pd.read_excel(path, sheet_name="RAW_DATA", dtype=str)
+    except Exception:
+        filtered_df = read_excel_safe(path, headers_to_try=(0, 2))
 
     # RAW veriyi okumayı dene (Üretim Takip sayfası için)
     try:
@@ -724,6 +763,9 @@ def do_match_depo(
     if hammadde_df is None:
         console.print(f"[red]Hata:[/red] Hammadde dosyası okunamadı: {hammadde_path}")
         raise typer.Exit(1)
+
+    if raw_df is None:
+        raw_df = filtered_df.copy()
 
     try:
         matched_df = match_with_depo(filtered_df, depo_df)
@@ -859,10 +901,9 @@ def do_match_depo(
 
         # --- YENİ EKLENTİ: KAPASİTE ANALİZİNDE STOK DÜŞME (NET GEREKSİNİM) ---
         is_capacity_mode = os.path.basename(path).startswith("temp_scaled_input_")
-        if is_capacity_mode:
-            stok_path = os.path.join(db_dir, "StokListesi.xlsx")
 
-            # 1. Öncelikle girdi reçete dosyasından eldeki kullanılabilir stokları oku (varsa)
+        # 1. Öncelikle girdi reçete dosyasından eldeki kullanılabilir stokları oku (varsa) - Sadece Kapasite Modunda
+        if is_capacity_mode:
             orig_path = input_path if input_path else path
             if os.path.exists(orig_path):
                 try:
@@ -887,7 +928,7 @@ def do_match_depo(
 
                         for c in df_orig_clean.columns:
                             nc = norm_col(str(c))
-                            if nc in ["kod", "malzeme kodu"]:
+                            if nc in ["kod", "malzemekodu"]:
                                 kod_col_orig = c
                             if stock_basis == "fiziki":
                                 if "fiziki" in nc and "stok" in nc:
@@ -928,70 +969,70 @@ def do_match_depo(
                         f"  [yellow]Uyarı:[/yellow] Orijinal dosyadan stok okuma hatası: {e}"
                     )
 
-            # 2. StokListesi.xlsx veritabanından oku ve üzerine yaz/tamamla
-            if os.path.exists(stok_path):
+        # 2. StokListesi.xlsx veritabanından oku ve üzerine yaz/tamamla - Her Zaman Aktif!
+        stok_path = os.path.join(db_dir, "StokListesi.xlsx")
+        if os.path.exists(stok_path):
+            try:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    df_stok = pd.read_excel(stok_path, header=0)
+
+                kod_col_stok = None
+                stok_col = None
+                rezerve_col = None
+
+                for c in df_stok.columns:
+                    nc = norm_col(str(c))
+                    if nc in ["malzemekodu", "kod"]:
+                        kod_col_stok = c
+                    elif nc == "stok" or (nc == "miktar" and "kritik" not in nc):
+                        stok_col = c
+                    elif "rezerve" in nc:
+                        rezerve_col = c
+
+                if kod_col_stok and stok_col:
+                    for _, row in df_stok.iterrows():
+                        k = str(row[kod_col_stok]).strip().upper()
+                        if k.endswith(".0"):
+                            k = k[:-2]
+                        if k and k != "NAN" and k != "":
+                            try:
+                                fiziki_val = float(str(row[stok_col]).replace(",", "."))
+                            except:
+                                fiziki_val = 0.0
+                            try:
+                                rezerve_val = (
+                                    float(str(row[rezerve_col]).replace(",", "."))
+                                    if rezerve_col and pd.notna(row[rezerve_col])
+                                    else 0.0
+                                )
+                            except:
+                                rezerve_val = 0.0
+
+                            if stock_basis == "fiziki":
+                                stok_dict_kullanilabilir[k] = fiziki_val
+                            else:
+                                stok_dict_kullanilabilir[k] = max(0.0, fiziki_val - rezerve_val)
+            except Exception as e:
+                console.print(
+                    f"  [yellow]Uyarı:[/yellow] StokListesi veritabanından stok okuma hatası: {e}"
+                )
+
+        # 3. matched_df'deki 'Üretilecek Miktar'ı net eksik ile güncelle (Sadece Kapasite Modunda)
+        if is_capacity_mode and "Üretilecek Miktar" in matched_df.columns:
+            def get_net_qty(row):
+                k = str(row.get(settings.col_depo_kod, "")).strip().upper()
+                if k.endswith(".0"):
+                    k = k[:-2]
+                gross_qty = 0.0
                 try:
-                    with warnings.catch_warnings():
-                        warnings.simplefilter("ignore")
-                        df_stok = pd.read_excel(stok_path, header=0)
+                    gross_qty = float(str(row["Üretilecek Miktar"]).replace(",", "."))
+                except:
+                    pass
+                stok_kull = stok_dict_kullanilabilir.get(k, 0.0)
+                return max(0.0, gross_qty - stok_kull)
 
-                    kod_col_stok = None
-                    stok_col = None
-                    rezerve_col = None
-
-                    for c in df_stok.columns:
-                        nc = norm_col(str(c))
-                        if nc in ["malzeme kodu", "kod"]:
-                            kod_col_stok = c
-                        elif nc == "stok" or (nc == "miktar" and "kritik" not in nc):
-                            stok_col = c
-                        elif "rezerve" in nc:
-                            rezerve_col = c
-
-                    if kod_col_stok and stok_col:
-                        for _, row in df_stok.iterrows():
-                            k = str(row[kod_col_stok]).strip().upper()
-                            if k.endswith(".0"):
-                                k = k[:-2]
-                            if k and k != "NAN" and k != "":
-                                try:
-                                    fiziki_val = float(str(row[stok_col]).replace(",", "."))
-                                except:
-                                    fiziki_val = 0.0
-                                try:
-                                    rezerve_val = (
-                                        float(str(row[rezerve_col]).replace(",", "."))
-                                        if rezerve_col and pd.notna(row[rezerve_col])
-                                        else 0.0
-                                    )
-                                except:
-                                    rezerve_val = 0.0
-
-                                if stock_basis == "fiziki":
-                                    stok_dict_kullanilabilir[k] = fiziki_val
-                                else:
-                                    stok_dict_kullanilabilir[k] = max(0.0, fiziki_val - rezerve_val)
-                except Exception as e:
-                    console.print(
-                        f"  [yellow]Uyarı:[/yellow] StokListesi veritabanından stok okuma hatası: {e}"
-                    )
-
-            # 3. matched_df'deki 'Üretilecek Miktar'ı net eksik ile güncelle
-            if "Üretilecek Miktar" in matched_df.columns:
-
-                def get_net_qty(row):
-                    k = str(row.get(settings.col_depo_kod, "")).strip().upper()
-                    if k.endswith(".0"):
-                        k = k[:-2]
-                    gross_qty = 0.0
-                    try:
-                        gross_qty = float(str(row["Üretilecek Miktar"]).replace(",", "."))
-                    except:
-                        pass
-                    stok_kull = stok_dict_kullanilabilir.get(k, 0.0)
-                    return max(0.0, gross_qty - stok_kull)
-
-                matched_df["Üretilecek Miktar"] = matched_df.apply(get_net_qty, axis=1)
+            matched_df["Üretilecek Miktar"] = matched_df.apply(get_net_qty, axis=1)
 
         # --- YENİ EKLENTİ: TOPLAM SÜRE ---
         toplam_sure_col = "Toplam Süre"
@@ -1075,23 +1116,13 @@ def do_match_depo(
 
         # --- YENİ EKLENTİ: ROTASIZLAR SAYFASI İÇİN FİLTRELEME ---
         console.print("  [cyan]⏳ Rotasız parçalar tespit ediliyor ve ayrıştırılıyor...[/cyan]")
-        source_df = raw_df if raw_df is not None else filtered_df
-        op_cols = [
-            c for c in source_df.columns if settings.col_operasyon_keyword.lower() in str(c).lower()
-        ]
-        df_rotasiz = pd.DataFrame()
-        if op_cols:
-            first_op_col = op_cols[0]
-            first_op_val = source_df[first_op_col].astype(str).str.strip()
-            is_empty_mask = (
-                source_df[first_op_col].isna()
-                | (first_op_val == "")
-                | (first_op_val.str.lower() == "nan")
-                | (first_op_val == "0")
-            )
-            df_rotasiz = source_df[is_empty_mask].copy()
-        else:
-            df_rotasiz = source_df.copy()
+        active_db_codes = set()
+        for idx, row in matched_df.iterrows():
+            p_code = str(row.get(settings.col_depo_kod, "")).strip().upper()
+            if p_code.endswith(".0"):
+                p_code = p_code[:-2]
+            if p_code and p_code != "NAN":
+                active_db_codes.add(p_code)
 
         sheet_dfs = {}
         unassigned_stations = set()
@@ -1149,6 +1180,21 @@ def do_match_depo(
             for sheet_name, rows in sheet_dfs.items():
                 sheet_dfs[sheet_name] = pd.DataFrame(rows)
 
+        # --- YENİ EKLENTİ: ROTASIZLAR SAYFASI İÇİN FİLTRELEME ---
+        filt_id_col = "Kod"
+        if "Kod" not in filtered_df.columns and settings.col_sira_no_id in filtered_df.columns:
+            filt_id_col = settings.col_sira_no_id
+
+        def is_rotasiz(r):
+            val = str(r.get(filt_id_col, "")).strip().upper()
+            if not val or val == "NAN":
+                return False
+            if val.endswith(".0"):
+                val = val[:-2]
+            return val not in active_db_codes
+
+        df_rotasiz = filtered_df[filtered_df.apply(is_rotasiz, axis=1)].copy()
+
         # --- YENİ EKLENTİ: ROTASIZLAR SAYFASINI EKLE ---
         if not df_rotasiz.empty:
             if "KAYNAK DOSYA" not in df_rotasiz.columns:
@@ -1184,7 +1230,7 @@ def do_match_depo(
                 sira_col = settings.col_sira_no_id
             else:
                 for c in raw_df.columns:
-                    if norm_col(c) in ["sirano", "sirano", "sira"]:
+                    if norm_col(c) in ["sirano", "srano", "sira"]:
                         sira_col = c
                         break
 
@@ -1211,9 +1257,38 @@ def do_match_depo(
                     settings.col_kullanilabilir_stok,
                     "Çarpılmış Miktar",
                     "Carpilmis Miktar",
+                    "Üretilecek Miktar",
+                    "Uretilecek Miktar",
                 ]:
                     if c in filtered_df.columns:
                         miktar_col = c
+                        break
+
+                def parse_kaynak_dosya_miktar(kaynak_dosya_str):
+                    res = {}
+                    if not kaynak_dosya_str or pd.isna(kaynak_dosya_str):
+                        return res
+                    parts = str(kaynak_dosya_str).split(",")
+                    for part in parts:
+                        part = part.strip()
+                        if not part:
+                            continue
+                        if "(" in part and part.endswith(")"):
+                            name = part[:part.find("(")].strip()
+                            qty_str = part[part.find("(")+1:-1].strip()
+                            try:
+                                qty = float(qty_str.replace(",", "."))
+                                res[name] = qty
+                            except ValueError:
+                                pass
+                        else:
+                            res[part] = 1.0
+                    return res
+
+                kaynak_col = None
+                for c in filtered_df.columns:
+                    if str(c).strip().upper() == "KAYNAK DOSYA":
+                        kaynak_col = c
                         break
 
                 # Kalan miktarları Kod veya Sıra No bazında kümülatif toplayalım
@@ -1228,13 +1303,25 @@ def do_match_depo(
                     for _, r in filtered_df.iterrows():
                         k_val = str(r.get(filt_id_col, "")).strip().upper()
                         if k_val and k_val != "nan":
-                            try:
-                                qty_val = float(str(r.get(miktar_col, 0)).replace(",", "."))
-                            except ValueError:
-                                qty_val = 0.0
-                            kod_to_remaining_qty[k_val] = (
-                                kod_to_remaining_qty.get(k_val, 0.0) + qty_val
-                            )
+                            k_dosya_str = str(r.get(kaynak_col, "")).strip() if kaynak_col else ""
+                            parsed_sources = parse_kaynak_dosya_miktar(k_dosya_str)
+                            
+                            if parsed_sources:
+                                for src_name, qty_val in parsed_sources.items():
+                                    if src_name.endswith(".0"):
+                                        src_name = src_name[:-2]
+                                    key = (src_name, k_val)
+                                    kod_to_remaining_qty[key] = (
+                                        kod_to_remaining_qty.get(key, 0.0) + qty_val
+                                    )
+                            else:
+                                try:
+                                    qty_val = float(str(r.get(miktar_col, 0)).replace(",", "."))
+                                except ValueError:
+                                    qty_val = 0.0
+                                kod_to_remaining_qty[k_val] = (
+                                    kod_to_remaining_qty.get(k_val, 0.0) + qty_val
+                                )
 
                 # Eşleşen veritabanı üzerinden TIM operasyonuna sahip olan tüm parça kodlarının setini alalım
                 tim_codes_in_db = set(
@@ -1370,6 +1457,18 @@ def do_match_depo(
                             except ValueError:
                                 design_qty = orig_qty
 
+                            # Reçetedeki operasyon sütunlarına göre kontrol et
+                            has_op = False
+                            for oc in [
+                                c
+                                for c in raw_df.columns
+                                if settings.col_operasyon_keyword.lower() in str(c).lower()
+                            ]:
+                                val = str(row.get(oc, "")).strip().upper()
+                                if val and val in target_ops_for_raw:
+                                    has_op = True
+                                    break
+
                             matched_tim_relations.append(
                                 {
                                     "row_ref": row,
@@ -1380,12 +1479,15 @@ def do_match_depo(
                                     "orig_qty": orig_qty,
                                     "design_qty": design_qty,
                                     "sira_no": sira_no,
+                                    "has_op": has_op,
                                 }
                             )
 
                     # Eşleşen ilişkilerin istatistiklerini topla (Toplam ve Eksik Çeşit Takibi İçin)
                     for rel in matched_tim_relations:
                         kaynak = str(rel["row_ref"].get("KAYNAK DOSYA", kaynak_metin_kisa)).strip()
+                        if kaynak.endswith(".0"):
+                            kaynak = kaynak[:-2]
                         parent_kod = str(
                             rel["p_row"].get("Kod", rel["p_row"].get(sira_col, ""))
                         ).strip()
@@ -1400,23 +1502,28 @@ def do_match_depo(
                         key_val = (
                             rel["parca_kodu"] if filt_id_col == raw_kod_col else rel["sira_no"]
                         )
-                        remaining_qty = kod_to_remaining_qty.get(key_val, 0.0)
+                        rem_qty_key = (kaynak, key_val) if kaynak else key_val
+                        remaining_qty = kod_to_remaining_qty.get(rem_qty_key, 0.0)
                         if remaining_qty > 0:
                             parent_stats[key]["missing"].add(child_kod)
 
-                    # Şimdi bu ilişkileri parça_kodu (veya sira_no) bazında gruplayıp kalan miktarları dağıtalım
+                    # Şimdi bu ilişkileri (Kaynak, parça_kodu) bazında gruplayıp kalan miktarları dağıtalım
                     grouped_relations = {}
                     for rel in matched_tim_relations:
+                        kaynak = str(rel["row_ref"].get("KAYNAK DOSYA", kaynak_metin_kisa)).strip()
+                        if kaynak.endswith(".0"):
+                            kaynak = kaynak[:-2]
                         key_val = (
                             rel["parca_kodu"] if filt_id_col == raw_kod_col else rel["sira_no"]
                         )
-                        if key_val not in grouped_relations:
-                            grouped_relations[key_val] = []
-                        grouped_relations[key_val].append(rel)
+                        group_key = (kaynak, key_val) if kaynak else key_val
+                        if group_key not in grouped_relations:
+                            grouped_relations[group_key] = []
+                        grouped_relations[group_key].append(rel)
 
-                    for key_val, rel_list in grouped_relations.items():
+                    for group_key, rel_list in grouped_relations.items():
                         # Kalan miktar
-                        remaining_qty = kod_to_remaining_qty.get(key_val, 0.0)
+                        remaining_qty = kod_to_remaining_qty.get(group_key, 0.0)
                         if remaining_qty <= 0:
                             # Eğer bu parça filtrelenmiş listede kalmadıysa (stok yetti veya elendi) montaj listesine EKLEME!
                             continue
@@ -2486,12 +2593,28 @@ def do_match_depo(
                     # Benzersiz Üst Montajları sırayla topla
                     unique_parents = []
                     seen_parents = set()
+                    
+                    # 1. Önce sol tablodaki (eksikleri olan) parent'ları topla (sıralamayı korumak için)
                     for row_idx in range(2, ws_format.max_row + 1):
                         k_dosya = ws_format[f"A{row_idx}"].value
                         p_kod = ws_format[f"B{row_idx}"].value
                         p_ad = ws_format[f"C{row_idx}"].value
                         if k_dosya is not None and p_kod is not None:
                             key = (str(k_dosya).strip(), str(p_kod).strip())
+                            if key not in seen_parents:
+                                seen_parents.add(key)
+                                unique_parents.append({"kaynak": k_dosya, "kod": p_kod, "ad": p_ad})
+
+                    # 2. Sonra bu sayfaya ait olan ama eksik parçası olmadığı için sol tabloda yer almayan parent'ları ekle
+                    for rel in matched_tim_relations:
+                        if rel.get("target_sheet") == sheet_name:
+                            k_dosya = str(rel["row_ref"].get("KAYNAK DOSYA", kaynak_metin_kisa)).strip()
+                            if k_dosya.endswith(".0"):
+                                k_dosya = k_dosya[:-2]
+                            p_kod = str(rel["p_row"].get("Kod", rel["p_row"].get(sira_col, ""))).strip()
+                            p_ad = rel["p_row"].get("Malzeme", rel["p_row"].get("Malzeme Adı", ""))
+                            
+                            key = (k_dosya, p_kod)
                             if key not in seen_parents:
                                 seen_parents.add(key)
                                 unique_parents.append({"kaynak": k_dosya, "kod": p_kod, "ad": p_ad})
@@ -2552,7 +2675,7 @@ def do_match_depo(
                         in_stock_limits = []
                         parent_relations = tim_relations_by_parent.get(key, [])
                         for rel in parent_relations:
-                            if rel.get("allocated_qty", 0.0) <= 0:
+                            if True:  # Include all TIM child relations (even if already in stock with no active op in file)
                                 c_kod = str(rel["parca_kodu"]).strip().upper()
                                 val_eldeki = stok_dict_kullanilabilir.get(c_kod, 0.0)
                                 val_ihtiyac = total_required_qty.get(c_kod, 0.0)

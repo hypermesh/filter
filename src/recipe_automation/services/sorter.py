@@ -48,6 +48,9 @@ def extract_file_names(kaynak_metin: str) -> list[str]:
         # Regex: boşluk ve ardından gelen parantez içindeki her şeyi sil
         clean_name = re.sub(r"\s*\([^)]*\)", "", part).strip()
 
+        # Önündeki öncelik numarasını temizle: '2 - 1946' -> '1946'
+        clean_name = re.sub(r"^\d+\s*-\s*", "", clean_name).strip()
+
         # Eğer 'Sadece_TIM_2241' veya '.xlsx' varsa onları da temizle
         clean_name = (
             clean_name.replace("Sadece_TIM_", "")
