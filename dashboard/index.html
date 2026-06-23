@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SheetJS (xlsx.full.min.js) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=1.1.0">
+    <link rel="stylesheet" href="styles.css?v=1.1.1">
 </head>
 <body>
     <div id="drop-zone" class="drop-zone">
@@ -139,7 +139,7 @@
                 <!-- TAB: Production -->
                 <section class="tab-content" id="tab-production">
                     <div class="production-layout-grid">
-                        <!-- Left Column: Entry & Log -->
+                        <!-- Left Column: Entry & Quick Info -->
                         <div class="layout-col flex-col gap-20">
                             <!-- Yeni Üretim Girişi -->
                             <div class="section-card glass relative-card">
@@ -178,28 +178,16 @@
                                 </form>
                             </div>
                             
-                            <!-- Üretim Giriş Günlüğü -->
+                            <!-- Hızlı Parça Bilgisi -->
                             <div class="section-card glass flex-col flex-1" style="min-height: 310px;">
                                 <div class="card-header">
-                                    <h2><i class="fa-solid fa-history text-orange"></i> Üretim Giriş Günlüğü</h2>
-                                    <span class="badge" id="prod-log-count">0 Kayıt</span>
+                                    <h2><i class="fa-solid fa-circle-info text-blue"></i> Hızlı Parça Bilgisi</h2>
                                 </div>
-                                <div class="table-wrapper flex-1" style="max-height: 235px; overflow-y: auto;">
-                                    <table class="table" id="production-log-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Sıra</th>
-                                                <th>Parça Kodu</th>
-                                                <th>Adet</th>
-                                                <th>İstasyon</th>
-                                                <th>Fazla</th>
-                                                <th>İşlem</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="production-log-body">
-                                            <!-- Giriş günlükleri buraya listelenecek -->
-                                        </tbody>
-                                    </table>
+                                <div class="part-info-box" id="quick-part-info">
+                                    <div class="info-placeholder">
+                                        <i class="fa-solid fa-search-plus"></i>
+                                        <p>Durumunu ve detaylarını incelemek için bir parça kodu arayın veya tablodan seçin.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -248,16 +236,28 @@
                             </div>
                         </div>
 
-                        <!-- Right Column: Hızlı Parça Bilgisi -->
+                        <!-- Right Column: Üretim Giriş Günlüğü -->
                         <div class="section-card glass flex-col flex-1" style="min-height: 600px;">
                             <div class="card-header">
-                                <h2><i class="fa-solid fa-circle-info text-blue"></i> Hızlı Parça Bilgisi</h2>
+                                <h2><i class="fa-solid fa-history text-orange"></i> Üretim Giriş Günlüğü</h2>
+                                <span class="badge" id="prod-log-count">0 Kayıt</span>
                             </div>
-                            <div class="part-info-box" id="quick-part-info">
-                                <div class="info-placeholder">
-                                    <i class="fa-solid fa-search-plus"></i>
-                                    <p>Durumunu ve detaylarını incelemek için bir parça kodu arayın veya tablodan seçin.</p>
-                                </div>
+                            <div class="table-wrapper flex-1" style="max-height: 520px; overflow-y: auto;">
+                                <table class="table" id="production-log-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Sıra</th>
+                                            <th>Parça Kodu</th>
+                                            <th>Adet</th>
+                                            <th>İstasyon</th>
+                                            <th>Fazla</th>
+                                            <th>İşlem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="production-log-body">
+                                        <!-- Giriş günlükleri buraya listelenecek -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -520,6 +520,6 @@
     <!-- Notification system -->
     <div id="toast" class="toast"></div>
 
-    <script src="app.js?v=1.1.0"></script>
+    <script src="app.js?v=1.1.1"></script>
 </body>
 </html>
