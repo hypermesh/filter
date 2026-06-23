@@ -671,6 +671,15 @@ body {
 }
 
 
+.relative {
+    position: relative;
+}
+
+.relative-card {
+    position: relative;
+    z-index: 10;
+}
+
 /* Autocomplete suggestions */
 .autocomplete-items {
     position: absolute;
