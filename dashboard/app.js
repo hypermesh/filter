@@ -27,7 +27,7 @@ let uretimListesiMap = {};     // Map of code -> Üretilecek Miktar in ÜRETİM 
 let uretimListesiRows = [];    // Rows of ÜRETİM LİSTESİ sheet
 
 // Pagination States
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 12;
 let paginationState = {
     takip: { page: 1, total: 0, filtered: [] },
     assemblyLeft: { page: 1, total: 0, filtered: [] },

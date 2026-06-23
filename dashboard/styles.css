@@ -732,7 +732,7 @@ body {
 .part-info-box {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     flex: 1;
     padding: 20px;
@@ -1296,7 +1296,7 @@ tr.station-row-completed td:nth-child(2) { /* Kod */
     display: grid;
     grid-template-columns: 1.2fr 2fr 1.2fr;
     gap: 20px;
-    align-items: stretch;
+    align-items: start;
 }
 
 .gap-20 {
