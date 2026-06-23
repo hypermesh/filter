@@ -2237,12 +2237,12 @@ function renderUlTable() {
             // Custom styling for modified input
             inputStyle = `width: 80px; background: rgba(16, 22, 40, 0.9); border: 1px solid ${badgeColor}; color: ${badgeColor}; box-shadow: 0 0 8px ${borderGlow}; border-radius: 4px; padding: 4px 8px; font-weight: 700; outline: none; transition: var(--transition);`;
             
-            // Badge to show original -> diff
+            // Highly visible layout with label
             changeBadgeHtml = `
-                <div style="font-size: 11px; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
-                    <span style="color: var(--text-dim); text-decoration: line-through;">${row.orijinalUretilecek}</span>
-                    <span style="color: var(--text-muted);">→</span>
-                    <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeColor}40; padding: 1px 6px; font-weight: 700; font-size: 10px; border-radius: 3px; display: inline-block;">
+                <div style="font-size: 11px; margin-top: 5px; display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-weight: 600; white-space: nowrap;">
+                    <span style="color: rgba(255, 255, 255, 0.7); font-size: 10.5px;">Orijinal: <strong style="color: white; font-weight: 700;">${row.orijinalUretilecek}</strong></span>
+                    <span style="color: rgba(255, 255, 255, 0.25); font-size: 11px;">|</span>
+                    <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeColor}30; padding: 2px 6px; font-weight: 700; font-size: 10px; border-radius: 4px; display: inline-block;">
                         ${diffText}
                     </span>
                 </div>
