@@ -450,6 +450,60 @@
         </div>
     </div>
 
+    <!-- Details Modal -->
+    <div id="details-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2 id="modal-title"><i class="fa-solid fa-file-invoice text-blue"></i> Dosya Detayları</h2>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Summary Stats -->
+                <div class="modal-stats-grid">
+                    <div class="modal-stat-card">
+                        <span class="label">Çeşit İlerlemesi</span>
+                        <span class="value" id="modal-stat-variety">0/0 hazır</span>
+                    </div>
+                    <div class="modal-stat-card">
+                        <span class="label">Toplam Adet İlerlemesi</span>
+                        <span class="value" id="modal-stat-qty">0/0 adet</span>
+                    </div>
+                    <div class="modal-stat-card">
+                        <span class="label">Eksik Kalem Sayısı</span>
+                        <span class="value text-orange" id="modal-stat-missing-count">0 eksik</span>
+                    </div>
+                </div>
+                
+                <!-- Search inside Modal -->
+                <div class="modal-filter-row mt-3">
+                    <div class="search-bar flex-1" style="margin-bottom: 0;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="modal-search" placeholder="Eksik parçalarda ara...">
+                    </div>
+                </div>
+
+                <!-- Missing Parts Table -->
+                <div class="table-wrapper mt-3" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table" id="modal-table">
+                        <thead>
+                            <tr>
+                                <th>Parça Kodu</th>
+                                <th>Malzeme Adı</th>
+                                <th>İstasyonlar</th>
+                                <th class="text-right">Gereken</th>
+                                <th class="text-right">Üretilen</th>
+                                <th class="text-right text-orange">Eksik (Kalan)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modal-table-body">
+                            <!-- Eksikler buraya listelenecek -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification system -->
     <div id="toast" class="toast"></div>
 

@@ -826,8 +826,14 @@ function renderDashboard() {
             </div>
         `;
         
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', () => {
+            openDetailsModal(f.kaynak);
+        });
+
         // Add double click listener to filter production log by this source file
-        card.addEventListener('dblclick', () => {
+        card.addEventListener('dblclick', (e) => {
+            e.stopPropagation(); // prevent modal opening again
             document.getElementById('takip-search').value = f.kaynak;
             switchTab('production');
         });
@@ -835,6 +841,105 @@ function renderDashboard() {
         container.appendChild(card);
     });
 }
+
+// Details Modal State & Logic
+let currentModalKaynak = null;
+
+function openDetailsModal(kaynakName) {
+    currentModalKaynak = kaynakName;
+    document.getElementById('modal-search').value = '';
+    renderModalData();
+    document.getElementById('details-modal').style.display = 'flex';
+}
+
+function renderModalData() {
+    if (!currentModalKaynak) return;
+    
+    // Find matching dosyaTakipRow
+    const dRow = dosyaTakipRows.find(f => f.kaynak === currentModalKaynak);
+    if (!dRow) return;
+
+    // Filter uretimTakipRows matching this source
+    const matchedRows = uretimTakipRows.filter(r => r.kaynak.includes(currentModalKaynak));
+    
+    // Calculate total quantities
+    const totalQty = matchedRows.reduce((sum, r) => sum + r.uretilecek, 0);
+    const producedQty = matchedRows.reduce((sum, r) => sum + r.uretilen, 0);
+    
+    // Set headers / stats
+    document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-file-invoice text-blue"></i> ${currentModalKaynak} - Dosya Detayları`;
+    document.getElementById('modal-stat-variety').textContent = `${dRow.hazir} / ${dRow.toplam} hazır`;
+    document.getElementById('modal-stat-qty').textContent = `${producedQty.toLocaleString()} / ${totalQty.toLocaleString()} adet`;
+    document.getElementById('modal-stat-missing-count').textContent = `${dRow.eksik} eksik kalem`;
+
+    // Filter missing rows
+    let missingRows = matchedRows.filter(r => r.kalan > 0);
+    
+    // Filter by modal search value
+    const searchVal = document.getElementById('modal-search').value.toLowerCase().trim();
+    if (searchVal) {
+        missingRows = missingRows.filter(r => 
+            r.kod.toLowerCase().includes(searchVal) || 
+            (codeToNameMap[r.kod] && codeToNameMap[r.kod].toLowerCase().includes(searchVal))
+        );
+    }
+
+    const tbody = document.getElementById('modal-table-body');
+    tbody.innerHTML = '';
+
+    if (missingRows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color: var(--text-dim); padding: 20px;">Eksik parça bulunamadı.</td></tr>';
+        return;
+    }
+
+    missingRows.forEach(r => {
+        const name = codeToNameMap[r.kod] || '-';
+        
+        // Find matching stations
+        const stations = [];
+        for (const [stName, rows] of Object.entries(stationSheetsMap)) {
+            const found = rows.some(sr => String(sr['Kod'] || '').trim().toUpperCase() === r.kod);
+            if (found) {
+                stations.push(stName);
+            }
+        }
+        
+        let stationsHtml = '';
+        if (stations.length === 0) {
+            stationsHtml = '<span style="color: var(--text-dim); font-size: 11px;">-</span>';
+        } else {
+            stationsHtml = stations.map(st => `
+                <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.25); margin: 2px; font-size: 10px; padding: 2px 6px; font-weight: 600;">${st}</span>
+            `).join('');
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight: 700; color: white;">${r.kod}</td>
+            <td style="color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${name}">${name}</td>
+            <td>${stationsHtml}</td>
+            <td class="text-right" style="font-weight: 600;">${r.uretilecek}</td>
+            <td class="text-right" style="color: ${r.uretilen > 0 ? 'var(--success)' : 'var(--text-dim)'}; font-weight: 600;">${r.uretilen}</td>
+            <td class="text-right" style="color: var(--warning); font-weight: 700;">${r.kalan}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Modal Event Listeners
+document.getElementById('modal-close-btn').addEventListener('click', () => {
+    document.getElementById('details-modal').style.display = 'none';
+    currentModalKaynak = null;
+});
+
+document.getElementById('details-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('details-modal')) {
+        document.getElementById('details-modal').style.display = 'none';
+        currentModalKaynak = null;
+    }
+});
+
+document.getElementById('modal-search').addEventListener('input', renderModalData);
 
 document.getElementById('dashboard-search').addEventListener('input', renderDashboard);
 
