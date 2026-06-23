@@ -222,7 +222,8 @@ function parseWorkbook() {
                                 malzeme: cellD ? String(cellD.v).trim() : '',
                                 hKod: cellE ? String(cellE.v).trim() : '',
                                 hammadde: cellF ? String(cellF.v).trim() : '',
-                                uretilecek: qty
+                                uretilecek: qty,
+                                orijinalUretilecek: qty
                             });
                         }
                     }
@@ -2140,13 +2141,38 @@ function filterAndPaginateUlTable() {
 
     let filtered = uretimListesiRows;
     
-    // 1. Text Search Filter
+    // 1. Advanced Include/Exclude Search Filter (Google-style)
     if (searchVal) {
+        const terms = searchVal.split(/\s+/);
+        const includeTerms = [];
+        const excludeTerms = [];
+        
+        terms.forEach(term => {
+            if (term.startsWith('-') && term.length > 1) {
+                excludeTerms.push(term.slice(1));
+            } else if (term) {
+                includeTerms.push(term);
+            }
+        });
+        
         filtered = filtered.filter(r => {
-            return r.kod.toLowerCase().includes(searchVal) || 
-                   r.malzeme.toLowerCase().includes(searchVal) || 
-                   r.hammadde.toLowerCase().includes(searchVal) || 
-                   r.kaynak.toLowerCase().includes(searchVal);
+            const searchString = [
+                r.kod,
+                r.malzeme,
+                r.hammadde,
+                r.kaynak,
+                r.hKod
+            ].join(' ').toLowerCase();
+            
+            // All include terms must match
+            const matchesInclude = includeTerms.every(term => searchString.includes(term));
+            if (!matchesInclude) return false;
+            
+            // None of the exclude terms must match
+            const matchesExclude = excludeTerms.some(term => searchString.includes(term));
+            if (matchesExclude) return false;
+            
+            return true;
         });
     }
 
@@ -2196,6 +2222,33 @@ function renderUlTable() {
     pageRows.forEach(row => {
         const tr = document.createElement('tr');
         
+        // Check if quantity has been modified
+        const isModified = row.uretilecek !== row.orijinalUretilecek;
+        let changeBadgeHtml = '';
+        let inputStyle = 'width: 80px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: white; border-radius: 4px; padding: 4px 8px; font-weight: 600; outline: none; transition: var(--transition);';
+        
+        if (isModified) {
+            const diff = row.uretilecek - row.orijinalUretilecek;
+            const diffText = diff > 0 ? `+${diff}` : `${diff}`;
+            const badgeColor = diff > 0 ? 'var(--success)' : 'var(--danger)';
+            const badgeBg = diff > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+            const borderGlow = diff > 0 ? 'var(--success-glow)' : 'var(--danger-glow)';
+            
+            // Custom styling for modified input
+            inputStyle = `width: 80px; background: rgba(16, 22, 40, 0.9); border: 1px solid ${badgeColor}; color: ${badgeColor}; box-shadow: 0 0 8px ${borderGlow}; border-radius: 4px; padding: 4px 8px; font-weight: 700; outline: none; transition: var(--transition);`;
+            
+            // Badge to show original -> diff
+            changeBadgeHtml = `
+                <div style="font-size: 11px; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+                    <span style="color: var(--text-dim); text-decoration: line-through;">${row.orijinalUretilecek}</span>
+                    <span style="color: var(--text-muted);">→</span>
+                    <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeColor}40; padding: 1px 6px; font-weight: 700; font-size: 10px; border-radius: 3px; display: inline-block;">
+                        ${diffText}
+                    </span>
+                </div>
+            `;
+        }
+
         tr.innerHTML = `
             <td style="font-size:12px; color:var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.kaynak}">${row.kaynak}</td>
             <td>${row.oncelik}</td>
@@ -2208,7 +2261,8 @@ function renderUlTable() {
                        value="${row.uretilecek}" 
                        data-kod="${row.kod}" 
                        min="0"
-                       style="width: 80px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: white; border-radius: 4px; padding: 4px 8px; font-weight: 600; outline: none; transition: var(--transition);">
+                       style="${inputStyle}">
+                ${changeBadgeHtml}
             </td>
         `;
         
@@ -2231,18 +2285,25 @@ function renderUlTable() {
             // 3. Recalculate
             recalculateAll();
             
+            // 4. Re-render list to show badge and color updates
+            filterAndPaginateUlTable();
+            
             showToast(`${kod} için yeni üretim miktarı belirlendi: ${newQty}`, "success");
         });
         
         input.addEventListener('focus', function() {
-            this.style.borderColor = 'var(--primary)';
-            this.style.boxShadow = '0 0 8px var(--primary-glow)';
-            this.style.background = 'rgba(16, 22, 40, 0.8)';
+            if (!isModified) {
+                this.style.borderColor = 'var(--primary)';
+                this.style.boxShadow = '0 0 8px var(--primary-glow)';
+                this.style.background = 'rgba(16, 22, 40, 0.8)';
+            }
         });
         input.addEventListener('blur', function() {
-            this.style.borderColor = 'var(--border-color)';
-            this.style.boxShadow = 'none';
-            this.style.background = 'rgba(0,0,0,0.3)';
+            if (!isModified) {
+                this.style.borderColor = 'var(--border-color)';
+                this.style.boxShadow = 'none';
+                this.style.background = 'rgba(0,0,0,0.3)';
+            }
         });
 
         tbody.appendChild(tr);
