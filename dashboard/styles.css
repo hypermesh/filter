@@ -1290,3 +1290,16 @@ tr.station-row-completed td:nth-child(2) { /* Kod */
     color: #0b0f19;
     position: absolute;
 }
+
+/* Production Tab Layout */
+.production-layout-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 2fr 1.2fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.gap-20 {
+    gap: 20px;
+}
+

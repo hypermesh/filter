@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SheetJS (xlsx.full.min.js) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=1.0.9">
+    <link rel="stylesheet" href="styles.css?v=1.1.0">
 </head>
 <body>
     <div id="drop-zone" class="drop-zone">
@@ -138,85 +138,74 @@
 
                 <!-- TAB: Production -->
                 <section class="tab-content" id="tab-production">
-                    <!-- Quick Entry & Info Grid -->
-                    <div class="grid-2-1">
-                        <div class="section-card glass relative-card">
-                            <div class="card-header">
-                                <h2><i class="fa-solid fa-plus-circle text-green"></i> Yeni Üretim Girişi</h2>
-                            </div>
-                            <form id="production-form" class="production-form">
-                                <div class="form-group relative">
-                                    <label for="prod-code">Parça Kodu</label>
-                                    <div class="input-with-icon">
-                                        <i class="fa-solid fa-barcode"></i>
-                                        <input type="text" id="prod-code" placeholder="Parça kodunu yazın..." required autocomplete="off">
-                                    </div>
-                                    <div id="autocomplete-list" class="autocomplete-items"></div>
+                    <div class="production-layout-grid">
+                        <!-- Left Column: Entry & Log -->
+                        <div class="layout-col flex-col gap-20">
+                            <!-- Yeni Üretim Girişi -->
+                            <div class="section-card glass relative-card">
+                                <div class="card-header">
+                                    <h2><i class="fa-solid fa-plus-circle text-green"></i> Yeni Üretim Girişi</h2>
                                 </div>
-                                <div class="form-group">
-                                    <label for="prod-qty">Üretim Adedi</label>
-                                    <div class="input-with-icon">
-                                        <i class="fa-solid fa-calculator"></i>
-                                        <input type="number" id="prod-qty" min="1" placeholder="Miktar girin..." required>
+                                <form id="production-form" class="production-form">
+                                    <div class="form-group relative">
+                                        <label for="prod-code">Parça Kodu</label>
+                                        <div class="input-with-icon">
+                                            <i class="fa-solid fa-barcode"></i>
+                                            <input type="text" id="prod-code" placeholder="Parça kodunu yazın..." required autocomplete="off">
+                                        </div>
+                                        <div id="autocomplete-list" class="autocomplete-items"></div>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="prod-station">İşlemin Yapıldığı İstasyon</label>
-                                    <div class="input-with-icon">
-                                        <i class="fa-solid fa-industry"></i>
-                                        <select id="prod-station" class="select-input">
-                                            <option value="Tüm İstasyonlar">Tüm İstasyonlar (Komple Bitti)</option>
-                                        </select>
+                                    <div class="form-group">
+                                        <label for="prod-qty">Üretim Adedi</label>
+                                        <div class="input-with-icon">
+                                            <i class="fa-solid fa-calculator"></i>
+                                            <input type="number" id="prod-qty" min="1" placeholder="Miktar girin..." required>
+                                        </div>
                                     </div>
-                                </div>
+                                    <div class="form-group">
+                                        <label for="prod-station">İşlemin Yapıldığı İstasyon</label>
+                                        <div class="input-with-icon">
+                                            <i class="fa-solid fa-industry"></i>
+                                            <select id="prod-station" class="select-input">
+                                                <option value="Tüm İstasyonlar">Tüm İstasyonlar (Komple Bitti)</option>
+                                            </select>
+                                        </div>
+                                    </div>
 
-                                <button type="submit" class="btn btn-primary btn-block">
-                                    <i class="fa-solid fa-check"></i> Üretim Girişini Kaydet
-                                </button>
-                            </form>
-                        </div>
-                        <div class="section-card glass flex-col">
-                            <div class="card-header">
-                                <h2><i class="fa-solid fa-circle-info text-blue"></i> Hızlı Parça Bilgisi</h2>
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        <i class="fa-solid fa-check"></i> Üretim Girişini Kaydet
+                                    </button>
+                                </form>
                             </div>
-                            <div class="part-info-box" id="quick-part-info">
-                                <div class="info-placeholder">
-                                    <i class="fa-solid fa-search-plus"></i>
-                                    <p>Durumunu ve detaylarını incelemek için bir parça kodu arayın veya tablodan seçin.</p>
+                            
+                            <!-- Üretim Giriş Günlüğü -->
+                            <div class="section-card glass flex-col flex-1" style="min-height: 310px;">
+                                <div class="card-header">
+                                    <h2><i class="fa-solid fa-history text-orange"></i> Üretim Giriş Günlüğü</h2>
+                                    <span class="badge" id="prod-log-count">0 Kayıt</span>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Split List & Log -->
-                    <div class="grid-1-2 mt-4">
-                        <!-- Production Log -->
-                        <div class="section-card glass flex-col">
-                            <div class="card-header">
-                                <h2><i class="fa-solid fa-history text-orange"></i> Üretim Giriş Günlüğü</h2>
-                                <span class="badge" id="prod-log-count">0 Kayıt</span>
-                            </div>
-                            <div class="table-wrapper flex-1">
-                                <table class="table" id="production-log-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Sıra</th>
-                                            <th>Parça Kodu</th>
-                                            <th>Adet</th>
-                                            <th>İstasyon</th>
-                                            <th>Fazla</th>
-                                            <th>İşlem</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="production-log-body">
-                                        <!-- Giriş günlükleri buraya listelenecek -->
-                                    </tbody>
-                                </table>
+                                <div class="table-wrapper flex-1" style="max-height: 235px; overflow-y: auto;">
+                                    <table class="table" id="production-log-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Sıra</th>
+                                                <th>Parça Kodu</th>
+                                                <th>Adet</th>
+                                                <th>İstasyon</th>
+                                                <th>Fazla</th>
+                                                <th>İşlem</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="production-log-body">
+                                            <!-- Giriş günlükleri buraya listelenecek -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Requirements Table -->
-                        <div class="section-card glass flex-col">
+                        <!-- Middle Column: Requirements Table -->
+                        <div class="section-card glass flex-col flex-1">
                             <div class="card-header">
                                 <h2><i class="fa-solid fa-table-list text-blue"></i> Üretim Takip Listesi (Gereksinimler)</h2>
                                 <div class="header-filters">
@@ -255,6 +244,19 @@
                                 <div class="pagination-buttons">
                                     <button class="btn btn-sm btn-secondary" id="takip-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
                                     <button class="btn btn-sm btn-secondary" id="takip-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Hızlı Parça Bilgisi -->
+                        <div class="section-card glass flex-col flex-1" style="min-height: 600px;">
+                            <div class="card-header">
+                                <h2><i class="fa-solid fa-circle-info text-blue"></i> Hızlı Parça Bilgisi</h2>
+                            </div>
+                            <div class="part-info-box" id="quick-part-info">
+                                <div class="info-placeholder">
+                                    <i class="fa-solid fa-search-plus"></i>
+                                    <p>Durumunu ve detaylarını incelemek için bir parça kodu arayın veya tablodan seçin.</p>
                                 </div>
                             </div>
                         </div>
@@ -518,6 +520,6 @@
     <!-- Notification system -->
     <div id="toast" class="toast"></div>
 
-    <script src="app.js?v=1.0.9"></script>
+    <script src="app.js?v=1.1.0"></script>
 </body>
 </html>
