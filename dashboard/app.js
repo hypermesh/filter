@@ -1612,11 +1612,11 @@ function renderStationsTab() {
     sidebar.innerHTML = '';
 
     let draggedItem = null;
+    const searchInput = document.getElementById('station-search');
+    const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
     stationList.forEach(st => {
         const btn = document.createElement('button');
-        btn.className = `station-item-btn ${st === activeStation ? 'active' : ''}`;
-        btn.setAttribute('draggable', true);
         
         // Count how many parts in this station are fully complete
         const rows = stationSheetsMap[st] || [];
@@ -1634,6 +1634,20 @@ function renderStationsTab() {
             }
         });
 
+        // Check if there is any search match in this station
+        let isSearchMatch = false;
+        if (searchVal) {
+            isSearchMatch = rows.some(r => {
+                const code = String(r['Kod'] || '').toLowerCase();
+                const mat = String(r['Malzeme Adı'] || '').toLowerCase();
+                const hCode = String(r['Hammadde Kod'] || '').toLowerCase();
+                return code.includes(searchVal) || mat.includes(searchVal) || hCode.includes(searchVal);
+            });
+        }
+
+        btn.className = `station-item-btn ${st === activeStation ? 'active' : ''} ${isSearchMatch ? 'search-match-pulse' : ''}`;
+        btn.setAttribute('draggable', true);
+        
         btn.innerHTML = `
             <span class="station-name" title="${st}">${st}</span>
             <span class="badge-pill">${completedCount} / ${rows.length}</span>
@@ -1862,7 +1876,7 @@ function renderStationTable(headers) {
 // Station navigation events
 document.getElementById('station-search').addEventListener('input', () => {
     paginationState.station.page = 1;
-    filterAndPaginateStationData();
+    renderStationsTab();
 });
 
 

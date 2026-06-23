@@ -989,6 +989,32 @@ body {
     background: rgba(59, 130, 246, 0.05) !important;
 }
 
+.station-item-btn.search-match-pulse {
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    background: rgba(59, 130, 246, 0.08) !important;
+    color: var(--text-main);
+    animation: stationSearchPulse 2s infinite ease-in-out;
+}
+
+.station-item-btn.search-match-pulse .badge-pill {
+    background: rgba(59, 130, 246, 0.2) !important;
+    color: #93c5fd !important;
+}
+
+@keyframes stationSearchPulse {
+    0% {
+        box-shadow: 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.45);
+        border-color: rgba(59, 130, 246, 0.7) !important;
+        background: rgba(59, 130, 246, 0.16) !important;
+    }
+    100% {
+        box-shadow: 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+}
+
 /* Toast Notifications */
 .toast {
     position: fixed;
