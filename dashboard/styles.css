@@ -9,6 +9,7 @@
 }
 
 :root {
+    color-scheme: dark;
     --bg-dark: #070B16;
     --bg-card: rgba(16, 22, 40, 0.65);
     --border-color: rgba(255, 255, 255, 0.07);
@@ -1168,4 +1169,13 @@ body {
 @keyframes modalSlideUp {
     from { transform: translateY(30px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
+}
+
+/* Custom styling for number inputs spinner buttons to fit dark theme */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    background: transparent !important;
+    filter: invert(0.8) brightness(1.2);
+    cursor: pointer;
+    margin: 0;
 }
