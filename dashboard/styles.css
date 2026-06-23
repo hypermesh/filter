@@ -1171,11 +1171,12 @@ body {
     to { transform: translateY(0); opacity: 1; }
 }
 
-/* Custom styling for number inputs spinner buttons to fit dark theme */
+/* Hide number input spinners (up/down arrows) to keep the text box clean and avoid browser styling issues */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
-    background: transparent !important;
-    filter: invert(0.8) brightness(1.2);
-    cursor: pointer;
-    margin: 0;
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+input[type="number"] {
+    -moz-appearance: textfield !important;
 }
