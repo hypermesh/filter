@@ -645,6 +645,32 @@ body {
     box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
 }
 
+.input-with-icon select {
+    width: 100%;
+    background: rgba(16, 22, 40, 0.7);
+    border: 1px solid var(--border-color);
+    padding: 11px 12px 11px 40px;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: var(--transition);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.input-with-icon select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+}
+
+.input-with-icon select option {
+    background-color: #0d1222;
+    color: white;
+}
+
+
 /* Autocomplete suggestions */
 .autocomplete-items {
     position: absolute;

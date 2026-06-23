@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SheetJS (xlsx.full.min.js) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=1.0.7">
+    <link rel="stylesheet" href="styles.css?v=1.0.8">
 </head>
 <body>
     <div id="drop-zone" class="drop-zone">
@@ -160,6 +160,16 @@
                                         <input type="number" id="prod-qty" min="1" placeholder="Miktar girin..." required>
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                    <label for="prod-station">İşlemin Yapıldığı İstasyon</label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-solid fa-industry"></i>
+                                        <select id="prod-station" class="select-input">
+                                            <option value="Tüm İstasyonlar">Tüm İstasyonlar (Komple Bitti)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <button type="submit" class="btn btn-primary btn-block">
                                     <i class="fa-solid fa-check"></i> Üretim Girişini Kaydet
                                 </button>
@@ -193,6 +203,7 @@
                                             <th>Sıra</th>
                                             <th>Parça Kodu</th>
                                             <th>Adet</th>
+                                            <th>İstasyon</th>
                                             <th>Fazla</th>
                                             <th>İşlem</th>
                                         </tr>
@@ -507,6 +518,6 @@
     <!-- Notification system -->
     <div id="toast" class="toast"></div>
 
-    <script src="app.js?v=1.0.7"></script>
+    <script src="app.js?v=1.0.8"></script>
 </body>
 </html>

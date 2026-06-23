@@ -261,6 +261,7 @@ function parseWorkbook() {
             // Col I-K: Production Log
             const cellI = utSheet[XLSX.utils.encode_cell({ r: r, c: 8 })]; // Col I (ÜRETİLEN KOD)
             const cellJ = utSheet[XLSX.utils.encode_cell({ r: r, c: 9 })]; // Col J (ÜRETİM ADEDİ)
+            const cellL = utSheet[XLSX.utils.encode_cell({ r: r, c: 11 })]; // Col L (İSTASYON)
             
             if (cellI && cellI.v !== undefined && cellI.v !== null && String(cellI.v).trim() !== "") {
                 const prodQty = cellJ ? parseFloat(cellJ.v) || 0 : 0;
@@ -268,7 +269,8 @@ function parseWorkbook() {
                     rowIndex: r + 1,
                     kod: String(cellI.v).trim().toUpperCase(),
                     adet: prodQty,
-                    fazla: 0
+                    fazla: 0,
+                    station: cellL && cellL.v ? String(cellL.v).trim() : 'Tüm İstasyonlar'
                 });
             }
 
@@ -1010,6 +1012,34 @@ function renderProductionTab() {
     filterAndPaginateTakipTable();
 }
 
+function updateStationOptions(code) {
+    const select = document.getElementById('prod-station');
+    if (!select) return;
+    
+    // Clear and add default option
+    select.innerHTML = `
+        <option value="Tüm İstasyonlar">Tüm İstasyonlar (Komple Bitti)</option>
+    `;
+    
+    code = code.toUpperCase().trim();
+    if (!code) return;
+    
+    // Find stations requiring this code
+    let stations = [];
+    for (const [stName, rows] of Object.entries(stationSheetsMap)) {
+        if (rows.some(r => String(r['Kod'] || '').trim().toUpperCase() === code)) {
+            stations.push(stName);
+        }
+    }
+    
+    stations.forEach(st => {
+        const option = document.createElement('option');
+        option.value = st;
+        option.textContent = `${st} İstasyonu`;
+        select.appendChild(option);
+    });
+}
+
 function initAutocomplete() {
     const codeInput = document.getElementById('prod-code');
     const autoList = document.getElementById('autocomplete-list');
@@ -1020,6 +1050,7 @@ function initAutocomplete() {
     codeInput.addEventListener('input', function() {
         const val = this.value.toUpperCase().trim();
         autoList.innerHTML = '';
+        updateStationOptions(val);
         if (!val) return;
 
         let suggestions = uniqueCodes.filter(c => c.includes(val)).slice(0, 10);
@@ -1033,6 +1064,7 @@ function initAutocomplete() {
                 codeInput.value = s;
                 autoList.innerHTML = '';
                 showQuickPartInfo(s);
+                updateStationOptions(s);
             });
             autoList.appendChild(div);
         });
@@ -1069,16 +1101,49 @@ function showQuickPartInfo(code) {
     const totalRem = Math.max(0.0, totalReq - totalProd);
     const overallPct = totalReq > 0 ? Math.round((totalProd / totalReq) * 100) : 0;
     
-    // Find stations requiring this code
-    let stations = [];
+    // Find stations requiring this code and calculate their completion status
+    let stationsStatus = [];
     for (const [stName, rows] of Object.entries(stationSheetsMap)) {
         if (rows.some(r => String(r['Kod'] || '').trim().toUpperCase() === code)) {
-            stations.push(stName);
+            const stLogs = productionLog.filter(log => log.kod === code && (log.station === stName || log.station === 'Tüm İstasyonlar' || !log.station));
+            const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
+            const stPct = totalReq > 0 ? Math.min(100, Math.round((stProd / totalReq) * 100)) : 0;
+            stationsStatus.push({
+                name: stName,
+                pct: stPct
+            });
         }
     }
 
+    // Detailed distribution by Kaynak Dosya (FIFO)
+    let kaynakBreakdownHtml = '';
+    if (reqs.length > 0) {
+        kaynakBreakdownHtml = `
+            <div class="part-info-row" style="margin-top: 10px; flex-direction:column; gap:6px; border-top:1px solid var(--border-color); padding-top:8px; width: 100%;">
+                <span class="part-info-label" style="font-weight:600; color:var(--primary);">Kaynak Dosya Dağılımı (FIFO):</span>
+                <div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:5px; max-height:160px; overflow-y:auto; padding-right:4px;">
+                    ${reqs.map(r => {
+                        const pct = r.uretilecek > 0 ? Math.min(100, Math.round((r.uretilen / r.uretilecek) * 100)) : 0;
+                        const pctColor = pct >= 100 ? 'var(--success)' : pct > 0 ? 'var(--warning)' : 'var(--danger)';
+                        return `
+                            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:6px 10px; border-radius:6px; width: 100%; box-sizing: border-box;">
+                                <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; width: 100%;">
+                                    <span style="font-weight:700; color:white;">${r.kaynak}</span>
+                                    <span style="font-weight:600; color:${pctColor};">${r.uretilen} / ${r.uretilecek} Adet (${pct}%)</span>
+                                </div>
+                                <div style="width:100%; height:4px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden;">
+                                    <div style="width:${pct}%; height:100%; background:${pctColor}; border-radius:2px;"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
     box.innerHTML = `
-        <div class="part-info-details">
+        <div class="part-info-details" style="width: 100%;">
             <div class="part-info-title">${code}</div>
             <div class="part-info-row">
                 <span class="part-info-label">Malzeme Adı:</span>
@@ -1100,15 +1165,19 @@ function showQuickPartInfo(code) {
                 <span class="part-info-label">Genel Durum:</span>
                 <span class="badge ${overallPct >= 100 ? 'badge-success' : overallPct > 0 ? 'badge-warning' : 'badge-danger'}">${overallPct}% Tamamlandı</span>
             </div>
-            <div class="part-info-row" style="margin-top: 5px; flex-direction:column; gap:6px; border-top:1px solid var(--border-color); padding-top:8px;">
-                <span class="part-info-label" style="font-weight:600;">İşleneceği İstasyonlar:</span>
-                <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:3px;">
-                    ${stations.length > 0 
-                        ? stations.map(s => `<span class="badge" style="background:rgba(255,255,255,0.06); color:var(--text-main); font-size:10px;">${s}</span>`).join('') 
+            <div class="part-info-row" style="margin-top: 5px; flex-direction:column; gap:6px; border-top:1px solid var(--border-color); padding-top:8px; width: 100%;">
+                <span class="part-info-label" style="font-weight:600;">İstasyon Tamamlanma Durumları:</span>
+                <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:3px; width:100%;">
+                    ${stationsStatus.length > 0 
+                        ? stationsStatus.map(st => {
+                            const badgeClass = st.pct >= 100 ? 'badge-success' : st.pct > 0 ? 'badge-warning' : 'badge-danger';
+                            return `<span class="badge ${badgeClass}" style="font-size:10px;">${st.name} (${st.pct}%)</span>`;
+                        }).join('') 
                         : '<span style="color:var(--text-dim); font-size:12px;">Tanımlı istasyon yok. (Büyük ihtimalle Montaj)</span>'
                     }
                 </div>
             </div>
+            ${kaynakBreakdownHtml}
         </div>
     `;
 }
@@ -1130,15 +1199,22 @@ document.getElementById('production-form').addEventListener('submit', function(e
     }
 
     // Append to production log
+    const stationSelect = document.getElementById('prod-station');
+    const selectedStation = stationSelect ? stationSelect.value : 'Tüm İstasyonlar';
+
     productionLog.push({
         rowIndex: uretimTakipRows.length + productionLog.length + 5, // Arbitrary index offset for new entries
         kod: code,
         adet: qty,
-        fazla: 0
+        fazla: 0,
+        station: selectedStation
     });
 
     showToast(`"${code}" kodu için ${qty} adet üretim girildi.`, "success");
     document.getElementById('prod-qty').value = '';
+    if (stationSelect) {
+        stationSelect.value = 'Tüm İstasyonlar';
+    }
     
     // Recalculate
     recalculateAll();
@@ -1166,7 +1242,7 @@ function renderProductionLog() {
     document.getElementById('prod-log-count').textContent = `${productionLog.length} Kayıt`;
 
     if (productionLog.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center" style="color: var(--text-dim); padding:20px;">Giriş yapılmadı.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color: var(--text-dim); padding:20px;">Giriş yapılmadı.</td></tr>';
         return;
     }
 
@@ -1180,6 +1256,7 @@ function renderProductionLog() {
             <td>${origIndex + 1}</td>
             <td style="font-weight:700; color:var(--primary); cursor:pointer;" onclick="showQuickPartInfo('${log.kod}')">${log.kod}</td>
             <td class="text-right" style="font-weight:600;">${log.adet}</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.06); color:var(--text-main); font-size:10px;">${log.station || 'Tüm İstasyonlar'}</span></td>
             <td class="text-right" style="color:${log.fazla > 0 ? 'var(--warning)' : 'var(--text-dim)'};">${log.fazla > 0 ? '+' + log.fazla : '-'}</td>
             <td>
                 <button class="trash-btn" onclick="deleteLogEntry(${origIndex})" title="Kayıt Sil">
@@ -1191,40 +1268,50 @@ function renderProductionLog() {
     });
 }
 
-function togglePartCompletion(code, shouldComplete) {
+function togglePartCompletion(code, shouldComplete, stationName) {
     const reqs = uretimTakipRows.filter(u => u.kod === code);
     if (reqs.length === 0) return;
     
     const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
     
     if (shouldComplete) {
-        const totalProd = reqs.reduce((sum, u) => sum + u.uretilen, 0.0);
-        const needed = Math.max(0.0, totalReq - totalProd);
+        // Calculate production for this station
+        const stLogs = productionLog.filter(log => log.kod === code && (log.station === stationName || log.station === 'Tüm İstasyonlar' || !log.station));
+        const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
+        const needed = Math.max(0.0, totalReq - stProd);
+        
         if (needed > 0) {
             productionLog.push({
                 rowIndex: uretimTakipRows.length + productionLog.length + 5,
                 kod: code,
                 adet: needed,
                 fazla: 0,
+                station: stationName || 'Tüm İstasyonlar',
                 autoCompleted: true
             });
-            showToast(`"${code}" parçası tamamlandı olarak işaretlendi.`, "success");
+            showToast(`"${code}" parçası ${stationName ? stationName + ' istasyonunda' : ''} tamamlandı olarak işaretlendi.`, "success");
         }
     } else {
-        // Remove autoCompleted logs first
-        productionLog = productionLog.filter(log => !(log.kod === code && log.autoCompleted));
+        // Remove autoCompleted logs for this code and station
+        productionLog = productionLog.filter(log => {
+            const isMatch = log.kod === code && log.autoCompleted && (log.station === stationName || !stationName || log.station === 'Tüm İstasyonlar');
+            return !isMatch;
+        });
         
         // Recalculate to see if it's still 100%
         recalculateAll();
         
-        // If it's still >= 100% (due to manual/excel logs), remove all logs for this code to force it under 100%
-        const reqsCheck = uretimTakipRows.filter(u => u.kod === code);
-        const totalProdCheck = reqsCheck.reduce((sum, u) => sum + u.uretilen, 0.0);
-        const pct = totalReq > 0 ? (totalProdCheck / totalReq) * 100 : 0;
-        if (pct >= 100) {
-            productionLog = productionLog.filter(log => log.kod !== code);
+        // Check completion for this station
+        const stLogs = productionLog.filter(log => log.kod === code && (log.station === stationName || log.station === 'Tüm İstasyonlar' || !log.station));
+        const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
+        const stPct = totalReq > 0 ? (stProd / totalReq) * 100 : 0;
+        
+        if (stPct >= 100) {
+            // Delete all logs matching this station to force it under 100%
+            productionLog = productionLog.filter(log => !(log.kod === code && (log.station === stationName || !stationName || log.station === 'Tüm İstasyonlar')));
         }
-        showToast(`"${code}" parçasının tamamlandı işareti kaldırıldı.`, "info");
+        
+        showToast(`"${code}" parçasının ${stationName ? stationName + ' istasyonundaki' : ''} tamamlandı işareti kaldırıldı.`, "info");
     }
     
     // Perform recalculation
@@ -1668,12 +1755,12 @@ function renderStationsTab() {
         let completedCount = 0;
         rows.forEach(r => {
             const code = String(r['Kod'] || '').trim().toUpperCase();
-            // Check in Üretim Takip
             const reqs = uretimTakipRows.filter(u => u.kod === code);
             if (reqs.length > 0) {
                 const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
-                const totalProd = reqs.reduce((sum, u) => sum + u.uretilen, 0.0);
-                if (totalReq > 0 && totalProd >= totalReq) {
+                const stLogs = productionLog.filter(log => log.kod === code && (log.station === st || log.station === 'Tüm İstasyonlar' || !log.station));
+                const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
+                if (totalReq > 0 && stProd >= totalReq) {
                     completedCount++;
                 }
             }
@@ -1782,8 +1869,9 @@ function filterAndPaginateStationData() {
             let completionPct = 0;
             if (reqs.length > 0) {
                 const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
-                const totalProd = reqs.reduce((sum, u) => sum + u.uretilen, 0.0);
-                completionPct = totalReq > 0 ? Math.round((totalProd / totalReq) * 100) : 0;
+                const stLogs = productionLog.filter(log => log.kod === code && (log.station === activeStation || log.station === 'Tüm İstasyonlar' || !log.station));
+                const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
+                completionPct = totalReq > 0 ? Math.min(100, Math.round((stProd / totalReq) * 100)) : 0;
             }
             if (statusFilter === 'ready') return completionPct >= 100;
             if (statusFilter === 'production') return completionPct > 0 && completionPct < 100;
@@ -1875,9 +1963,10 @@ function renderStationTable(headers) {
         
         if (reqs.length > 0) {
             const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
-            const totalProd = reqs.reduce((sum, u) => sum + u.uretilen, 0.0);
-            completionPct = totalReq > 0 ? Math.round((totalProd / totalReq) * 100) : 0;
-            completionText = `${totalProd} / ${totalReq}`;
+            const stLogs = productionLog.filter(log => log.kod === code && (log.station === activeStation || log.station === 'Tüm İstasyonlar' || !log.station));
+            const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
+            completionPct = totalReq > 0 ? Math.min(100, Math.round((stProd / totalReq) * 100)) : 0;
+            completionText = `${stProd} / ${totalReq}`;
             
             if (completionPct >= 100) {
                 badgeHtml = `<span class="badge badge-success">Hazır (${completionPct}%)</span>`;
@@ -1898,7 +1987,7 @@ function renderStationTable(headers) {
                 if (reqs.length > 0) {
                     td.innerHTML = `
                         <div class="status-cell-container" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-                            <input type="checkbox" class="station-complete-checkbox" ${completionPct >= 100 ? 'checked' : ''} onchange="togglePartCompletion('${code}', this.checked)" title="Bitti / Üretildi Olarak İşaretle">
+                            <input type="checkbox" class="station-complete-checkbox" ${completionPct >= 100 ? 'checked' : ''} onchange="togglePartCompletion('${code}', this.checked, '${activeStation}')" title="Bitti / Üretildi Olarak İşaretle">
                             ${badgeHtml}
                         </div>
                     `;
@@ -1987,7 +2076,11 @@ exportBtn.addEventListener('click', () => {
             delete utSheet[XLSX.utils.encode_cell({ r: r, c: 8 })]; // Col I
             delete utSheet[XLSX.utils.encode_cell({ r: r, c: 9 })]; // Col J
             delete utSheet[XLSX.utils.encode_cell({ r: r, c: 10 })]; // Col K
+            delete utSheet[XLSX.utils.encode_cell({ r: r, c: 11 })]; // Col L
         }
+
+        // Set Col L header
+        utSheet[XLSX.utils.encode_cell({ r: 0, c: 11 })] = { t: 's', v: 'İSTASYON' };
 
         // Rewrite production log rows
         productionLog.forEach((log, idx) => {
@@ -2001,6 +2094,7 @@ exportBtn.addEventListener('click', () => {
                 v: log.fazla,
                 f: `IF(I${r+1}<>"",MAX(0,SUMIF($I$2:$I$6377,I${r+1},$J$2:$J$6377)-SUMIF($C$2:$C$6377,I${r+1},$D$2:$D$6377)),"")`
             };
+            utSheet[XLSX.utils.encode_cell({ r: r, c: 11 })] = { t: 's', v: log.station || 'Tüm İstasyonlar' };
         });
 
         // Ensure SheetJS knows the new range of "Üretim Takip"
