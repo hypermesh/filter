@@ -513,6 +513,7 @@ body {
     flex-direction: column;
     gap: 12px;
     transition: var(--transition);
+    cursor: pointer;
 }
 
 .file-progress-card:hover {

@@ -846,10 +846,24 @@ function renderDashboard() {
 let currentModalKaynak = null;
 
 function openDetailsModal(kaynakName) {
+    console.log("openDetailsModal called with:", kaynakName);
     currentModalKaynak = kaynakName;
-    document.getElementById('modal-search').value = '';
-    renderModalData();
-    document.getElementById('details-modal').style.display = 'flex';
+    
+    const modalEl = document.getElementById('details-modal');
+    if (modalEl) {
+        modalEl.style.display = 'flex';
+    }
+    
+    const searchEl = document.getElementById('modal-search');
+    if (searchEl) {
+        searchEl.value = '';
+    }
+    
+    try {
+        renderModalData();
+    } catch (err) {
+        console.error("Error rendering modal data:", err);
+    }
 }
 
 function renderModalData() {
@@ -857,34 +871,55 @@ function renderModalData() {
     
     // Find matching dosyaTakipRow
     const dRow = dosyaTakipRows.find(f => f.kaynak === currentModalKaynak);
-    if (!dRow) return;
+    if (!dRow) {
+        console.warn("Could not find dosyaTakipRow for kaynak:", currentModalKaynak);
+        return;
+    }
 
     // Filter uretimTakipRows matching this source
-    const matchedRows = uretimTakipRows.filter(r => r.kaynak.includes(currentModalKaynak));
+    const matchedRows = uretimTakipRows.filter(r => r.kaynak && String(r.kaynak).includes(currentModalKaynak));
     
     // Calculate total quantities
-    const totalQty = matchedRows.reduce((sum, r) => sum + r.uretilecek, 0);
-    const producedQty = matchedRows.reduce((sum, r) => sum + r.uretilen, 0);
+    const totalQty = matchedRows.reduce((sum, r) => sum + (parseFloat(r.uretilecek) || 0), 0);
+    const producedQty = matchedRows.reduce((sum, r) => sum + (parseFloat(r.uretilen) || 0), 0);
     
-    // Set headers / stats
-    document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-file-invoice text-blue"></i> ${currentModalKaynak} - Dosya Detayları`;
-    document.getElementById('modal-stat-variety').textContent = `${dRow.hazir} / ${dRow.toplam} hazır`;
-    document.getElementById('modal-stat-qty').textContent = `${producedQty.toLocaleString()} / ${totalQty.toLocaleString()} adet`;
-    document.getElementById('modal-stat-missing-count').textContent = `${dRow.eksik} eksik kalem`;
+    // Set headers / stats safely
+    const titleEl = document.getElementById('modal-title');
+    if (titleEl) {
+        titleEl.innerHTML = `<i class="fa-solid fa-file-invoice text-blue"></i> ${currentModalKaynak} - Dosya Detayları`;
+    }
+    
+    const varietyEl = document.getElementById('modal-stat-variety');
+    if (varietyEl) {
+        varietyEl.textContent = `${dRow.hazir || 0} / ${dRow.toplam || 0} hazır`;
+    }
+    
+    const qtyEl = document.getElementById('modal-stat-qty');
+    if (qtyEl) {
+        qtyEl.textContent = `${producedQty.toLocaleString()} / ${totalQty.toLocaleString()} adet`;
+    }
+    
+    const missingCountEl = document.getElementById('modal-stat-missing-count');
+    if (missingCountEl) {
+        missingCountEl.textContent = `${dRow.eksik || 0} eksik kalem`;
+    }
 
     // Filter missing rows
-    let missingRows = matchedRows.filter(r => r.kalan > 0);
+    let missingRows = matchedRows.filter(r => (parseFloat(r.kalan) || 0) > 0);
     
-    // Filter by modal search value
-    const searchVal = document.getElementById('modal-search').value.toLowerCase().trim();
+    // Filter by modal search value safely
+    const searchInput = document.getElementById('modal-search');
+    const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
     if (searchVal) {
-        missingRows = missingRows.filter(r => 
-            r.kod.toLowerCase().includes(searchVal) || 
-            (codeToNameMap[r.kod] && codeToNameMap[r.kod].toLowerCase().includes(searchVal))
-        );
+        missingRows = missingRows.filter(r => {
+            const code = String(r.kod || '').toLowerCase();
+            const name = String(codeToNameMap[r.kod] || '').toLowerCase();
+            return code.includes(searchVal) || name.includes(searchVal);
+        });
     }
 
     const tbody = document.getElementById('modal-table-body');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     if (missingRows.length === 0) {
@@ -895,12 +930,16 @@ function renderModalData() {
     missingRows.forEach(r => {
         const name = codeToNameMap[r.kod] || '-';
         
-        // Find matching stations
+        // Find matching stations safely
         const stations = [];
-        for (const [stName, rows] of Object.entries(stationSheetsMap)) {
-            const found = rows.some(sr => String(sr['Kod'] || '').trim().toUpperCase() === r.kod);
-            if (found) {
-                stations.push(stName);
+        if (stationSheetsMap) {
+            for (const [stName, rows] of Object.entries(stationSheetsMap)) {
+                if (Array.isArray(rows)) {
+                    const found = rows.some(sr => sr && String(sr['Kod'] || '').trim().toUpperCase() === String(r.kod).trim().toUpperCase());
+                    if (found) {
+                        stations.push(stName);
+                    }
+                }
             }
         }
         
@@ -915,31 +954,41 @@ function renderModalData() {
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td style="font-weight: 700; color: white;">${r.kod}</td>
+            <td style="font-weight: 700; color: white;">${r.kod || '-'}</td>
             <td style="color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${name}">${name}</td>
             <td>${stationsHtml}</td>
-            <td class="text-right" style="font-weight: 600;">${r.uretilecek}</td>
-            <td class="text-right" style="color: ${r.uretilen > 0 ? 'var(--success)' : 'var(--text-dim)'}; font-weight: 600;">${r.uretilen}</td>
-            <td class="text-right" style="color: var(--warning); font-weight: 700;">${r.kalan}</td>
+            <td class="text-right" style="font-weight: 600;">${r.uretilecek || 0}</td>
+            <td class="text-right" style="color: ${(r.uretilen || 0) > 0 ? 'var(--success)' : 'var(--text-dim)'}; font-weight: 600;">${r.uretilen || 0}</td>
+            <td class="text-right" style="color: var(--warning); font-weight: 700;">${r.kalan || 0}</td>
         `;
         tbody.appendChild(tr);
     });
 }
 
 // Modal Event Listeners
-document.getElementById('modal-close-btn').addEventListener('click', () => {
-    document.getElementById('details-modal').style.display = 'none';
-    currentModalKaynak = null;
-});
-
-document.getElementById('details-modal').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('details-modal')) {
-        document.getElementById('details-modal').style.display = 'none';
+const closeBtn = document.getElementById('modal-close-btn');
+if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+        const modal = document.getElementById('details-modal');
+        if (modal) modal.style.display = 'none';
         currentModalKaynak = null;
-    }
-});
+    });
+}
 
-document.getElementById('modal-search').addEventListener('input', renderModalData);
+const modalOverlay = document.getElementById('details-modal');
+if (modalOverlay) {
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.style.display = 'none';
+            currentModalKaynak = null;
+        }
+    });
+}
+
+const modalSearch = document.getElementById('modal-search');
+if (modalSearch) {
+    modalSearch.addEventListener('input', renderModalData);
+}
 
 document.getElementById('dashboard-search').addEventListener('input', renderDashboard);
 
