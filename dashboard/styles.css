@@ -1296,7 +1296,7 @@ tr.station-row-completed td:nth-child(2) { /* Kod */
     display: grid;
     grid-template-columns: 1.2fr 2fr 1.2fr;
     gap: 20px;
-    align-items: start;
+    align-items: stretch;
 }
 
 .gap-20 {
