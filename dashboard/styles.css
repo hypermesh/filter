@@ -1206,3 +1206,52 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
     -moz-appearance: textfield !important;
 }
+
+/* Station Row Completed Styling */
+tr.station-row-completed {
+    background-color: rgba(16, 185, 129, 0.05) !important;
+}
+tr.station-row-completed td:first-child {
+    border-left: 3px solid var(--success) !important;
+}
+tr.station-row-completed td {
+    color: rgba(160, 174, 192, 0.5) !important;
+}
+tr.station-row-completed td:nth-child(2) { /* Kod */
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Custom checkbox for station completion */
+.station-complete-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+.station-complete-checkbox:hover {
+    border-color: var(--success);
+    box-shadow: 0 0 8px var(--success-glow);
+}
+.station-complete-checkbox:checked {
+    background: var(--success);
+    border-color: var(--success);
+    box-shadow: 0 0 10px var(--success-glow);
+}
+.station-complete-checkbox:checked::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 11px;
+    color: #0b0f19;
+    position: absolute;
+}

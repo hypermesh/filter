@@ -1191,6 +1191,51 @@ function renderProductionLog() {
     });
 }
 
+function togglePartCompletion(code, shouldComplete) {
+    const reqs = uretimTakipRows.filter(u => u.kod === code);
+    if (reqs.length === 0) return;
+    
+    const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
+    
+    if (shouldComplete) {
+        const totalProd = reqs.reduce((sum, u) => sum + u.uretilen, 0.0);
+        const needed = Math.max(0.0, totalReq - totalProd);
+        if (needed > 0) {
+            productionLog.push({
+                rowIndex: uretimTakipRows.length + productionLog.length + 5,
+                kod: code,
+                adet: needed,
+                fazla: 0,
+                autoCompleted: true
+            });
+            showToast(`"${code}" parçası tamamlandı olarak işaretlendi.`, "success");
+        }
+    } else {
+        // Remove autoCompleted logs first
+        productionLog = productionLog.filter(log => !(log.kod === code && log.autoCompleted));
+        
+        // Recalculate to see if it's still 100%
+        recalculateAll();
+        
+        // If it's still >= 100% (due to manual/excel logs), remove all logs for this code to force it under 100%
+        const reqsCheck = uretimTakipRows.filter(u => u.kod === code);
+        const totalProdCheck = reqsCheck.reduce((sum, u) => sum + u.uretilen, 0.0);
+        const pct = totalReq > 0 ? (totalProdCheck / totalReq) * 100 : 0;
+        if (pct >= 100) {
+            productionLog = productionLog.filter(log => log.kod !== code);
+        }
+        showToast(`"${code}" parçasının tamamlandı işareti kaldırıldı.`, "info");
+    }
+    
+    // Perform recalculation
+    recalculateAll();
+    
+    // Render whichever tab is active
+    renderTab(currentTab);
+}
+window.togglePartCompletion = togglePartCompletion;
+
+
 function filterAndPaginateTakipTable() {
     const searchVal = document.getElementById('takip-search').value.toLowerCase().trim();
     const statusVal = document.getElementById('takip-filter-status').value;
@@ -1842,11 +1887,24 @@ function renderStationTable(headers) {
         }
 
         const tr = document.createElement('tr');
+        if (completionPct >= 100) {
+            tr.classList.add('station-row-completed');
+        }
+
         finalHeaders.forEach(h => {
             const td = document.createElement('td');
             
             if (h === 'Durum') {
-                td.innerHTML = badgeHtml;
+                if (reqs.length > 0) {
+                    td.innerHTML = `
+                        <div class="status-cell-container" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                            <input type="checkbox" class="station-complete-checkbox" ${completionPct >= 100 ? 'checked' : ''} onchange="togglePartCompletion('${code}', this.checked)" title="Bitti / Üretildi Olarak İşaretle">
+                            ${badgeHtml}
+                        </div>
+                    `;
+                } else {
+                    td.innerHTML = badgeHtml;
+                }
             } else {
                 let val = row[h];
                 if (typeof val === 'number') {
