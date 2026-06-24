@@ -595,10 +595,58 @@ function parseWorkbook() {
 // Live spreadsheet calculation engine (SUMIF, SUMIFS, FIFO matching, limits, sets)
 function recalculateAll() {
     // 1. Calculate total produced quantity for each part code from the production log
-    const totalProducedMap = {};
+    const requiredStationsMap = {};
+    for (const [stName, rows] of Object.entries(stationSheetsMap)) {
+        for (const row of rows) {
+            const code = String(row['Kod'] || '').trim().toUpperCase();
+            if (code) {
+                if (!requiredStationsMap[code]) requiredStationsMap[code] = [];
+                requiredStationsMap[code].push(stName);
+            }
+        }
+    }
+
+    const codeStationSums = {}; 
+    const codeGlobalSums = {};  
+
     for (const log of productionLog) {
         const code = log.kod;
-        totalProducedMap[code] = (totalProducedMap[code] || 0.0) + parseFloat(log.adet);
+        const adet = parseFloat(log.adet) || 0;
+        const st = log.station || 'Tüm İstasyonlar';
+
+        if (st === 'Tüm İstasyonlar') {
+            codeGlobalSums[code] = (codeGlobalSums[code] || 0) + adet;
+        } else {
+            if (!codeStationSums[code]) codeStationSums[code] = {};
+            codeStationSums[code][st] = (codeStationSums[code][st] || 0) + adet;
+        }
+    }
+
+    const totalProducedMap = {};
+    const allCodes = new Set([...Object.keys(codeGlobalSums), ...Object.keys(codeStationSums)]);
+    
+    for (const code of allCodes) {
+        const globalSum = codeGlobalSums[code] || 0;
+        const reqStations = requiredStationsMap[code] || [];
+        
+        let minStationSum = 0;
+        if (reqStations.length > 0) {
+            minStationSum = Infinity;
+            for (const reqSt of reqStations) {
+                const sSum = (codeStationSums[code] && codeStationSums[code][reqSt]) || 0;
+                if (sSum < minStationSum) minStationSum = sSum;
+            }
+        } else {
+            let sumOther = 0;
+            if (codeStationSums[code]) {
+                for (const sSum of Object.values(codeStationSums[code])) {
+                    sumOther += sSum;
+                }
+            }
+            minStationSum = sumOther;
+        }
+
+        totalProducedMap[code] = globalSum + minStationSum;
     }
 
     // 2. Allocate produced quantities in FIFO order in Üretim Takip requirements
