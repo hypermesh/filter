@@ -10,8 +10,8 @@
 
 ---
 ## 📍 Progress Summary
-**Aktif Phase:** Stok Rezervasyon Sistemi (Phase 5) Tamamlandı
-**Durum:** Öncelik sırasına göre FIFO stok rezervasyonu yapan `8_Stok_Rezerve.bat` ve `reserve` CLI komutu eklendi. StokListesi.xlsx'ten ham stok değeri alınarak kısmi rezervasyon (Seçenek A) mantığı uygulandı. Şirket bilgisayarı uyumu için bat dosyalarındaki Türkçe karakter sorunu giderildi.
+**Aktif Phase:** Dashboard (Web UI) Geliştirmeleri (Phase 6) Tamamlandı
+**Durum:** Dashboard tablosunda fazla üretimleri takip edebilmek için "Fazla Üretim" mantığı eklendi. Üretim girişleri tarayıcı belleği (RAM) yerine `localStorage`'da tutularak kalıcı hale getirildi. Arayüz filtre ve hesaplama mantıkları iyileştirildi.
 
 ---
 ## Phase 0 — Kurulum
@@ -60,3 +60,9 @@
 - [x] 5 birim test yazıldı ve tüm testler geçiyor.
 - [x] Şirket bilgisayarı uyumu: Tüm `.bat` `echo` satırları ASCII karakterlere dönüştürüldü (S11 — Türkçe karakter sorunu).
 - [x] Tüm değişiklikler GitHub'a push edildi.
+
+## Phase 6 — Dashboard (Web UI) Geliştirmeleri
+- [x] İstasyon detayları tablosunda `Üretilen > Üretilecek` durumları için "Fazla Üretim (+X)" rozeti (mavi ton) eklendi.
+- [x] Dashboard'daki Üretim Takip loglarının (`productionLog`) sayfa yenilenmesinde silinmesi hatası giderildi, loglar `localStorage`'a kaydedildi.
+- [x] Ek toplanabilir set (Ek Set) mantığı doğrulanarak Python (backend) ile uyumlu hale getirildi.
+- [x] Debug logları temizlendi ve tüm güncellemeler GitHub'a gönderildi.

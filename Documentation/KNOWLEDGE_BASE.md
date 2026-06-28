@@ -67,6 +67,10 @@ Tarihsel alınan kararlar ve gerekçeleri.
 * **Çözüm:** Tüm `.bat` dosyalarındaki `echo` komutlarında Türkçe özel karakterler ASCII karşılıklarıyla değiştirildi (örn: `Bilgisayarda` yerine `Bilgisayarda`, `İ` → `I`, `ş` → `s` vb.). Fonksiyonel içerik (Python kodu, dosya yolları) değiştirilmedi — yalnızca kullanıcıya görünen `echo` mesajları ASCII'ye indirildi.
 * **Önlem:** Bundan sonra yazılacak tüm `.bat` `echo` satırlarında Türkçe özel karakter **kullanılmamalıdır**. Sadece `@echo off`, dosya yolları ve Python/uv komutlarında Türkçe karakter kabul edilebilir.
 
+### S12: Dashboard Üretim Loglarının Sayfa Yenilenmesinde Silinmesi
+* **Sorun:** Dashboard (Web UI) üzerinde girilen üretim miktarları (`productionLog`) yalnızca tarayıcı belleğinde (RAM) tutuluyordu. Sayfa yenilendiğinde (Ctrl+Shift+R) tüm üretim girişleri kayboluyor, istasyon tablolarındaki "Hazır" / "Fazla Üretim" durumu sıfırlanarak "Eksik" olarak görünüyordu.
+* **Çözüm:** Üretim logları `localStorage`'a kaydedilecek şekilde güncellendi. Yüklenen Excel dosyasının adı anahtar (key) olarak kullanıldı. Böylece sayfa yenilense veya tarayıcı kapatılıp açılsa bile, aynı dosya yüklendiğinde eski kayıtlar geri getirildi. Ayrıca hedeflenenden fazla girilen üretimler için mavi tonlu "Fazla Üretim" (Over-Production) rozeti eklendi.
+
 ## FAILED (Başarısız Denemeler)
 *(Boş)*
 
