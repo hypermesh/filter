@@ -7,6 +7,7 @@ let loadedExcelFileName = ''; // Yüklü Excel dosya adı (localStorage anahtar�
 let uretimTakipRows = []; // Üretim Takip requirements (Col A-G)
 let productionLog = [];    // Üretim Takip logs entered (Col I-K)
 let dosyaTakipRows = [];   // Üretim Takip summary (Col M-Q)
+let downtimeMap = {};      // İstasyon duruş saatleri { "ISTASYON_ADI": saat }
 
 // --- LocalStorage Yardımcı Fonksiyonlar ---
 function getStorageKey() {
@@ -31,6 +32,23 @@ function loadProductionLogFromStorage() {
         }
     } catch(e) {
         console.warn('localStorage okuma hatası:', e);
+    }
+}
+function saveDowntimeMapToStorage() {
+    try {
+        localStorage.setItem(`downtime_${loadedExcelFileName}`, JSON.stringify(downtimeMap));
+    } catch(e) {}
+}
+function loadDowntimeMapFromStorage() {
+    try {
+        const raw = localStorage.getItem(`downtime_${loadedExcelFileName}`);
+        if (raw) {
+            downtimeMap = JSON.parse(raw);
+        } else {
+            downtimeMap = {};
+        }
+    } catch(e) {
+        downtimeMap = {};
     }
 }
 function clearProductionLogStorage(fileName) {
@@ -146,6 +164,7 @@ function handleFile(file) {
             loadedExcelFileName = file.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
             parseWorkbook();
             loadProductionLogFromStorage(); // localStorage'dan geri yükle
+            loadDowntimeMapFromStorage();
             
             // Switch view
             dropZone.style.display = 'none';
@@ -178,6 +197,7 @@ function parseWorkbook() {
     uretimTakipRows = [];
     productionLog = [];
     dosyaTakipRows = [];
+    downtimeMap = {};
     montajOtomasyonLeft = [];
     montajOtomasyonRight = [];
     finalMontajLeft = [];
@@ -2852,7 +2872,10 @@ function renderPerformanceTab() {
             else if (upSt.includes("3D")) { gunlukSaat = 22; makineSayisi = 15; }
         }
         
-        const haftalikKapasiteDk = gunlukSaat * makineSayisi * HAFTALIK_CALISMA_GUNU * 60;
+        const downtimeHours = downtimeMap[stName] || 0;
+        // Toplam kapasiteden duruşu (dk cinsinden) düşüyoruz
+        const netKapasiteDk = Math.max(0, (gunlukSaat * makineSayisi * HAFTALIK_CALISMA_GUNU * 60) - (downtimeHours * 60));
+        const haftalikKapasiteDk = netKapasiteDk;
         
         // Üretilen iş (Standart Saat) hesapla
         let uretilenStandartDk = 0;
@@ -2899,9 +2922,24 @@ function renderPerformanceTab() {
                 <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-align: right;">
                     (Makine: ${makineSayisi} | Günlük: ${gunlukSaat}s)
                 </div>
+                <div class="perf-stats" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                    <span style="display:flex; align-items:center; gap:5px;">
+                        <i class="fa-solid fa-pause-circle text-orange"></i> Duruş (Saat):
+                    </span>
+                    <input type="number" min="0" step="0.5" class="downtime-input" value="${downtimeHours}" 
+                        onchange="updateDowntime('${stName.replace(/'/g, "\\'")}', this.value)" 
+                        style="width: 60px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; padding: 2px 5px; text-align: center;">
+                </div>
             </div>
         `;
         
         container.insertAdjacentHTML('beforeend', cardHTML);
     });
+}
+
+function updateDowntime(stName, value) {
+    const val = parseFloat(value) || 0;
+    downtimeMap[stName] = val;
+    saveDowntimeMapToStorage();
+    renderPerformanceTab();
 }
