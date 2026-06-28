@@ -1,11 +1,43 @@
 // Global App State
 let workbook = null;
 let currentTab = 'dashboard';
+let loadedExcelFileName = ''; // Yüklü Excel dosya adı (localStorage anahtarı için)
 
 // Parsed Data Structures
 let uretimTakipRows = []; // Üretim Takip requirements (Col A-G)
 let productionLog = [];    // Üretim Takip logs entered (Col I-K)
 let dosyaTakipRows = [];   // Üretim Takip summary (Col M-Q)
+
+// --- LocalStorage Yardımcı Fonksiyonlar ---
+function getStorageKey() {
+    return `prodLog_${loadedExcelFileName}`;
+}
+function saveProductionLogToStorage() {
+    try {
+        localStorage.setItem(getStorageKey(), JSON.stringify(productionLog));
+    } catch(e) {
+        console.warn('localStorage kayıt hatası:', e);
+    }
+}
+function loadProductionLogFromStorage() {
+    try {
+        const raw = localStorage.getItem(getStorageKey());
+        if (raw) {
+            const saved = JSON.parse(raw);
+            if (Array.isArray(saved) && saved.length > 0) {
+                productionLog = saved;
+                console.log(`[Storage] ${saved.length} üretim kaydı geri yüklendi (${loadedExcelFileName})`);
+            }
+        }
+    } catch(e) {
+        console.warn('localStorage okuma hatası:', e);
+    }
+}
+function clearProductionLogStorage(fileName) {
+    try {
+        localStorage.removeItem(`prodLog_${fileName}`);
+    } catch(e) {}
+}
 
 let montajOtomasyonLeft = [];  // MONTAJ OTOMASYON İZLEME child rows (Col A-I)
 let montajOtomasyonRight = []; // MONTAJ OTOMASYON İZLEME parent rows (Col K-R)
@@ -111,7 +143,9 @@ function handleFile(file) {
             });
             
             loadedFileName.textContent = `Yüklenen Dosya: ${file.name}`;
+            loadedExcelFileName = file.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
             parseWorkbook();
+            loadProductionLogFromStorage(); // localStorage'dan geri yükle
             
             // Switch view
             dropZone.style.display = 'none';
@@ -1308,6 +1342,7 @@ document.getElementById('production-form').addEventListener('submit', function(e
         station: selectedStation
     });
 
+    saveProductionLogToStorage(); // localStorage'a kaydet
     showToast(`"${code}" kodu için ${qty} adet üretim girildi.`, "success");
     document.getElementById('prod-qty').value = '';
     if (stationSelect) {
@@ -1326,6 +1361,7 @@ document.getElementById('production-form').addEventListener('submit', function(e
 function deleteLogEntry(index) {
     const deletedCode = productionLog[index].kod;
     productionLog.splice(index, 1);
+    saveProductionLogToStorage(); // localStorage güncelle
     showToast(`Üretim kaydı silindi.`, "info");
     
     recalculateAll();
@@ -1387,6 +1423,7 @@ function togglePartCompletion(code, shouldComplete, stationName) {
                 station: stationName || 'Tüm İstasyonlar',
                 autoCompleted: true
             });
+            saveProductionLogToStorage(); // localStorage güncelle
             showToast(`"${code}" parçası ${stationName ? stationName + ' istasyonunda' : ''} tamamlandı olarak işaretlendi.`, "success");
         }
     } else {
@@ -2054,11 +2091,20 @@ function renderStationTable(headers) {
         
         if (reqs.length > 0) {
             const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
-            const stLogs = productionLog.filter(log => log.kod === code && (log.station === activeStation || log.station === 'Tüm İstasyonlar' || !log.station));
+            const allLogs = productionLog.filter(log => log.kod === code);
+            const stLogs = allLogs.filter(log => log.station === activeStation || log.station === 'Tüm İstasyonlar' || !log.station);
             const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
             const rawPct = totalReq > 0 ? Math.round((stProd / totalReq) * 100) : 0;
             completionPct = Math.min(100, rawPct);
             completionText = `${stProd} / ${totalReq}`;
+
+            // DEBUG — Geçici, sonra silinecek
+            if (code === '40001') {
+                console.log(`[DEBUG 40001] totalReq=${totalReq} stProd=${stProd} rawPct=${rawPct} activeStation="${activeStation}"`);
+                console.log(`[DEBUG 40001] allLogs:`, allLogs);
+                console.log(`[DEBUG 40001] stLogs:`, stLogs);
+                console.log(`[DEBUG 40001] uretimTakipRows for code:`, reqs);
+            }
 
             if (stProd > totalReq && totalReq > 0) {
                 // Fazla Üretim: üretilen > hedef
