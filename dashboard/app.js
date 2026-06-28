@@ -271,6 +271,7 @@ function parseWorkbook() {
                 const kodIdx = headers.indexOf('kod');
                 const istasyonIdx = headers.findIndex(h => h.includes('iş istasyonu') || h.includes('is istasyonu'));
                 const sureIdx = headers.findIndex(h => h.includes('birim işlem süresi') || h.includes('birim islem suresi'));
+                const setupIdx = headers.findIndex(h => h.includes('hazırlık süresi') || h.includes('hazirlik suresi'));
                 
                 if (kodIdx !== -1 && istasyonIdx !== -1 && sureIdx !== -1) {
                     for (let r = range.s.r + 1; r <= range.e.r; r++) {
@@ -282,9 +283,10 @@ function parseWorkbook() {
                             const code = String(kodCell.v).trim().toUpperCase();
                             const istasyon = String(istCell.v).trim().toUpperCase();
                             const sure = sureCell ? parseFloat(sureCell.v) || 0 : 0;
+                            const setup = (setupIdx !== -1) ? (sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + setupIdx })] ? parseFloat(sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + setupIdx })].v) || 0 : 0) : 0;
                             
                             if (!unitTimeMap[code]) unitTimeMap[code] = {};
-                            unitTimeMap[code][istasyon] = sure;
+                            unitTimeMap[code][istasyon] = { sure: sure, setup: setup };
                         }
                     }
                 }
@@ -2831,8 +2833,8 @@ function renderPerformanceTab() {
         return;
     }
     
-    // Varsayılan çalışma günü sayısı (Şimdilik 6 gün varsayalım)
-    const HAFTALIK_CALISMA_GUNU = 6;
+    // Varsayılan çalışma günü sayısı (Kullanıcı 5 güne düşürdü)
+    const HAFTALIK_CALISMA_GUNU = 5;
     
     stationList.forEach(stName => {
         // Kapasite bul
@@ -2864,12 +2866,15 @@ function renderPerformanceTab() {
             const stProd = logs.reduce((sum, l) => sum + l.adet, 0);
             
             let unitTime = 0;
-            if (unitTimeMap[code]) {
-                unitTime = unitTimeMap[code][stName] || 0;
+            let setupTime = 0;
+            if (unitTimeMap[code] && unitTimeMap[code][stName]) {
+                unitTime = unitTimeMap[code][stName].sure || 0;
+                setupTime = unitTimeMap[code][stName].setup || 0;
             }
             
-            if (stProd > 0 && unitTime > 0) {
-                uretilenStandartDk += (stProd * unitTime);
+            if (stProd > 0) {
+                // Eğer hiç üretildiyse 1 kere setupTime ekle, üstüne (adet * unitTime) ekle
+                uretilenStandartDk += setupTime + (stProd * unitTime);
             }
         });
         
