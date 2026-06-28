@@ -2049,24 +2049,33 @@ function renderStationTable(headers) {
         const reqs = uretimTakipRows.filter(u => u.kod === code);
         let completionText = '-';
         let completionPct = 0;
+        let isOverproduced = false;
         let badgeHtml = '<span class="badge badge-danger">Eksik</span>';
         
         if (reqs.length > 0) {
             const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
             const stLogs = productionLog.filter(log => log.kod === code && (log.station === activeStation || log.station === 'Tüm İstasyonlar' || !log.station));
             const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
-            completionPct = totalReq > 0 ? Math.min(100, Math.round((stProd / totalReq) * 100)) : 0;
+            const rawPct = totalReq > 0 ? Math.round((stProd / totalReq) * 100) : 0;
+            completionPct = Math.min(100, rawPct);
             completionText = `${stProd} / ${totalReq}`;
-            
-            if (completionPct >= 100) {
-                badgeHtml = `<span class="badge badge-success">Hazır (${completionPct}%)</span>`;
+
+            if (stProd > totalReq && totalReq > 0) {
+                // Fazla Üretim: üretilen > hedef
+                isOverproduced = true;
+                const fazla = Math.round((stProd - totalReq) * 1000) / 1000;
+                badgeHtml = `<span class="badge badge-overproduced"><i class="fa-solid fa-arrow-trend-up" style="font-size:10px;"></i> Fazla Üretim (+${fazla})</span>`;
+            } else if (completionPct >= 100) {
+                badgeHtml = `<span class="badge badge-success"><i class="fa-solid fa-check" style="font-size:10px;"></i> Tamamlandı</span>`;
             } else if (completionPct > 0) {
                 badgeHtml = `<span class="badge badge-warning">Üretimde (${completionPct}%)</span>`;
             }
         }
 
         const tr = document.createElement('tr');
-        if (completionPct >= 100) {
+        if (isOverproduced) {
+            tr.classList.add('station-row-overproduced');
+        } else if (completionPct >= 100) {
             tr.classList.add('station-row-completed');
         }
 
@@ -2075,15 +2084,17 @@ function renderStationTable(headers) {
             
             if (h === 'Durum') {
                 if (reqs.length > 0) {
+                    const isDone = completionPct >= 100 || isOverproduced;
                     td.innerHTML = `
                         <div class="status-cell-container" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-                            <input type="checkbox" class="station-complete-checkbox" ${completionPct >= 100 ? 'checked' : ''} onchange="togglePartCompletion('${code}', this.checked, '${activeStation}')" title="Bitti / Üretildi Olarak İşaretle">
+                            <input type="checkbox" class="station-complete-checkbox" ${isDone ? 'checked' : ''} onchange="togglePartCompletion('${code}', this.checked, '${activeStation}')" title="Bitti / Üretildi Olarak İşaretle">
                             ${badgeHtml}
                         </div>
                     `;
                 } else {
                     td.innerHTML = badgeHtml;
                 }
+
             } else {
                 let val = row[h];
                 if (typeof val === 'number') {

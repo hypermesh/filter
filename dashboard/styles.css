@@ -1285,6 +1285,35 @@ tr.station-row-completed td:nth-child(2) { /* Kod */
     color: rgba(255, 255, 255, 0.6) !important;
 }
 
+/* Fazla Üretim satırı — mavi ton */
+tr.station-row-overproduced {
+    background-color: rgba(59, 130, 246, 0.06) !important;
+}
+tr.station-row-overproduced td:first-child {
+    border-left: 3px solid #3b82f6 !important;
+}
+tr.station-row-overproduced td {
+    color: rgba(160, 174, 192, 0.5) !important;
+}
+tr.station-row-overproduced td:nth-child(2) { /* Kod */
+    color: rgba(147, 197, 253, 0.8) !important;
+}
+
+/* Fazla Üretim badge */
+.badge-overproduced {
+    background: rgba(59, 130, 246, 0.15);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 /* Custom checkbox for station completion */
 .station-complete-checkbox {
     appearance: none;
