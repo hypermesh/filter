@@ -76,6 +76,10 @@
                         <i class="fa-solid fa-microchip"></i>
                         <span>İstasyon İş Listeleri</span>
                     </button>
+                    <button class="nav-item" data-tab="performance">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span>Performans Karnesi</span>
+                    </button>
                     <button class="nav-item" data-tab="assembly">
                         <i class="fa-solid fa-puzzle-piece"></i>
                         <span>Montaj İzleme</span>
@@ -438,6 +442,18 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: Performans Karnesi -->
+                <section class="tab-content" id="tab-performance">
+                    <div class="section-card glass flex-col flex-1">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-gauge-high text-blue"></i> Haftalık İstasyon Performans Karnesi (OEE & Kapasite)</h2>
+                        </div>
+                        <div class="performance-grid" id="performance-cards-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; overflow-y: auto;">
+                            <!-- Performans kartları JS tarafından buraya doldurulacak -->
                         </div>
                     </div>
                 </section>

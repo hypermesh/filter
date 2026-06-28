@@ -190,6 +190,7 @@ function parseWorkbook() {
     codeToNameMap = {};
     uretimListesiMap = {};
     uretimListesiRows = [];
+    unitTimeMap = {}; // { 'KOD': { 'ISTASYON_ADI': süre_dk } }
 
     // First scan other sheets to extract part code names and populate maps
     for (const sName of workbook.SheetNames) {
@@ -260,6 +261,30 @@ function parseWorkbook() {
                                 uretilecek: qty,
                                 orijinalUretilecek: qty
                             });
+                        }
+                    }
+                }
+            }
+            
+            // Eğer sayfa "Tüm Veriler" ise birim işlem sürelerini çıkar
+            if (sName.toUpperCase().replace(/I/g, 'İ').includes('TÜM VERİLER') || sName.toUpperCase().includes('TUM VERILER')) {
+                const kodIdx = headers.indexOf('kod');
+                const istasyonIdx = headers.findIndex(h => h.includes('iş istasyonu') || h.includes('is istasyonu'));
+                const sureIdx = headers.findIndex(h => h.includes('birim işlem süresi') || h.includes('birim islem suresi'));
+                
+                if (kodIdx !== -1 && istasyonIdx !== -1 && sureIdx !== -1) {
+                    for (let r = range.s.r + 1; r <= range.e.r; r++) {
+                        const kodCell = sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + kodIdx })];
+                        const istCell = sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + istasyonIdx })];
+                        const sureCell = sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + sureIdx })];
+                        
+                        if (kodCell && kodCell.v && istCell && istCell.v) {
+                            const code = String(kodCell.v).trim().toUpperCase();
+                            const istasyon = String(istCell.v).trim().toUpperCase();
+                            const sure = sureCell ? parseFloat(sureCell.v) || 0 : 0;
+                            
+                            if (!unitTimeMap[code]) unitTimeMap[code] = {};
+                            unitTimeMap[code][istasyon] = sure;
                         }
                     }
                 }
@@ -884,6 +909,8 @@ function renderTab(tabId) {
         renderRotasizlarTab();
     } else if (tabId === 'stations') {
         renderStationsTab();
+    } else if (tabId === 'performance') {
+        renderPerformanceTab();
     }
 }
 
@@ -2780,3 +2807,96 @@ async function exportStationDataToExcel() {
 }
 
 document.getElementById('export-station-btn')?.addEventListener('click', exportStationDataToExcel);
+
+// -------------------------------------------------------------
+// X. PERFORMANCE TAB RENDERING
+// -------------------------------------------------------------
+const DEFAULT_CAPACITY = {
+    "varsayilan_gunluk_saat": 9,
+    "istasyonlar": {
+        "CY": { "gunluk_saat": 9, "makine_sayisi": 3 },
+        "QUASER": { "gunluk_saat": 9, "makine_sayisi": 3 },
+        "3D PRINT": { "gunluk_saat": 22, "makine_sayisi": 15 },
+        "3D YAZICI GRUBU": { "gunluk_saat": 22, "makine_sayisi": 15 }
+    }
+};
+
+function renderPerformanceTab() {
+    const container = document.getElementById('performance-cards-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (stationList.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-dim); width: 100%; text-align: center;">Excel verisi yüklenmedi.</div>';
+        return;
+    }
+    
+    // Varsayılan çalışma günü sayısı (Şimdilik 6 gün varsayalım)
+    const HAFTALIK_CALISMA_GUNU = 6;
+    
+    stationList.forEach(stName => {
+        // Kapasite bul
+        let gunlukSaat = DEFAULT_CAPACITY.varsayilan_gunluk_saat;
+        let makineSayisi = 1;
+        
+        if (DEFAULT_CAPACITY.istasyonlar[stName]) {
+            gunlukSaat = DEFAULT_CAPACITY.istasyonlar[stName].gunluk_saat || gunlukSaat;
+            makineSayisi = DEFAULT_CAPACITY.istasyonlar[stName].makine_sayisi || makineSayisi;
+        } else {
+            // Eğer isminde Quaser, 3D vs varsa yakalamaya çalış
+            const upSt = stName.toUpperCase();
+            if (upSt.includes("QUASER")) { gunlukSaat = 9; makineSayisi = 3; }
+            else if (upSt.includes("CY")) { gunlukSaat = 9; makineSayisi = 3; }
+            else if (upSt.includes("3D")) { gunlukSaat = 22; makineSayisi = 15; }
+        }
+        
+        const haftalikKapasiteDk = gunlukSaat * makineSayisi * HAFTALIK_CALISMA_GUNU * 60;
+        
+        // Üretilen iş (Standart Saat) hesapla
+        let uretilenStandartDk = 0;
+        
+        // Bu istasyona giren parçaları bul
+        const stRows = stationSheetsMap[stName] || [];
+        const uniqueCodes = new Set(stRows.map(r => String(r.Kod || '').trim().toUpperCase()).filter(k => k));
+        
+        uniqueCodes.forEach(code => {
+            const logs = productionLog.filter(l => l.kod === code && (l.station === stName || l.station === 'Tüm İstasyonlar'));
+            const stProd = logs.reduce((sum, l) => sum + l.adet, 0);
+            
+            let unitTime = 0;
+            if (unitTimeMap[code]) {
+                unitTime = unitTimeMap[code][stName] || 0;
+            }
+            
+            if (stProd > 0 && unitTime > 0) {
+                uretilenStandartDk += (stProd * unitTime);
+            }
+        });
+        
+        const kapasiteSaat = Math.round(haftalikKapasiteDk / 60);
+        const uretilenSaat = Math.round(uretilenStandartDk / 60);
+        const yuzde = haftalikKapasiteDk > 0 ? Math.min(100, Math.round((uretilenStandartDk / haftalikKapasiteDk) * 100)) : 0;
+        const overCapacity = yuzde >= 100;
+        
+        const cardHTML = `
+            <div class="perf-card">
+                <h3>
+                    <span><i class="fa-solid fa-industry text-blue"></i> ${stName}</span>
+                    <span style="color: ${overCapacity ? '#ef4444' : '#00f0ff'};">${yuzde}%</span>
+                </h3>
+                <div class="perf-bar-bg">
+                    <div class="perf-bar-fill ${overCapacity ? 'over-capacity' : ''}" style="width: ${yuzde}%;"></div>
+                </div>
+                <div class="perf-stats">
+                    <span><strong>${uretilenSaat}</strong> Saat Üretildi</span>
+                    <span><strong>${kapasiteSaat}</strong> Saat Kapasite</span>
+                </div>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-align: right;">
+                    (Makine: ${makineSayisi} | Günlük: ${gunlukSaat}s)
+                </div>
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', cardHTML);
+    });
+}
