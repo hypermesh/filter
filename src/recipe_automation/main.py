@@ -394,6 +394,8 @@ def filter_id(
     for file in files:
         success = False
         last_error = None
+        single_out_path = None
+        single_raw_df = None
         for h in (0, 2):
             df = read_excel_safe(file, headers_to_try=(h,))
             if df is None:
@@ -447,15 +449,21 @@ def filter_id(
                         console.print(
                             f"  [cyan]ℹ️ Miktar sütunu olarak '{carp_col}' tespit edildi ve kullanıldı.[/cyan]"
                         )
-                        res.insert(0, "KAYNAK DOSYA", kaynak_metin)
                     else:
                         console.print(
                             "  [yellow]⚠️ Miktar sütunu BULUNAMADI! Varsayılan birleştirme uygulanıyor.[/yellow]"
                         )
+
+                    if "KAYNAK DOSYA" in res.columns:
+                        res["KAYNAK DOSYA"] = kaynak_metin
+                    else:
                         res.insert(0, "KAYNAK DOSYA", kaynak_metin)
                     all_dfs.append(res)
                     df_raw_copy = df.copy()
-                    df_raw_copy.insert(0, "KAYNAK DOSYA", kaynak_metin)
+                    if "KAYNAK DOSYA" in df_raw_copy.columns:
+                        df_raw_copy["KAYNAK DOSYA"] = kaynak_metin
+                    else:
+                        df_raw_copy.insert(0, "KAYNAK DOSYA", kaynak_metin)
                     all_raw_dfs.append(df_raw_copy)
                     file_totals[kaynak_metin] = meta.get("orijinal_kalem_sayisi", 0)
 
@@ -465,24 +473,31 @@ def filter_id(
                         )
                         res.to_excel(out_path, index=False)
                         console.print(f"[green]✅ Çıktı oluşturuldu:[/green] {out_path}\n")
-                        console.print(
-                            "\n[bold cyan]=== OTOMATİK DEPO EŞLEŞTİRME BAŞLATILIYOR ===[/bold cyan]"
-                        )
-                        do_match_depo(
-                            out_path,
-                            group=group,
-                            file_totals=file_totals,
-                            raw_df=df,
-                            input_path=path,
-                        )
+                        single_out_path = out_path
+                        single_raw_df = df
                 success = True
                 break
             except ValueError as e:
                 last_error = e
                 continue
 
-        if not success and last_error:
-            console.print(f"[yellow]Atlanıyor {os.path.basename(file)}[/yellow]: {last_error}\n")
+        if success:
+            if len(files) == 1 and single_out_path is not None:
+                console.print(
+                    "\n[bold cyan]=== OTOMATİK DEPO EŞLEŞTİRME BAŞLATILIYOR ===[/bold cyan]"
+                )
+                do_match_depo(
+                    single_out_path,
+                    group=group,
+                    file_totals=file_totals,
+                    raw_df=single_raw_df,
+                    input_path=path,
+                )
+        else:
+            if last_error:
+                console.print(
+                    f"[yellow]Atlanıyor {os.path.basename(file)}[/yellow]: {last_error}\n"
+                )
 
     if len(files) > 1 and all_dfs:
         combined = pd.concat(all_dfs, ignore_index=True)
@@ -575,6 +590,8 @@ def filter_stock(
     for file in files:
         success = False
         last_error = None
+        single_out_path = None
+        single_raw_df = None
         for h in (2, 0):  # Reçete genelde 2'den başlar
             df = read_excel_safe(file, headers_to_try=(h,))
             if df is None:
@@ -628,15 +645,21 @@ def filter_stock(
                         console.print(
                             f"  [cyan]ℹ️ Miktar sütunu olarak '{carp_col}' tespit edildi ve kullanıldı.[/cyan]"
                         )
-                        res.insert(0, "KAYNAK DOSYA", kaynak_metin)
                     else:
                         console.print(
                             "  [yellow]⚠️ Miktar sütunu BULUNAMADI! Varsayılan birleştirme uygulanıyor.[/yellow]"
                         )
+
+                    if "KAYNAK DOSYA" in res.columns:
+                        res["KAYNAK DOSYA"] = kaynak_metin
+                    else:
                         res.insert(0, "KAYNAK DOSYA", kaynak_metin)
                     all_dfs.append(res)
                     df_raw_copy = df.copy()
-                    df_raw_copy.insert(0, "KAYNAK DOSYA", kaynak_metin)
+                    if "KAYNAK DOSYA" in df_raw_copy.columns:
+                        df_raw_copy["KAYNAK DOSYA"] = kaynak_metin
+                    else:
+                        df_raw_copy.insert(0, "KAYNAK DOSYA", kaynak_metin)
                     all_raw_dfs.append(df_raw_copy)
                     file_totals[kaynak_metin] = meta.get("orijinal_kalem_sayisi", 0)
 
@@ -646,24 +669,31 @@ def filter_stock(
                         )
                         res.to_excel(out_path, index=False)
                         console.print(f"[green]✅ Çıktı oluşturuldu:[/green] {out_path}\n")
-                        console.print(
-                            "\n[bold cyan]=== OTOMATİK DEPO EŞLEŞTİRME BAŞLATILIYOR ===[/bold cyan]"
-                        )
-                        do_match_depo(
-                            out_path,
-                            group=group,
-                            file_totals=file_totals,
-                            raw_df=df,
-                            input_path=path,
-                        )
+                        single_out_path = out_path
+                        single_raw_df = df
                 success = True
                 break
             except ValueError as e:
                 last_error = e
                 continue
 
-        if not success and last_error:
-            console.print(f"[yellow]Atlanıyor {os.path.basename(file)}[/yellow]: {last_error}\n")
+        if success:
+            if len(files) == 1 and single_out_path is not None:
+                console.print(
+                    "\n[bold cyan]=== OTOMATİK DEPO EŞLEŞTİRME BAŞLATILIYOR ===[/bold cyan]"
+                )
+                do_match_depo(
+                    single_out_path,
+                    group=group,
+                    file_totals=file_totals,
+                    raw_df=single_raw_df,
+                    input_path=path,
+                )
+        else:
+            if last_error:
+                console.print(
+                    f"[yellow]Atlanıyor {os.path.basename(file)}[/yellow]: {last_error}\n"
+                )
 
     if len(files) > 1 and all_dfs:
         combined = pd.concat(all_dfs, ignore_index=True)
@@ -1531,16 +1561,9 @@ def do_match_depo(
                             # Eğer bu parça filtrelenmiş listede kalmadıysa (stok yetti veya elendi) montaj listesine EKLEME!
                             continue
 
-                        # Kalan miktarı orijinal miktarlara göre dağıt
-                        temp_qty = remaining_qty
+                        # Kalan miktarı her üst montajda bu eksikliği gösterecek şekilde ata
                         for rel in rel_list:
-                            allocated = min(rel["orig_qty"], temp_qty)
-                            temp_qty -= allocated
-                            rel["allocated_qty"] = allocated
-
-                        # Kalan küsurat varsa sonuncu ilişkiye ekle
-                        if temp_qty > 0 and len(rel_list) > 0:
-                            rel_list[-1]["allocated_qty"] += temp_qty
+                            rel["allocated_qty"] = min(rel["orig_qty"], remaining_qty)
 
                         # Şimdi izleme dict'ine ekle
                         for rel in rel_list:
@@ -1782,6 +1805,19 @@ def do_match_depo(
                 sheet_dfs[s_name]["Önerilen Verimli Adet"] = None
                 sheet_dfs[s_name]["Güncel Setup Yükü (%)"] = None
 
+        # Hariç tutulan kodları JSON'dan yükle (Arayüze aktarmak için)
+        excluded_codes = set()
+        try:
+            db_dir_local = os.path.join(os.getcwd(), settings.db_dir_name)
+            json_path_local = os.path.join(db_dir_local, "haric_tutulacak_parcalar.json")
+            if os.path.exists(json_path_local):
+                with open(json_path_local, encoding="utf-8") as f:
+                    data_excl = json.load(f)
+                    if isinstance(data_excl, list):
+                        excluded_codes = {str(k).strip().upper() for k in data_excl}
+        except Exception:
+            pass
+
         # ExcelWriter ile Çoklu Sheet Yazdırma
         console.print("  [cyan]⏳ Excel sayfaları diske yazılıyor (Pandas)...[/cyan]")
         with pd.ExcelWriter(out_path, engine="openpyxl") as writer:
@@ -1842,6 +1878,11 @@ def do_match_depo(
                 ):
                     safe_name = re.sub(r"[\\/*?:\[\]]", "-", str(sheet_name))[:31]
                     df_sheet.to_excel(writer, sheet_name=safe_name, index=False)
+
+            # 6. Dashboard için Harici Kodlar Gizli Sayfası
+            if excluded_codes:
+                df_excl = pd.DataFrame({"Kod": list(excluded_codes)})
+                df_excl.to_excel(writer, sheet_name="HARİCİ_KODLAR", index=False)
 
         # --- İSTENEN SÜTUNLARI GİZLEME VE GENİŞLİK AYARLAMA ---
         target_hide_cols = [
@@ -2478,6 +2519,11 @@ def do_match_depo(
 
             for sheet_name in wb.sheetnames:
                 ws_format = wb[sheet_name]
+
+                # Gizli sayfaları atla ve gizle
+                if sheet_name == "HARİCİ_KODLAR":
+                    ws_format.sheet_state = "hidden"
+                    continue
 
                 # 1. Başlık satırını kalın yap
                 for cell in ws_format[1]:

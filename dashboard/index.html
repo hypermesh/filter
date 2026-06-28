@@ -12,7 +12,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SheetJS (xlsx.full.min.js) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=1.1.4">
+    <!-- ExcelJS & FileSaver for advanced Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link rel="stylesheet" href="styles.css?v=1.1.16">
 </head>
 <body>
     <div id="drop-zone" class="drop-zone">
@@ -69,6 +72,10 @@
                         <i class="fa-solid fa-list-ol"></i>
                         <span>Üretim Listesi</span>
                     </button>
+                    <button class="nav-item" data-tab="stations">
+                        <i class="fa-solid fa-microchip"></i>
+                        <span>İstasyon İş Listeleri</span>
+                    </button>
                     <button class="nav-item" data-tab="assembly">
                         <i class="fa-solid fa-puzzle-piece"></i>
                         <span>Montaj İzleme</span>
@@ -76,10 +83,6 @@
                     <button class="nav-item" data-tab="rotasizlar">
                         <i class="fa-solid fa-circle-exclamation"></i>
                         <span>Rotasızlar</span>
-                    </button>
-                    <button class="nav-item" data-tab="stations">
-                        <i class="fa-solid fa-microchip"></i>
-                        <span>İstasyon İş Listeleri</span>
                     </button>
                 </nav>
                 <div class="sidebar-footer">
@@ -127,7 +130,7 @@
                             <h2><i class="fa-solid fa-file-zipper text-blue"></i> Kaynak Dosya Durumları</h2>
                             <div class="search-bar">
                                 <i class="fa-solid fa-magnifying-glass"></i>
-                                <input type="text" id="dashboard-search" placeholder="Kaynak dosya ara...">
+                                <input type="text" id="dashboard-search" placeholder="Kaynak dosya ara..." oninput="renderDashboard()">
                             </div>
                         </div>
                         <div class="dashboard-files-container" id="dashboard-files-list">
@@ -162,7 +165,7 @@
                                             <input type="number" id="prod-qty" min="1" placeholder="Miktar girin..." required>
                                         </div>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="form-group" style="display: none;">
                                         <label for="prod-station">İşlemin Yapıldığı İstasyon</label>
                                         <div class="input-with-icon">
                                             <i class="fa-solid fa-industry"></i>
@@ -184,7 +187,7 @@
                                     <h2><i class="fa-solid fa-history text-orange"></i> Üretim Giriş Günlüğü</h2>
                                     <span class="badge" id="prod-log-count">0 Kayıt</span>
                                 </div>
-                                <div class="table-wrapper flex-1" style="max-height: 190px; overflow-y: auto;">
+                                <div class="table-wrapper flex-1" style="overflow-y: auto;">
                                     <table class="table" id="production-log-table">
                                         <thead>
                                             <tr>
@@ -211,7 +214,7 @@
                                 <div class="header-filters">
                                     <div class="search-bar">
                                         <i class="fa-solid fa-magnifying-glass"></i>
-                                        <input type="text" id="takip-search" placeholder="Kod veya Kaynak ara...">
+                                        <input type="text" id="takip-search" placeholder="Kod veya Kaynak ara..." oninput="filterAndPaginateTakipTable()">
                                     </div>
                                     <select id="takip-filter-status" class="select-input">
                                         <option value="all">Tüm Durumlar</option>
@@ -239,17 +242,10 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="pagination-footer">
-                                <span class="page-info" id="takip-page-info">Gösterilen: 0 - 0 / Toplam: 0</span>
-                                <div class="pagination-buttons">
-                                    <button class="btn btn-sm btn-secondary" id="takip-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
-                                    <button class="btn btn-sm btn-secondary" id="takip-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Right Column: Hızlı Parça Bilgisi -->
-                        <div class="section-card glass flex-col flex-1" style="min-height: 520px;">
+                        <div class="section-card glass flex-col flex-1">
                             <div class="card-header">
                                 <h2><i class="fa-solid fa-circle-info text-blue"></i> Hızlı Parça Bilgisi</h2>
                             </div>
@@ -274,15 +270,15 @@
                         </button>
                     </div>
 
-                    <div class="mt-3">
+                    <div class="mt-3 flex-1 flex-col">
                         <!-- Assembly Right: Parents -->
-                        <div class="section-card glass flex-col">
+                        <div class="section-card glass flex-col flex-1">
                             <div class="card-header">
                                 <h2><i class="fa-solid fa-cubes text-purple"></i> Üst Montaj & Set Limitleri</h2>
                                 <div class="header-filters">
                                     <div class="search-bar">
                                         <i class="fa-solid fa-magnifying-glass"></i>
-                                        <input type="text" id="assembly-right-search" placeholder="Ara...">
+                                        <input type="text" id="assembly-right-search" placeholder="Ara..." oninput="filterAndPaginateAssembly()">
                                     </div>
                                     <select id="assembly-right-filter-status" class="select-input">
                                         <option value="all">Tüm Montajlar</option>
@@ -314,27 +310,20 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="pagination-footer">
-                                <span class="page-info" id="assembly-right-page-info">Gösterilen: 0 / 0</span>
-                                <div class="pagination-buttons">
-                                    <button class="btn btn-sm btn-secondary" id="assembly-right-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
-                                    <button class="btn btn-sm btn-secondary" id="assembly-right-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </section>
 
                 <!-- TAB: Rotasizlar -->
                 <section class="tab-content" id="tab-rotasizlar">
-                    <div class="section-card glass flex-col">
+                    <div class="section-card glass flex-col flex-1">
                         <div class="card-header">
                             <h2><i class="fa-solid fa-triangle-exclamation text-orange"></i> Rota Tanımı Bulunmayan Parçalar</h2>
                             <div class="header-actions">
                                 <span class="badge badge-orange" id="rotasiz-count">0 Kalem</span>
                                 <div class="search-bar">
                                     <i class="fa-solid fa-magnifying-glass"></i>
-                                    <input type="text" id="rotasiz-search" placeholder="Parça kodu ara...">
+                                    <input type="text" id="rotasiz-search" placeholder="Parça kodu ara..." oninput="renderRotasizlarTab()">
                                 </div>
                             </div>
                         </div>
@@ -359,13 +348,13 @@
 
                 <!-- TAB: Üretim Listesi -->
                 <section class="tab-content" id="tab-uretim-listesi">
-                    <div class="section-card glass flex-col">
+                    <div class="section-card glass flex-col flex-1">
                         <div class="card-header">
                             <h2><i class="fa-solid fa-list-ol text-blue"></i> Üretim Listesi (Ana Üretim Miktarları)</h2>
                             <div class="header-filters">
                                 <div class="search-bar">
                                     <i class="fa-solid fa-magnifying-glass"></i>
-                                    <input type="text" id="ul-search" placeholder="Kod, malzeme ara... (Hariç tutmak için: -kelime)">
+                                    <input type="text" id="ul-search" placeholder="Kod, malzeme ara... (Hariç tutmak için: -kelime)" oninput="filterAndPaginateUlTable()">
                                 </div>
                                 <select id="ul-sort" class="select-input">
                                     <option value="priority-asc">Öncelik (Artan)</option>
@@ -393,13 +382,6 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="pagination-footer">
-                            <span class="page-info" id="ul-page-info">Gösterilen: 0 / 0</span>
-                            <div class="pagination-buttons">
-                                <button class="btn btn-sm btn-secondary" id="ul-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
-                                <button class="btn btn-sm btn-secondary" id="ul-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
-                            </div>
-                        </div>
                     </div>
                 </section>
 
@@ -417,13 +399,20 @@
                         </div>
 
                         <!-- Station Data Details -->
-                        <div class="section-card glass flex-col">
-                            <div class="card-header">
-                                <h2 id="current-station-title"><i class="fa-solid fa-industry text-green"></i> İstasyon Detayları</h2>
-                                <div class="header-filters">
+                        <div class="section-card glass flex-col flex-1">
+                            <div class="card-header" style="flex-direction: column; align-items: stretch; gap: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h2 id="current-station-title" style="display:flex; align-items:center; gap:10px; margin:0;">
+                                        <i class="fa-solid fa-industry text-green"></i> İstasyon Detayları
+                                    </h2>
+                                    <button id="export-station-btn" onclick="exportStationDataToExcel()" class="btn btn-success" title="İstasyonu Excel Olarak İndir" style="padding: 6px 12px; font-size: 13px; border-radius: 6px; animation: pulseExcelBtn 2s infinite ease-in-out;">
+                                        <i class="fa-solid fa-file-excel"></i> İndir
+                                    </button>
+                                </div>
+                                <div class="header-filters" style="justify-content: flex-end;">
                                     <div class="search-bar">
                                         <i class="fa-solid fa-magnifying-glass"></i>
-                                        <input type="text" id="station-search" placeholder="Kod veya malzeme ara...">
+                                        <input type="text" id="station-search" placeholder="Kod veya malzeme ara..." oninput="renderStationsTab()">
                                     </div>
                                     <select id="station-filter-status" class="select-input">
                                         <option value="all">Tüm Durumlar</option>
@@ -448,13 +437,6 @@
                                         <!-- İstasyon satırları buraya gelecek -->
                                     </tbody>
                                 </table>
-                            </div>
-                            <div class="pagination-footer">
-                                <span class="page-info" id="station-page-info">Gösterilen: 0 / 0</span>
-                                <div class="pagination-buttons">
-                                    <button class="btn btn-sm btn-secondary" id="station-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
-                                    <button class="btn btn-sm btn-secondary" id="station-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -520,6 +502,6 @@
     <!-- Notification system -->
     <div id="toast" class="toast"></div>
 
-    <script src="app.js?v=1.1.4"></script>
+    <script src="app.js?v=1.1.17"></script>
 </body>
 </html>

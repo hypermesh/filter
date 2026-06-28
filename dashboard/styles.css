@@ -36,7 +36,7 @@ body {
     background-color: var(--bg-dark);
     color: var(--text-main);
     min-height: 100vh;
-    overflow-x: hidden;
+    overflow: hidden;
     background-image: 
         radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.07) 0px, transparent 50%),
         radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
@@ -217,6 +217,7 @@ body {
     flex-direction: column;
     height: 100vh;
     max-height: 100vh;
+    overflow: hidden;
 }
 
 /* Header */
@@ -263,6 +264,7 @@ body {
 .app-content-wrapper {
     display: flex;
     flex: 1;
+    min-height: 0;
     overflow: hidden;
 }
 
@@ -330,19 +332,24 @@ body {
 /* Main Panel */
 .app-main-panel {
     flex: 1;
+    min-height: 0;
     padding: 25px;
-    overflow-y: auto;
+    overflow-y: hidden;
     background: rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
 }
 
 /* Tabs */
 .tab-content {
     display: none;
-    height: 100%;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .tab-content.active {
-    display: block;
+    display: flex;
     animation: fadeIn 0.3s ease-out;
 }
 
@@ -403,6 +410,7 @@ body {
     padding: 22px;
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 
 .card-header {
@@ -573,24 +581,42 @@ body {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 20px;
+    flex: 1;
+    min-height: 0;
+}
+
+.stations-list-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding-right: 5px;
 }
 
 .grid-1-2 {
     display: grid;
     grid-template-columns: 1.2fr 2fr;
     gap: 20px;
+    flex: 1;
+    min-height: 0;
 }
 
 .grid-1-1 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
+    flex: 1;
+    min-height: 0;
 }
 
 .grid-1-4 {
     display: grid;
     grid-template-columns: 220px 1fr;
     gap: 20px;
+    flex: 1;
+    min-height: 0;
 }
 
 .mt-4 { margin-top: 20px; }
@@ -735,6 +761,7 @@ body {
     justify-content: flex-start;
     align-items: center;
     flex: 1;
+    min-height: 0;
     padding: 20px;
     background: rgba(0, 0, 0, 0.15);
     border-radius: 8px;
@@ -763,6 +790,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    flex: 1;
+    min-height: 0;
 }
 
 .part-info-title {
@@ -799,7 +828,7 @@ body {
 .h-600 { height: 600px; max-height: 600px; }
 .h-700 { height: 700px; max-height: 700px; }
 .flex-col { display: flex; flex-direction: column; }
-.flex-1 { flex: 1; }
+.flex-1 { flex: 1; min-height: 0; }
 
 .table {
     width: 100%;
@@ -1296,10 +1325,31 @@ tr.station-row-completed td:nth-child(2) { /* Kod */
     display: grid;
     grid-template-columns: 1.2fr 2fr 1.2fr;
     gap: 20px;
-    align-items: start;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Excel Export Button Pulse */
+@keyframes pulseExcelBtn {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        transform: scale(1);
+    }
 }
 
 .gap-20 {
     gap: 20px;
+}
+
+.layout-col {
+    min-height: 0;
 }
 

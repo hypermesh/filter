@@ -25,6 +25,7 @@ let activeStation = '';
 let codeToNameMap = {};        // Map of code -> material name
 let uretimListesiMap = {};     // Map of code -> Üretilecek Miktar in ÜRETİM LİSTESİ
 let uretimListesiRows = [];    // Rows of ÜRETİM LİSTESİ sheet
+let excludedHariciKodlar = new Set(); // Codes that are excluded (Merdane, Boru vs.)
 
 // Pagination States
 const PAGE_SIZE = 12;
@@ -228,6 +229,18 @@ function parseWorkbook() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // 0. Parse HARİCİ_KODLAR (Hidden Sheet)
+    const hariciSheet = workbook.Sheets["HARİCİ_KODLAR"];
+    if (hariciSheet && hariciSheet['!ref']) {
+        const range = XLSX.utils.decode_range(hariciSheet['!ref']);
+        for (let r = range.s.r + 1; r <= range.e.r; r++) {
+            const cell = hariciSheet[XLSX.utils.encode_cell({ r: r, c: 0 })];
+            if (cell && cell.v) {
+                excludedHariciKodlar.add(String(cell.v).trim().toUpperCase());
             }
         }
     }
@@ -513,8 +526,12 @@ function parseWorkbook() {
 
     // 5. Parse Station Sheets
     const excludedSheets = [
-        "ÜRETİM LİSTESİ", "Tüm Veriler", "HAMMADDE", "HAMMADDE SİPARİŞ",
-        "Üretim Takip", "Rotasızlar", "MONTAJ OTOMASYON İZLEME", "FINAL MONTAJ İZLEME"
+        "ÜRETİM LİSTESİ", "Tüm Veriler", "HAMMADDE SİPARİŞ",
+        "Üretim Takip", "Rotasızlar"
+    ];
+
+    const hiddenStations = [
+        "HAMMADDE", "MONTAJ OTOMASYON İZLEME", "FINAL MONTAJ İZLEME"
     ];
 
     for (const sName of workbook.SheetNames) {
@@ -530,7 +547,20 @@ function parseWorkbook() {
         // Read Headers
         for (let c = range.s.c; c <= range.e.c; c++) {
             const hCell = sheet[XLSX.utils.encode_cell({ r: range.s.r, c: c })];
-            headers.push(hCell ? String(hCell.v).trim() : `Sütun ${c+1}`);
+            let rawHeader = hCell ? String(hCell.v).trim() : `Sütun ${c+1}`;
+            
+            const upHeader = rawHeader.toUpperCase();
+            if (upHeader === 'KOD') rawHeader = 'Kod';
+            else if (upHeader === 'ÖNCELİK SIRASI' || upHeader === 'ONCELIK SIRASI') rawHeader = 'Öncelik Sırası';
+            else if (upHeader === 'MALZEME ADI') rawHeader = 'Malzeme Adı';
+            else if (upHeader === 'HAMMADDE KOD' || upHeader === 'HAMMADDE KODU') rawHeader = 'Hammadde Kod';
+            else if (upHeader === 'HAMMADDE') rawHeader = 'Hammadde';
+            else if (upHeader === 'REZERVE EDİLECEK MİKTAR') rawHeader = 'Rezerve Edilecek Miktar';
+            else if (upHeader === 'ÜRETİLECEK MİKTAR' || upHeader === 'URETILECEK MIKTAR') rawHeader = 'Üretilecek Miktar';
+            else if (upHeader === 'TOPLAM HAMMADDE MİKTARI') rawHeader = 'Toplam Hammadde Miktarı';
+            else if (upHeader === 'DURUM') rawHeader = 'Durum';
+
+            headers.push(rawHeader);
         }
 
         // Read Rows
@@ -566,7 +596,11 @@ function parseWorkbook() {
         if (rows.length > 0) {
             stationSheetsMap[sName] = rows;
             stationHeadersMap[sName] = headers;
-            stationList.push(sName);
+            
+            // Only add to the UI left menu if it's not a hidden background station
+            if (!hiddenStations.includes(sName)) {
+                stationList.push(sName);
+            }
         }
     }
 
@@ -1026,6 +1060,26 @@ if (closeBtn) {
     });
 }
 
+// Helper to bind search inputs robustly (handles input, keyup, and Enter key)
+function bindSearchInput(inputId, callback) {
+    const inputEl = document.getElementById(inputId);
+    if (!inputEl) return;
+    let timeout;
+    const trigger = () => {
+        clearTimeout(timeout);
+        callback();
+    };
+    inputEl.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(trigger, 300);
+    });
+    inputEl.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            trigger();
+        }
+    });
+}
+
 const modalOverlay = document.getElementById('details-modal');
 if (modalOverlay) {
     modalOverlay.addEventListener('click', (e) => {
@@ -1036,12 +1090,8 @@ if (modalOverlay) {
     });
 }
 
-const modalSearch = document.getElementById('modal-search');
-if (modalSearch) {
-    modalSearch.addEventListener('input', renderModalData);
-}
-
-document.getElementById('dashboard-search').addEventListener('input', renderDashboard);
+bindSearchInput('modal-search', renderModalData);
+bindSearchInput('dashboard-search', renderDashboard);
 
 // -------------------------------------------------------------
 // 2. PRODUCTION VIEW & LOGIC
@@ -1167,9 +1217,9 @@ function showQuickPartInfo(code) {
     let kaynakBreakdownHtml = '';
     if (reqs.length > 0) {
         kaynakBreakdownHtml = `
-            <div class="part-info-row" style="margin-top: 10px; flex-direction:column; gap:6px; border-top:1px solid var(--border-color); padding-top:8px; width: 100%;">
+            <div class="part-info-row" style="margin-top: 10px; flex-direction:column; gap:6px; border-top:1px solid var(--border-color); padding-top:8px; width: 100%; flex: 1; min-height: 0;">
                 <span class="part-info-label" style="font-weight:600; color:var(--primary);">Kaynak Dosya Dağılımı (FIFO):</span>
-                <div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:5px; max-height:160px; overflow-y:auto; padding-right:4px;">
+                <div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:5px; flex: 1; min-height: 0; overflow-y:auto; padding-right:4px;">
                     ${reqs.map(r => {
                         const pct = r.uretilecek > 0 ? Math.min(100, Math.round((r.uretilen / r.uretilecek) * 100)) : 0;
                         const pctColor = pct >= 100 ? 'var(--success)' : pct > 0 ? 'var(--warning)' : 'var(--danger)';
@@ -1406,17 +1456,12 @@ function renderTakipTable() {
     tbody.innerHTML = '';
 
     const pState = paginationState.takip;
-    const startIdx = (pState.page - 1) * PAGE_SIZE;
-    const endIdx = Math.min(pState.total, startIdx + PAGE_SIZE);
-
-    document.getElementById('takip-page-info').textContent = `Gösterilen: ${pState.total > 0 ? startIdx + 1 : 0} - ${endIdx} / Toplam: ${pState.total}`;
-
     if (pState.total === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="color: var(--text-dim); padding:20px;">Eşleşen parça bulunamadı.</td></tr>';
         return;
     }
 
-    const pageRows = pState.filtered.slice(startIdx, endIdx);
+    const pageRows = pState.filtered;
     
     pageRows.forEach(r => {
         const pct = Math.round(r.tamamlanma * 100);
@@ -1456,13 +1501,13 @@ function renderTakipTable() {
 }
 
 // Pagination controls for Takip table
-document.getElementById('takip-prev-btn').addEventListener('click', () => {
+document.getElementById('takip-prev-btn')?.addEventListener('click', () => {
     if (paginationState.takip.page > 1) {
         paginationState.takip.page--;
         renderTakipTable();
     }
 });
-document.getElementById('takip-next-btn').addEventListener('click', () => {
+document.getElementById('takip-next-btn')?.addEventListener('click', () => {
     const maxPage = Math.ceil(paginationState.takip.total / PAGE_SIZE);
     if (paginationState.takip.page < maxPage) {
         paginationState.takip.page++;
@@ -1470,7 +1515,7 @@ document.getElementById('takip-next-btn').addEventListener('click', () => {
     }
 });
 
-document.getElementById('takip-search').addEventListener('input', () => {
+bindSearchInput('takip-search', () => {
     paginationState.takip.page = 1;
     filterAndPaginateTakipTable();
 });
@@ -1564,18 +1609,19 @@ function renderAssemblyRightTable() {
     tbody.innerHTML = '';
 
     const pState = paginationState.assemblyRight;
-    const startIdx = (pState.page - 1) * PAGE_SIZE;
-    const endIdx = Math.min(pState.total, startIdx + PAGE_SIZE);
-
-    document.getElementById('assembly-right-page-info').textContent = `Gösterilen: ${pState.total > 0 ? startIdx + 1 : 0} - ${endIdx} / Toplam: ${pState.total}`;
-
     if (pState.total === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="color: var(--text-dim); padding:20px;">Eşleşen üst montaj bulunamadı.</td></tr>';
         return;
     }
 
-    const pageRows = pState.filtered.slice(startIdx, endIdx);
+    const pageRows = pState.filtered;
     const activeTabLeftSource = activeTabAssembly === 'otomasyon' ? montajOtomasyonLeft : finalMontajLeft;
+
+    // Precompute which parents actually have children to avoid O(N^2) filtering later
+    const parentsWithKids = new Set();
+    activeTabLeftSource.forEach(l => {
+        parentsWithKids.add(`${l.ustKod}___${l.kaynak}`);
+    });
 
     pageRows.forEach(parent => {
         const pct = Math.round(parent.tamamlanma * 100);
@@ -1583,12 +1629,13 @@ function renderAssemblyRightTable() {
         if (pct >= 100) colorClass = 'var(--success)';
         else if (pct > 0) colorClass = 'var(--warning)';
 
-        const hasShortage = parent.tamamlanma < 1.0;
         const parentKey = `${parent.ustKod}___${parent.kaynak}`;
-        const isExpanded = hasShortage && expandedParentAssembly === parentKey;
+        const hasKids = parentsWithKids.has(parentKey);
+        const isExpandable = parent.tamamlanma < 1.0 && hasKids;
+        const isExpanded = isExpandable && expandedParentAssembly === parentKey;
 
         const tr = document.createElement('tr');
-        if (hasShortage) {
+        if (isExpandable) {
             tr.style.cursor = 'pointer';
             if (isExpanded) {
                 tr.classList.add('expanded-parent-row');
@@ -1605,7 +1652,7 @@ function renderAssemblyRightTable() {
             tr.style.cursor = 'default';
         }
 
-        const chevron = hasShortage
+        const chevron = isExpandable
             ? (isExpanded 
                 ? '<i class="fa-solid fa-chevron-down text-purple" style="margin-right: 8px; font-size:10px;"></i>' 
                 : '<i class="fa-solid fa-chevron-right" style="margin-right: 8px; font-size:10px; color: var(--text-dim);"></i>')
@@ -1714,7 +1761,7 @@ function renderAssemblyRightTable() {
 }
 
 // Assembly search input events
-document.getElementById('assembly-right-search').addEventListener('input', () => {
+bindSearchInput('assembly-right-search', () => {
     paginationState.assemblyRight.page = 1;
     filterAndPaginateAssembly();
 });
@@ -1728,13 +1775,13 @@ document.getElementById('assembly-right-sort').addEventListener('change', () => 
 });
 
 // Right pagination buttons
-document.getElementById('assembly-right-prev-btn').addEventListener('click', () => {
+document.getElementById('assembly-right-prev-btn')?.addEventListener('click', () => {
     if (paginationState.assemblyRight.page > 1) {
         paginationState.assemblyRight.page--;
         renderAssemblyRightTable();
     }
 });
-document.getElementById('assembly-right-next-btn').addEventListener('click', () => {
+document.getElementById('assembly-right-next-btn')?.addEventListener('click', () => {
     const maxPage = Math.ceil(paginationState.assemblyRight.total / PAGE_SIZE);
     if (paginationState.assemblyRight.page < maxPage) {
         paginationState.assemblyRight.page++;
@@ -1781,7 +1828,7 @@ function renderRotasizlarTab() {
     });
 }
 
-document.getElementById('rotasiz-search').addEventListener('input', renderRotasizlarTab);
+bindSearchInput('rotasiz-search', renderRotasizlarTab);
 
 // -------------------------------------------------------------
 // 5. STATIONS VIEW
@@ -1966,11 +2013,6 @@ function renderStationTable(headers) {
     tbody.innerHTML = '';
 
     const pState = paginationState.station;
-    const startIdx = (pState.page - 1) * PAGE_SIZE;
-    const endIdx = Math.min(pState.total, startIdx + PAGE_SIZE);
-
-    document.getElementById('station-page-info').textContent = `Gösterilen: ${pState.total > 0 ? startIdx + 1 : 0} - ${endIdx} / Toplam: ${pState.total}`;
-
     if (pState.total === 0) {
         tbody.innerHTML = '<tr><td colspan="10" class="text-center" style="color:var(--text-dim); padding:20px;">Bu istasyonda eşleşen iş listesi bulunamadı.</td></tr>';
         return;
@@ -1998,7 +2040,7 @@ function renderStationTable(headers) {
     });
     thead.appendChild(trHead);
 
-    const pageRows = pState.filtered.slice(startIdx, endIdx);
+    const pageRows = pState.filtered;
 
     pageRows.forEach(row => {
         const code = String(row['Kod'] || '').trim().toUpperCase();
@@ -2054,8 +2096,16 @@ function renderStationTable(headers) {
                 // Styling specific columns
                 if (h === 'Kod') {
                     td.style.fontWeight = '700';
-                    td.style.color = 'white';
-                } else if (h === 'Malzeme Adı' || h === 'Hammadde') {
+                    td.style.whiteSpace = 'nowrap';
+                    if (excludedHariciKodlar.has(code)) {
+                        td.style.color = '#fda4af';
+                        td.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>${td.textContent}`;
+                    } else {
+                        td.style.color = 'white';
+                    }
+                } else if (h === 'Malzeme Adı') {
+                    td.style.color = 'var(--text-muted)';
+                } else if (h === 'Hammadde') {
                     td.style.color = 'var(--text-muted)';
                 } else if (h.includes('Miktar') || h.includes('Adet')) {
                     td.className = 'text-right';
@@ -2069,7 +2119,7 @@ function renderStationTable(headers) {
 }
 
 // Station navigation events
-document.getElementById('station-search').addEventListener('input', () => {
+bindSearchInput('station-search', () => {
     paginationState.station.page = 1;
     renderStationsTab();
 });
@@ -2090,13 +2140,13 @@ if (document.getElementById('station-sort')) {
     });
 }
 
-document.getElementById('station-prev-btn').addEventListener('click', () => {
+document.getElementById('station-prev-btn')?.addEventListener('click', () => {
     if (paginationState.station.page > 1) {
         paginationState.station.page--;
         filterAndPaginateStationData();
     }
 });
-document.getElementById('station-next-btn').addEventListener('click', () => {
+document.getElementById('station-next-btn')?.addEventListener('click', () => {
     const maxPage = Math.ceil(paginationState.station.total / PAGE_SIZE);
     if (paginationState.station.page < maxPage) {
         paginationState.station.page++;
@@ -2419,19 +2469,15 @@ function filterAndPaginateUlTable() {
 function renderUlTable() {
     const tbody = document.getElementById('ul-table-body');
     tbody.innerHTML = '';
-
+    
     const pState = paginationState.ul;
-    const startIdx = (pState.page - 1) * PAGE_SIZE;
-    const endIdx = Math.min(pState.total, startIdx + PAGE_SIZE);
-
-    document.getElementById('ul-page-info').textContent = `Gösterilen: ${pState.total > 0 ? startIdx + 1 : 0} - ${endIdx} / Toplam: ${pState.total}`;
 
     if (pState.total === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="color:var(--text-dim); padding:20px;">Eşleşen parça bulunamadı.</td></tr>';
         return;
     }
 
-    const pageRows = pState.filtered.slice(startIdx, endIdx);
+    const pageRows = pState.filtered;
 
     pageRows.forEach(row => {
         const tr = document.createElement('tr');
@@ -2466,7 +2512,7 @@ function renderUlTable() {
         tr.innerHTML = `
             <td style="font-size:12px; color:var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.kaynak}">${row.kaynak}</td>
             <td>${row.oncelik}</td>
-            <td style="font-weight:700; color:white;">${row.kod}</td>
+            <td style="font-weight:700; white-space:nowrap; color:${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '#fda4af' : 'white'};">${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>' : ''}${row.kod}</td>
             <td style="color:var(--text-dim);">${row.malzeme}</td>
             <td style="font-size:12px; color:var(--text-muted);">${row.hKod}</td>
             <td style="color:var(--text-dim);">${row.hammadde}</td>
@@ -2525,7 +2571,7 @@ function renderUlTable() {
 }
 
 // Üretim Listesi navigation events
-document.getElementById('ul-search').addEventListener('input', () => {
+bindSearchInput('ul-search', () => {
     paginationState.ul.page = 1;
     filterAndPaginateUlTable();
 });
@@ -2535,17 +2581,153 @@ document.getElementById('ul-sort').addEventListener('change', () => {
     filterAndPaginateUlTable();
 });
 
-document.getElementById('ul-prev-btn').addEventListener('click', () => {
+document.getElementById('ul-prev-btn')?.addEventListener('click', () => {
     if (paginationState.ul.page > 1) {
         paginationState.ul.page--;
         renderUlTable();
     }
 });
 
-document.getElementById('ul-next-btn').addEventListener('click', () => {
+document.getElementById('ul-next-btn')?.addEventListener('click', () => {
     const maxPage = Math.ceil(paginationState.ul.total / PAGE_SIZE);
     if (paginationState.ul.page < maxPage) {
         paginationState.ul.page++;
         renderUlTable();
     }
 });
+
+// --- EXCEL EXPORT USING EXCELJS ---
+async function exportStationDataToExcel() {
+    console.log("İstasyon Excel İndirme başlatıldı...");
+    if (!paginationState.station.filtered || paginationState.station.filtered.length === 0) {
+        alert("Dışa aktarılacak veri bulunamadı.");
+        return;
+    }
+
+    try {
+        const stationName = activeStation || "Tüm_İstasyonlar";
+        const dateStr = new Date().toLocaleDateString('tr-TR').replace(/\./g, '-');
+        const fileName = `${stationName.replace(/\s+/g, '_')}_İş_Listesi_${dateStr}.xlsx`;
+
+        // Create a new ExcelJS workbook and worksheet
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = "Antigravity Engine";
+        workbook.created = new Date();
+        const worksheet = workbook.addWorksheet(stationName.substring(0, 31)); // Excel sheet names max 31 chars
+
+        // Get headers from the table currently displayed
+        const thead = document.getElementById('station-thead');
+        const thElements = thead.querySelectorAll('th');
+        const headerNames = Array.from(thElements).map(th => th.textContent.trim());
+
+        // Add headers
+        const headerRow = worksheet.addRow(headerNames);
+        headerRow.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+        headerRow.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+        headerRow.height = 30;
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F2937' } }; // Dark gray
+            cell.border = {
+                top: { style: 'thin' }, left: { style: 'thin' },
+                bottom: { style: 'thin' }, right: { style: 'thin' }
+            };
+        });
+
+        // Add data rows
+        paginationState.station.filtered.forEach(row => {
+            const code = String(row['Kod'] || '').trim().toUpperCase();
+            
+            // Re-calculate status
+            const reqs = uretimTakipRows.filter(u => u.kod === code);
+            let completionText = 'Eksik';
+            let completionPct = 0;
+            
+            if (reqs.length > 0) {
+                const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
+                const stLogs = productionLog.filter(log => log.kod === code && (log.station === activeStation || log.station === 'Tüm İstasyonlar' || !log.station));
+                const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
+                completionPct = totalReq > 0 ? Math.min(100, Math.round((stProd / totalReq) * 100)) : 0;
+                
+                if (completionPct >= 100) {
+                    completionText = `Hazır (${completionPct}%)`;
+                } else if (completionPct > 0) {
+                    completionText = `Üretimde (${completionPct}%)`;
+                } else {
+                    completionText = `Eksik (0%)`;
+                }
+            }
+
+            const rowData = [];
+            headerNames.forEach(header => {
+                if (header === 'Durum') {
+                    rowData.push(completionText);
+                } else {
+                    let val = row[header];
+                    if (typeof val === 'number' && !Number.isInteger(val)) {
+                        val = parseFloat(val.toFixed(3));
+                    }
+                    rowData.push(val !== undefined && val !== null ? val : '-');
+                }
+            });
+
+            const xlRow = worksheet.addRow(rowData);
+            xlRow.alignment = { vertical: 'middle', wrapText: true };
+            
+            xlRow.eachCell((cell, colNumber) => {
+                cell.border = {
+                    top: { style: 'thin', color: { argb: 'FFDDDDDD' } },
+                    left: { style: 'thin', color: { argb: 'FFDDDDDD' } },
+                    bottom: { style: 'thin', color: { argb: 'FFDDDDDD' } },
+                    right: { style: 'thin', color: { argb: 'FFDDDDDD' } }
+                };
+                
+                const header = headerNames[colNumber - 1];
+                if (header === 'Durum') {
+                    const statusStr = String(cell.value).toLowerCase();
+                    if (statusStr.includes('hazır')) {
+                        cell.font = { color: { argb: 'FF10B981' }, bold: true }; // Green
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFECFDF5' } };
+                    } else if (statusStr.includes('üretimde')) {
+                        cell.font = { color: { argb: 'FFF59E0B' }, bold: true }; // Orange
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFBEB' } };
+                    } else if (statusStr.includes('eksik')) {
+                        cell.font = { color: { argb: 'FFEF4444' }, bold: true }; // Red
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF2F2' } };
+                    }
+                } else if (header === 'Kod') {
+                    cell.font = { bold: true };
+                }
+                
+                // Color entire row purple if it's a harici (excluded) code, except for Status column
+                if (excludedHariciKodlar.has(code) && header !== 'Durum') {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2EBF9' } };
+                    if (header === 'Kod') {
+                        cell.font = { color: { argb: 'FF6C3483' }, bold: true }; // Purple font
+                    } else {
+                        cell.font = { color: { argb: 'FF6C3483' } }; // Purple font
+                    }
+                }
+            });
+        });
+
+        // Auto-fit columns
+        worksheet.columns.forEach(column => {
+            let maxLength = 0;
+            column.eachCell({ includeEmpty: true }, cell => {
+                let columnLength = cell.value ? cell.value.toString().length : 10;
+                if (columnLength > maxLength) maxLength = columnLength;
+            });
+            column.width = Math.min(maxLength + 2, 40); // clamp max width
+        });
+
+        // Generate and save file
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        saveAs(blob, fileName);
+    } catch (err) {
+        console.error("Excel dışa aktarma hatası:", err);
+        alert("Excel oluşturulurken bir hata oluştu: " + err.message);
+    }
+}
+
+document.getElementById('export-station-btn')?.addEventListener('click', exportStationDataToExcel);
