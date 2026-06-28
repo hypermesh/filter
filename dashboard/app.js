@@ -2098,14 +2098,6 @@ function renderStationTable(headers) {
             completionPct = Math.min(100, rawPct);
             completionText = `${stProd} / ${totalReq}`;
 
-            // DEBUG — Geçici, sonra silinecek
-            if (code === '40001') {
-                console.log(`[DEBUG 40001] totalReq=${totalReq} stProd=${stProd} rawPct=${rawPct} activeStation="${activeStation}"`);
-                console.log(`[DEBUG 40001] allLogs:`, allLogs);
-                console.log(`[DEBUG 40001] stLogs:`, stLogs);
-                console.log(`[DEBUG 40001] uretimTakipRows for code:`, reqs);
-            }
-
             if (stProd > totalReq && totalReq > 0) {
                 // Fazla Üretim: üretilen > hedef
                 isOverproduced = true;
