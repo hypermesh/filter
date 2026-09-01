@@ -1401,3 +1401,17 @@ tr.station-row-overproduced td:nth-child(2) { /* Kod */
     min-height: 0;
 }
 
+
+/* --- DRAG AND DROP FEEDBACK --- */
+#station-tbody tr[draggable=true] {
+    cursor: grab;
+}
+#station-tbody tr.dragging {
+    cursor: grabbing;
+}
+#station-tbody tr.drag-over-top td {
+    border-top: 2px solid var(--primary) !important;
+}
+#station-tbody tr.drag-over-bottom td {
+    border-bottom: 2px solid var(--primary) !important;
+}

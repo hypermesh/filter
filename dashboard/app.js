@@ -2122,24 +2122,26 @@ function filterAndPaginateStationData() {
     }
 
     // 3. Sorting
-    filtered.sort((a, b) => {
-        if (sortVal === 'priority-asc' || sortVal === 'priority-desc') {
-            const priorityA = parseInt(a['Öncelik Sırası']) || 99999;
-            const priorityB = parseInt(b['Öncelik Sırası']) || 99999;
-            return sortVal === 'priority-asc' ? priorityA - priorityB : priorityB - priorityA;
-        }
-        if (sortVal === 'code-asc') {
-            const codeA = String(a['Kod'] || '');
-            const codeB = String(b['Kod'] || '');
-            return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
-        }
-        if (sortVal === 'uretilecek-desc') {
-            const qtyA = parseFloat(a['Üretilecek Miktar']) || 0;
-            const qtyB = parseFloat(b['Üretilecek Miktar']) || 0;
-            return qtyB - qtyA;
-        }
-        return 0;
-    });
+    if (sortVal !== 'custom') {
+        filtered.sort((a, b) => {
+            if (sortVal === 'priority-asc' || sortVal === 'priority-desc') {
+                const priorityA = parseInt(a['Öncelik Sırası']) || 99999;
+                const priorityB = parseInt(b['Öncelik Sırası']) || 99999;
+                return sortVal === 'priority-asc' ? priorityA - priorityB : priorityB - priorityA;
+            }
+            if (sortVal === 'code-asc') {
+                const codeA = String(a['Kod'] || '');
+                const codeB = String(b['Kod'] || '');
+                return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
+            }
+            if (sortVal === 'uretilecek-desc') {
+                const qtyA = parseFloat(a['Üretilecek Miktar']) || 0;
+                const qtyB = parseFloat(b['Üretilecek Miktar']) || 0;
+                return qtyB - qtyA;
+            }
+            return 0;
+        });
+    }
 
     paginationState.station.filtered = filtered;
     paginationState.station.total = filtered.length;
@@ -2231,6 +2233,16 @@ function renderStationTable(headers) {
             tr.classList.add('station-row-overproduced');
         } else if (completionPct >= 100) {
             tr.classList.add('station-row-completed');
+        }
+        
+        tr.draggable = true;
+        tr.dataset.index = pState.filtered.indexOf(row);
+        if (window.handleStationRowDragStart) {
+            tr.addEventListener('dragstart', window.handleStationRowDragStart);
+            tr.addEventListener('dragover', window.handleStationRowDragOver);
+            tr.addEventListener('dragleave', window.handleStationRowDragLeave);
+            tr.addEventListener('drop', window.handleStationRowDrop);
+            tr.addEventListener('dragend', window.handleStationRowDragEnd);
         }
 
         finalHeaders.forEach(h => {
@@ -3099,3 +3111,102 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
+// ---- DRAG AND DROP REORDERING ----
+let draggedStationRow = null;
+
+window.handleStationRowDragStart = function(e) {
+    draggedStationRow = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', this.dataset.index);
+    this.style.opacity = '0.4';
+};
+
+window.handleStationRowDragOver = function(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = this.getBoundingClientRect();
+    const offset = e.clientY - rect.top;
+    this.classList.remove('drag-over-top', 'drag-over-bottom');
+    if (offset > rect.height / 2) {
+        this.classList.add('drag-over-bottom');
+    } else {
+        this.classList.add('drag-over-top');
+    }
+};
+
+window.handleStationRowDragLeave = function(e) {
+    this.classList.remove('drag-over-top', 'drag-over-bottom');
+};
+
+window.handleStationRowDragEnd = function(e) {
+    this.style.opacity = '1';
+    document.querySelectorAll('#station-tbody tr').forEach(tr => tr.classList.remove('drag-over-top', 'drag-over-bottom'));
+};
+
+window.handleStationRowDrop = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.classList.remove('drag-over-top', 'drag-over-bottom');
+    
+    if (draggedStationRow === this || !draggedStationRow) return;
+
+    const tbody = this.parentNode;
+    const allRows = Array.from(tbody.children);
+    const dragIndex = parseInt(draggedStationRow.dataset.index);
+    const dropIndex = parseInt(this.dataset.index);
+
+    const rect = this.getBoundingClientRect();
+    const offset = e.clientY - rect.top;
+    const insertAfter = offset > rect.height / 2;
+
+    // Özel Sıralamaya geç
+    const sortSelect = document.getElementById('station-sort');
+    if (sortSelect) sortSelect.value = 'custom';
+
+    const originalArray = stationSheetsMap[activeStation];
+    if (!originalArray) return;
+    
+    const dragDataRow = paginationState.station.filtered[dragIndex];
+    const targetDataRow = paginationState.station.filtered[dropIndex];
+    
+    const originalDragIndex = originalArray.indexOf(dragDataRow);
+    const originalDropIndex = originalArray.indexOf(targetDataRow);
+    
+    if (originalDragIndex > -1 && originalDropIndex > -1) {
+        // Eski yerinden çıkar
+        originalArray.splice(originalDragIndex, 1);
+        
+        // Yeni hedefin güncel indeksini bul (dizi kaymış olabilir)
+        const newTargetIndex = originalArray.indexOf(targetDataRow);
+        
+        let finalInsertIndex = newTargetIndex;
+        if (insertAfter) {
+            finalInsertIndex = newTargetIndex + 1;
+        }
+        
+        // Yeni yerine ekle
+        originalArray.splice(finalInsertIndex, 0, dragDataRow);
+        
+        // Kümülatif süreyi baştan hesapla
+        recalcKumulatifSureForStation(activeStation);
+        
+        // Yeniden render
+        filterAndPaginateStationData();
+    }
+};
+
+function recalcKumulatifSureForStation(stName) {
+    const rows = stationSheetsMap[stName];
+    if (!rows) return;
+    let kumulatif = 0;
+    for (const row of rows) {
+        let saatKey = Object.keys(row).find(k => k.toLowerCase() === 'saat') || 'Saat';
+        let kumulatifKey = Object.keys(row).find(k => k.toLowerCase() === 'kümülatif süre') || 'Kümülatif Süre';
+        
+        const saatVal = parseFloat(row[saatKey]) || 0;
+        kumulatif += saatVal;
+        row[kumulatifKey] = kumulatif;
+    }
+}
