@@ -1804,6 +1804,12 @@ def do_match_depo(
                 sheet_dfs[s_name]["Setup Yükü (%)"] = None
                 sheet_dfs[s_name]["Önerilen Verimli Adet"] = None
                 sheet_dfs[s_name]["Güncel Setup Yükü (%)"] = None
+                
+                # --- YENİ: Saat ve Kümülatif Süre sütunlarını ekle ---
+                if "Toplam Süre" in sheet_dfs[s_name].columns:
+                    ts_idx = list(sheet_dfs[s_name].columns).index("Toplam Süre")
+                    sheet_dfs[s_name].insert(ts_idx + 1, "Saat", None)
+                    sheet_dfs[s_name].insert(ts_idx + 2, "Kümülatif Süre", None)
 
         # Hariç tutulan kodları JSON'dan yükle (Arayüze aktarmak için)
         excluded_codes = set()
@@ -2009,6 +2015,8 @@ def do_match_depo(
                 setup_yuku_col_letter = None
                 onerilen_adet_col_letter = None
                 guncel_setup_col_letter = None
+                saat_col_letter = None
+                kumulatif_col_letter = None
 
                 for col in ws.columns:
                     val = str(col[0].value).strip() if col[0].value else ""
@@ -2034,6 +2042,10 @@ def do_match_depo(
                         onerilen_adet_col_letter = col[0].column_letter
                     elif val == "Güncel Setup Yükü (%)":
                         guncel_setup_col_letter = col[0].column_letter
+                    elif val == "Saat":
+                        saat_col_letter = col[0].column_letter
+                    elif val == "Kümülatif Süre":
+                        kumulatif_col_letter = col[0].column_letter
 
                 # Eğer HAMMADDE sayfasıysa harflerini global olarak aklımızda tutalım (SUMIF için) ve sayfayı gizleyelim
                 if ws_name == "HAMMADDE":
@@ -2093,6 +2105,24 @@ def do_match_depo(
                         for row_idx in range(2, ws.max_row + 1):
                             formula = f"={hazirlik_col_letter}{row_idx}+({birim_col_letter}{row_idx}*{uretilecek_col_letter}{row_idx})"
                             ws[f"{toplam_sure_col_letter}{row_idx}"] = formula
+
+                    # YENİ EKLENTİ: Saat ve Kümülatif Süre
+                    if (
+                        toplam_sure_col_letter
+                        and saat_col_letter
+                        and kumulatif_col_letter
+                    ):
+                        for row_idx in range(2, ws.max_row + 1):
+                            cell_saat = ws[f"{saat_col_letter}{row_idx}"]
+                            cell_saat.value = f"={toplam_sure_col_letter}{row_idx}/86400"
+                            cell_saat.number_format = "[h]:mm"
+
+                            cell_kumulatif = ws[f"{kumulatif_col_letter}{row_idx}"]
+                            if row_idx == 2:
+                                cell_kumulatif.value = f"={saat_col_letter}2"
+                            else:
+                                cell_kumulatif.value = f"={kumulatif_col_letter}{row_idx-1}+{saat_col_letter}{row_idx}"
+                            cell_kumulatif.number_format = "[h]:mm"
 
                     # YENİ EKLENTİ: Setup ve Verimlilik Formülleri
                     if uretilecek_col_letter and hazirlik_col_letter and birim_col_letter:
