@@ -693,11 +693,34 @@ function parseWorkbook() {
                 }
                 
                 rowObj.rowIndex = r + 1; // Excel row is 1-indexed
+                
+                // --- MANUEL FORMÜL HESAPLAMASI (SheetJS / OpenPyXL 0 hatasını aşmak için) ---
+                const hazirlik = parseFloat(rowObj['Hazırlık Süresi']) || 0;
+                const birim = parseFloat(rowObj['Birim İşlem Süresi']) || 0;
+                const miktar = parseFloat(rowObj['Üretilecek Miktar']) || 0;
+                
+                const calculatedToplam = hazirlik + (birim * miktar);
+                if (rowObj['Toplam Süre'] === 0 || rowObj['Toplam Süre'] === '' || rowObj['Toplam Süre'] === undefined) {
+                    rowObj['Toplam Süre'] = calculatedToplam;
+                }
+                
+                if (rowObj['Saat'] === 0 || rowObj['Saat'] === '' || rowObj['Saat'] === undefined) {
+                    rowObj['Saat'] = rowObj['Toplam Süre'] / 86400;
+                }
+                
                 rows.push(rowObj);
             }
         }
 
         if (rows.length > 0) {
+            let kumulatif = 0;
+            for (let row of rows) {
+                const saat = parseFloat(row['Saat']) || 0;
+                kumulatif += saat;
+                if (row['Kümülatif Süre'] === 0 || row['Kümülatif Süre'] === '' || row['Kümülatif Süre'] === undefined) {
+                    row['Kümülatif Süre'] = kumulatif;
+                }
+            }
             stationSheetsMap[sName] = rows;
             stationHeadersMap[sName] = headers;
             
@@ -2214,7 +2237,22 @@ function renderStationTable(headers) {
 
             } else {
                 let val = row[h];
-                if (typeof val === 'number') {
+                
+                // Saat ve Kümülatif Süre formatı
+                if ((h === 'Saat' || h === 'Kümülatif Süre') && typeof val === 'number') {
+                    // val is decimal fraction of a day (e.g. 0.025)
+                    const totalHours = Math.floor(val * 24);
+                    let totalMins = Math.round((val * 24 * 60) % 60);
+                    
+                    // Handle edge case where rounding minutes makes it 60
+                    let displayHours = totalHours;
+                    if (totalMins === 60) {
+                        displayHours += 1;
+                        totalMins = 0;
+                    }
+                    val = `${displayHours}:${totalMins.toString().padStart(2, '0')}`;
+                } 
+                else if (typeof val === 'number') {
                     if (!Number.isInteger(val)) {
                         val = parseFloat(val.toFixed(3));
                     }
@@ -3029,3 +3067,21 @@ function toggleColVisibility(colName, isVisible) {
     saveHiddenColsToStorage();
     renderStationTable(stationHeadersMap[activeStation] || []);
 }
+
+// ---- Sidebar Toggle ----
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('toggle-sidebar-btn');
+    const sidebar = document.getElementById('main-sidebar');
+    
+    // Load state from local storage
+    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+        sidebar.classList.add('collapsed');
+    }
+
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        });
+    }
+});

@@ -278,6 +278,25 @@ body {
     justify-content: space-between;
     padding: 20px 15px;
     flex-shrink: 0;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-sidebar.collapsed {
+    width: 70px;
+    padding: 20px 10px;
+}
+
+.app-sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 12px 0;
+}
+
+.app-sidebar.collapsed .nav-item span {
+    display: none;
+}
+
+.app-sidebar.collapsed .sidebar-footer {
+    display: none;
 }
 
 .sidebar-nav {
@@ -289,18 +308,18 @@ body {
 .nav-item {
     background: transparent;
     border: none;
-    outline: none;
     color: var(--text-muted);
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
-    font-weight: 500;
-    font-size: 14px;
+    padding: 12px 15px;
     border-radius: 8px;
     cursor: pointer;
-    transition: var(--transition);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
     text-align: left;
+    width: 100%;
 }
 
 .nav-item:hover {
