@@ -166,6 +166,18 @@ function handleFile(file) {
             loadProductionLogFromStorage(); // localStorage'dan geri yükle
             loadDowntimeMapFromStorage();
             
+            // YENİ: Montaj sayfası var mı kontrol et, yoksa menüden gizle
+            const assemblyBtn = document.querySelector('button[data-tab="assembly"]');
+            if (assemblyBtn) {
+                if (workbook.Sheets["MONTAJ OTOMASYON İZLEME"] || workbook.Sheets["FINAL MONTAJ İZLEME"]) {
+                    assemblyBtn.style.display = 'flex';
+                } else {
+                    assemblyBtn.style.display = 'none';
+                    // Eğer montaj tabındayken yeniden dosya yüklenirse ve montaj yoksa dashboarda dön
+                    if (currentTab === 'assembly') switchTab('dashboard');
+                }
+            }
+            
             // Switch view
             dropZone.style.display = 'none';
             appContainer.style.display = 'flex';

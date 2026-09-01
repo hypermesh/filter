@@ -573,6 +573,13 @@ def filter_stock(
     ):
         haric_tut = True
 
+    create_montaj = True
+    if not Confirm.ask(
+        "[bold yellow]Soru:[/bold yellow] Montaj İzleme sayfaları (Montaj Otomasyon / Final Montaj) excel'e eklensin mi?",
+        default=True,
+    ):
+        create_montaj = False
+
     target_ops = load_group(group)
     console.print(
         f"[bold blue]Kullanılan Grup:[/bold blue] {group} ({len(target_ops)} adet operasyon kuralı)"
@@ -1235,7 +1242,7 @@ def do_match_depo(
             sheet_dfs["Rotasızlar"] = df_rotasiz
 
         # --- YENİ EKLENTİ: MONTAJ İZLEME SAYFASI ---
-        if raw_df is not None:
+        if raw_df is not None and create_montaj:
             console.print(
                 "  [cyan]⏳ Montaj izleme ilişkileri ve hiyerarşi ağacı analiz ediliyor...[/cyan]"
             )
