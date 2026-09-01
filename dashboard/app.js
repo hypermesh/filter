@@ -663,6 +663,11 @@ function parseWorkbook() {
             else if (upHeader === 'ÜRETİLECEK MİKTAR' || upHeader === 'URETILECEK MIKTAR') rawHeader = 'Üretilecek Miktar';
             else if (upHeader === 'TOPLAM HAMMADDE MİKTARI') rawHeader = 'Toplam Hammadde Miktarı';
             else if (upHeader === 'DURUM') rawHeader = 'Durum';
+            else if (upHeader === 'HAZIRLIK SÜRESİ' || upHeader === 'HAZIRLIK SURESI') rawHeader = 'Hazırlık Süresi';
+            else if (upHeader === 'BİRİM İŞLEM SÜRESİ' || upHeader === 'BIRIM ISLEM SURESI' || upHeader === 'BİRİM İŞLEM' || upHeader === 'Birim İşlem') rawHeader = 'Birim İşlem Süresi';
+            else if (upHeader === 'TOPLAM SÜRE' || upHeader === 'TOPLAM SURE') rawHeader = 'Toplam Süre';
+            else if (upHeader === 'SAAT') rawHeader = 'Saat';
+            else if (upHeader === 'KÜMÜLATİF SÜRE' || upHeader === 'KÜMÜLATİF' || upHeader === 'KUMULATIF SURE') rawHeader = 'Kümülatif Süre';
 
             headers.push(rawHeader);
         }
@@ -694,33 +699,11 @@ function parseWorkbook() {
                 
                 rowObj.rowIndex = r + 1; // Excel row is 1-indexed
                 
-                // --- MANUEL FORMÜL HESAPLAMASI (SheetJS / OpenPyXL 0 hatasını aşmak için) ---
-                const hazirlik = parseFloat(rowObj['Hazırlık Süresi']) || 0;
-                const birim = parseFloat(rowObj['Birim İşlem Süresi']) || 0;
-                const miktar = parseFloat(rowObj['Üretilecek Miktar']) || 0;
-                
-                const calculatedToplam = hazirlik + (birim * miktar);
-                if (rowObj['Toplam Süre'] === 0 || rowObj['Toplam Süre'] === '' || rowObj['Toplam Süre'] === undefined) {
-                    rowObj['Toplam Süre'] = calculatedToplam;
-                }
-                
-                if (rowObj['Saat'] === 0 || rowObj['Saat'] === '' || rowObj['Saat'] === undefined) {
-                    rowObj['Saat'] = rowObj['Toplam Süre'] / 86400;
-                }
-                
                 rows.push(rowObj);
             }
         }
 
         if (rows.length > 0) {
-            let kumulatif = 0;
-            for (let row of rows) {
-                const saat = parseFloat(row['Saat']) || 0;
-                kumulatif += saat;
-                if (row['Kümülatif Süre'] === 0 || row['Kümülatif Süre'] === '' || row['Kümülatif Süre'] === undefined) {
-                    row['Kümülatif Süre'] = kumulatif;
-                }
-            }
             stationSheetsMap[sName] = rows;
             stationHeadersMap[sName] = headers;
             
@@ -931,6 +914,37 @@ function recalculateAll() {
             if (tHammaddeKey && hMiktarKey) {
                 const hMiktarVal = parseFloat(row[hMiktarKey]) || 0;
                 row[tHammaddeKey] = uretilecekMiktarVal * hMiktarVal;
+            }
+        }
+
+        // Formül hesaplamaları (Üretilecek Miktar güncellendikten sonra yapılmalı)
+        let kumulatif = 0;
+        for (const row of rows) {
+            let hazirlikKey = Object.keys(row).find(k => k.toLowerCase() === 'hazırlık süresi') || 'Hazırlık Süresi';
+            let birimKey = Object.keys(row).find(k => k.toLowerCase() === 'birim işlem süresi') || 'Birim İşlem Süresi';
+            let miktarKey = Object.keys(row).find(k => k.toLowerCase() === 'üretilecek miktar') || 'Üretilecek Miktar';
+            let toplamSureKey = Object.keys(row).find(k => k.toLowerCase() === 'toplam süre') || 'Toplam Süre';
+            let saatKey = Object.keys(row).find(k => k.toLowerCase() === 'saat') || 'Saat';
+            let kumulatifKey = Object.keys(row).find(k => k.toLowerCase() === 'kümülatif süre') || 'Kümülatif Süre';
+            
+            const hazirlik = parseFloat(row[hazirlikKey]) || 0;
+            const birim = parseFloat(row[birimKey]) || 0;
+            const miktar = parseFloat(row[miktarKey]) || 0;
+            
+            // Eğer openpyxl kaynaklı hesaplanmamış formül ise (sıfır veya string ise)
+            if (!row[toplamSureKey] || row[toplamSureKey] === 0 || typeof row[toplamSureKey] === 'string') {
+                row[toplamSureKey] = hazirlik + (birim * miktar);
+            }
+            
+            if (!row[saatKey] || row[saatKey] === 0 || typeof row[saatKey] === 'string') {
+                row[saatKey] = row[toplamSureKey] / 86400;
+            }
+            
+            const saatVal = parseFloat(row[saatKey]) || 0;
+            kumulatif += saatVal;
+            
+            if (!row[kumulatifKey] || row[kumulatifKey] === 0 || typeof row[kumulatifKey] === 'string') {
+                row[kumulatifKey] = kumulatif;
             }
         }
     }
