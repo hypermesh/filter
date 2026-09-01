@@ -430,6 +430,16 @@
                                         <option value="code-asc">Kod (A-Z)</option>
                                         <option value="uretilecek-desc">Üretilecek (Azalan)</option>
                                     </select>
+                                    <!-- Sütun Seçici Butonu -->
+                                    <div style="position: relative; display: inline-block;">
+                                        <button id="col-picker-btn" onclick="toggleColPicker()" class="btn" title="Sütunları Göster/Gizle" style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: var(--text-primary); border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                            <i class="fa-solid fa-table-columns"></i> Sütunlar
+                                        </button>
+                                        <div id="col-picker-dropdown" style="display:none; position:absolute; right:0; top:calc(100% + 6px); background: #1e2535; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 14px; min-width: 200px; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+                                            <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px; text-transform: uppercase; letter-spacing: 0.5px;">Görünür Sütunlar</div>
+                                            <div id="col-picker-list"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="table-wrapper flex-1">

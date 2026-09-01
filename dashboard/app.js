@@ -8,6 +8,7 @@ let uretimTakipRows = []; // Üretim Takip requirements (Col A-G)
 let productionLog = [];    // Üretim Takip logs entered (Col I-K)
 let dosyaTakipRows = [];   // Üretim Takip summary (Col M-Q)
 let downtimeMap = {};      // İstasyon duruş saatleri { "ISTASYON_ADI": saat }
+let hiddenStationCols = new Set(); // Kullanıcının gizlediği sütun başlıkları
 
 // --- LocalStorage Yardımcı Fonksiyonlar ---
 function getStorageKey() {
@@ -50,6 +51,15 @@ function loadDowntimeMapFromStorage() {
     } catch(e) {
         downtimeMap = {};
     }
+}
+function saveHiddenColsToStorage() {
+    try { localStorage.setItem('hiddenStationCols', JSON.stringify([...hiddenStationCols])); } catch(e) {}
+}
+function loadHiddenColsFromStorage() {
+    try {
+        const raw = localStorage.getItem('hiddenStationCols');
+        hiddenStationCols = raw ? new Set(JSON.parse(raw)) : new Set();
+    } catch(e) { hiddenStationCols = new Set(); }
 }
 function clearProductionLogStorage(fileName) {
     try {
@@ -165,6 +175,7 @@ function handleFile(file) {
             parseWorkbook();
             loadProductionLogFromStorage(); // localStorage'dan geri yükle
             loadDowntimeMapFromStorage();
+            loadHiddenColsFromStorage();
             
             // YENİ: Montaj sayfası var mı kontrol et, yoksa menüden gizle
             const assemblyBtn = document.querySelector('button[data-tab="assembly"]');
@@ -2117,16 +2128,23 @@ function renderStationTable(headers) {
     }
 
     // Select the key columns to display
-    const displayCols = headers.filter(h => [
-        'Öncelik Sırası', 'Kod', 'Malzeme Adı', 'Hammadde Kod', 'Hammadde', 
-        'Rezerve Edilecek Miktar', 'Üretilecek Miktar', 'Toplam Hammadde Miktarı', 'Durum'
-    ].includes(h) || h === 'Kod' || h.includes('Miktar') || h.includes('Öncelik'));
+    const ALL_DISPLAY_COLS = [
+        'Öncelik Sırası', 'Kod', 'Malzeme Adı', 'Hammadde Kod', 'Hammadde',
+        'Rezerve Edilecek Miktar', 'Üretilecek Miktar', 'Hammadde Miktar', 'Toplam Hammadde Miktarı',
+        'Hazırlık Süresi', 'Birim İşlem Süresi', 'Toplam Süre', 'Saat', 'Kümülatif Süre', 'Durum'
+    ];
 
-    const colsToShow = displayCols.length > 0 ? displayCols : headers.slice(0, 8);
+    // Sadece bu sayfanın headers'ında bulunanları al (Saat / Kümülatif Süre dahil)
+    const displayCols = ALL_DISPLAY_COLS.filter(c => c === 'Durum' || headers.includes(c));
 
-    // Add Status header
-    const finalHeaders = [...colsToShow];
-    if (!finalHeaders.includes('Durum')) finalHeaders.push('Durum');
+    // Kullanıcının gizlediği sütunları çıkar
+    const colsToShow = displayCols.filter(c => !hiddenStationCols.has(c));
+
+    // Sütun seçici dropdown'ı güncelle
+    _updateColPickerUI(displayCols);
+
+    // Add Status header (always visible)
+    const finalHeaders = colsToShow.includes('Durum') ? colsToShow : [...colsToShow, 'Durum'];
 
     // Create table header cells
     const trHead = document.createElement('tr');
@@ -2954,4 +2972,60 @@ function updateDowntime(stName, value) {
     downtimeMap[stName] = val;
     saveDowntimeMapToStorage();
     renderPerformanceTab();
+}
+
+// ---- Sütun Gizle/Göster ----
+function toggleColPicker() {
+    const dd = document.getElementById('col-picker-dropdown');
+    if (dd) dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+}
+
+// Dropdown kapanması için dışarı tıklama
+document.addEventListener('click', function(e) {
+    const btn = document.getElementById('col-picker-btn');
+    const dd = document.getElementById('col-picker-dropdown');
+    if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
+        dd.style.display = 'none';
+    }
+});
+
+function _updateColPickerUI(displayCols) {
+    const list = document.getElementById('col-picker-list');
+    if (!list) return;
+    // Yalnızca değiştiğinde yeniden çiz (dil değiştirme döngüsünü engelle)
+    const key = displayCols.join(',');
+    if (list.dataset.lastCols === key) {
+        // Sadece checkbox durumlarını güncelle
+        list.querySelectorAll('input[type=checkbox]').forEach(cb => {
+            cb.checked = !hiddenStationCols.has(cb.dataset.col);
+        });
+        return;
+    }
+    list.dataset.lastCols = key;
+    list.innerHTML = '';
+    // "Durum" her zaman görünür olsun, gizlenemez
+    const toggleableCols = displayCols.filter(c => c !== 'Durum');
+    toggleableCols.forEach(col => {
+        const label = document.createElement('label');
+        label.style.cssText = 'display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer; font-size:13px; color:var(--text-primary);';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.dataset.col = col;
+        cb.checked = !hiddenStationCols.has(col);
+        cb.style.cssText = 'width:14px; height:14px; cursor:pointer; accent-color: #00f0ff;';
+        cb.onchange = () => toggleColVisibility(col, cb.checked);
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(col));
+        list.appendChild(label);
+    });
+}
+
+function toggleColVisibility(colName, isVisible) {
+    if (isVisible) {
+        hiddenStationCols.delete(colName);
+    } else {
+        hiddenStationCols.add(colName);
+    }
+    saveHiddenColsToStorage();
+    renderStationTable(stationHeadersMap[activeStation] || []);
 }
