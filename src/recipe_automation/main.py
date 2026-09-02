@@ -1923,7 +1923,6 @@ def do_match_depo(
             "istasyonanakayitmi",
             "fasonmu",
             "rezerveedilecekmiktar",
-            "onceliksirasi",
         ]
 
         # Kullanıcının talebi: JSON'da hammadde tanımlıysa (TIM vb.), Malzeme Adı gizlensin.
