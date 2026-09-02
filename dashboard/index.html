@@ -408,29 +408,30 @@
                         <!-- Station Data Details -->
                         <div class="section-card glass flex-col flex-1">
                             <div class="card-header" style="flex-direction: column; align-items: stretch; gap: 15px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <h2 id="current-station-title" style="display:flex; align-items:center; gap:10px; margin:0;">
-                                        <i class="fa-solid fa-industry text-green"></i> İstasyon Detayları
-                                    </h2>
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                                        <h2 id="current-station-title" style="display:flex; align-items:center; gap:10px; margin:0;">
+                                            <i class="fa-solid fa-industry text-green"></i> İstasyon Detayları
+                                        </h2>
+                                        <div id="station-capacity-badge" style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 5px 12px; border-radius: 6px; font-size: 13px;">
+                                        </div>
+                                    </div>
                                     <button id="export-station-btn" onclick="exportStationDataToExcel()" class="btn btn-success" title="İstasyonu Excel Olarak İndir" style="padding: 6px 12px; font-size: 13px; border-radius: 6px; animation: pulseExcelBtn 2s infinite ease-in-out;">
                                         <i class="fa-solid fa-file-excel"></i> İndir
                                     </button>
                                 </div>
-                                <div class="header-filters" style="justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                                    <div id="station-capacity-badge" style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 6px 14px; border-radius: 8px; font-size: 13px;">
+                                <div class="header-filters" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <div class="search-bar" style="min-width: 220px;">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <input type="text" id="station-search" placeholder="Kod veya malzeme ara..." oninput="renderStationsTab()">
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                        <div class="search-bar">
-                                            <i class="fa-solid fa-magnifying-glass"></i>
-                                            <input type="text" id="station-search" placeholder="Kod veya malzeme ara..." oninput="renderStationsTab()">
-                                        </div>
-                                    <select id="station-filter-status" class="select-input">
+                                    <select id="station-filter-status" class="select-input" style="width: auto;">
                                         <option value="all">Tüm Durumlar</option>
                                         <option value="missing">Eksik Olanlar</option>
                                         <option value="production">Üretimde Olanlar</option>
                                         <option value="ready">Hazır (Eksiksiz) Olanlar</option>
                                     </select>
-                                    <select id="station-sort" class="select-input">
+                                    <select id="station-sort" class="select-input" style="width: auto;">
                                         <option value="priority-asc">Öncelik (Artan)</option>
                                         <option value="priority-desc">Öncelik (Azalan)</option>
                                         <option value="code-asc">Kod (A-Z)</option>
@@ -439,14 +440,13 @@
                                     </select>
                                     <!-- Sütun Seçici Butonu -->
                                     <div style="position: relative; display: inline-block;">
-                                        <button id="col-picker-btn" onclick="toggleColPicker()" class="btn" title="Sütunları Göster/Gizle" style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: var(--text-primary); border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                        <button id="col-picker-btn" onclick="toggleColPicker()" class="btn" title="Sütunları Göster/Gizle" style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: var(--text-primary); border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
                                             <i class="fa-solid fa-table-columns"></i> Sütunlar
                                         </button>
                                         <div id="col-picker-dropdown" style="display:none; position:absolute; right:0; top:calc(100% + 6px); background: #1e2535; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 14px; min-width: 200px; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
                                             <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px; text-transform: uppercase; letter-spacing: 0.5px;">Görünür Sütunlar</div>
                                             <div id="col-picker-list"></div>
                                         </div>
-                                    </div>
                                     </div>
                                 </div>
                             </div>
