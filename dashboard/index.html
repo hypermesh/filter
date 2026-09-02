@@ -416,11 +416,14 @@
                                         <i class="fa-solid fa-file-excel"></i> İndir
                                     </button>
                                 </div>
-                                <div class="header-filters" style="justify-content: flex-end;">
-                                    <div class="search-bar">
-                                        <i class="fa-solid fa-magnifying-glass"></i>
-                                        <input type="text" id="station-search" placeholder="Kod veya malzeme ara..." oninput="renderStationsTab()">
+                                <div class="header-filters" style="justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                    <div id="station-capacity-badge" style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 6px 14px; border-radius: 8px; font-size: 13px;">
                                     </div>
+                                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                        <div class="search-bar">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                            <input type="text" id="station-search" placeholder="Kod veya malzeme ara..." oninput="renderStationsTab()">
+                                        </div>
                                     <select id="station-filter-status" class="select-input">
                                         <option value="all">Tüm Durumlar</option>
                                         <option value="missing">Eksik Olanlar</option>
@@ -443,6 +446,7 @@
                                             <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px; text-transform: uppercase; letter-spacing: 0.5px;">Görünür Sütunlar</div>
                                             <div id="col-picker-list"></div>
                                         </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>

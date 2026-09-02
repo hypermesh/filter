@@ -2226,41 +2226,47 @@ def do_match_depo(
                             makine_sayisi = machine_counts.get(ws_name, 1)
 
                         last_row = ws.max_row
-
-                        # İstasyon Sayısı
-                        mach_row = last_row + 2
-                        ws[f"A{mach_row}"] = "İSTASYON SAYISI"
-                        ws[f"A{mach_row}"].font = Font(bold=True)
-                        ws[f"{toplam_sure_col_letter}{mach_row}"] = makine_sayisi
-                        ws[f"{toplam_sure_col_letter}{mach_row}"].font = Font(bold=True)
-
-                        # Toplam Saat
-                        hour_row = mach_row + 1
-                        ws[f"A{hour_row}"] = "TOPLAM SÜRE (SAAT)"
-                        ws[f"A{hour_row}"].font = Font(bold=True)
-                        ws[f"{toplam_sure_col_letter}{hour_row}"] = (
-                            f"=SUM({toplam_sure_col_letter}2:{toplam_sure_col_letter}{last_row})/3600"
+                        border_thin = Border(
+                            left=Side(style="thin", color="B0C4DE"),
+                            right=Side(style="thin", color="B0C4DE"),
+                            top=Side(style="thin", color="B0C4DE"),
+                            bottom=Side(style="thin", color="B0C4DE"),
                         )
-                        ws[f"{toplam_sure_col_letter}{hour_row}"].font = Font(bold=True)
-                        ws[f"{toplam_sure_col_letter}{hour_row}"].number_format = "#,##0.00"
-
-                        # Toplam İş Günü (Saat / (gunluk_saat * İstasyon Sayısı))
-                        day_row = hour_row + 1
-                        ws[f"A{day_row}"] = f"TOPLAM İŞ GÜNÜ ({gunluk_saat} Saat/Gün)"
-                        ws[f"A{day_row}"].font = Font(bold=True)
-                        ws[f"{toplam_sure_col_letter}{day_row}"] = (
-                            f"={toplam_sure_col_letter}{hour_row}/({gunluk_saat}*{toplam_sure_col_letter}{mach_row})"
-                        )
-                        ws[f"{toplam_sure_col_letter}{day_row}"].font = Font(bold=True)
-                        ws[f"{toplam_sure_col_letter}{day_row}"].number_format = "#,##0.00"
-
-                        # Dolgu ve kenarlık
-                        fill_color = PatternFill(
+                        fill_summary = PatternFill(
                             start_color="D9EAD3", end_color="D9EAD3", fill_type="solid"
                         )
-                        for r in range(mach_row, day_row + 1):
-                            ws[f"A{r}"].fill = fill_color
-                            ws[f"{toplam_sure_col_letter}{r}"].fill = fill_color
+
+                        # 1. İstasyon (Makine) Sayısı
+                        mach_row = last_row + 2
+                        ws[f"B{mach_row}"] = "İSTASYON SAYISI"
+                        ws[f"B{mach_row}"].font = Font(bold=True)
+                        ws[f"B{mach_row}"].fill = fill_summary
+                        ws[f"B{mach_row}"].border = border_thin
+                        ws[f"B{mach_row}"].alignment = Alignment(horizontal="left", vertical="middle")
+
+                        ws[f"C{mach_row}"] = makine_sayisi
+                        ws[f"C{mach_row}"].font = Font(bold=True)
+                        ws[f"C{mach_row}"].fill = fill_summary
+                        ws[f"C{mach_row}"].border = border_thin
+                        ws[f"C{mach_row}"].alignment = Alignment(horizontal="right", vertical="middle")
+                        ws[f"C{mach_row}"].number_format = "#,##0"
+
+                        # 2. Toplam İş Günü (Saat / (gunluk_saat * İstasyon Sayısı))
+                        day_row = mach_row + 1
+                        ws[f"B{day_row}"] = f"TOPLAM İŞ GÜNÜ ({gunluk_saat} Saat/Gün)"
+                        ws[f"B{day_row}"].font = Font(bold=True)
+                        ws[f"B{day_row}"].fill = fill_summary
+                        ws[f"B{day_row}"].border = border_thin
+                        ws[f"B{day_row}"].alignment = Alignment(horizontal="left", vertical="middle")
+
+                        ws[f"C{day_row}"] = (
+                            f"=SUM({toplam_sure_col_letter}2:{toplam_sure_col_letter}{last_row})/({gunluk_saat}*C{mach_row}*3600)"
+                        )
+                        ws[f"C{day_row}"].font = Font(bold=True)
+                        ws[f"C{day_row}"].fill = fill_summary
+                        ws[f"C{day_row}"].border = border_thin
+                        ws[f"C{day_row}"].alignment = Alignment(horizontal="right", vertical="middle")
+                        ws[f"C{day_row}"].number_format = "#,##0.00"
 
                 elif ws_name == "Üretim Takip":
                     kaynak_col_idx = None

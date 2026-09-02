@@ -2091,6 +2091,61 @@ function filterAndPaginateStationData() {
 
     document.getElementById('current-station-title').innerHTML = `<i class="fa-solid fa-industry text-green"></i> ${activeStation} İstasyon İş Listesi`;
 
+    // İstasyon Kapasite Rozetini Güncelle
+    const capBadge = document.getElementById('station-capacity-badge');
+    if (capBadge) {
+        if (!activeStation || rows.length === 0) {
+            capBadge.style.display = 'none';
+        } else {
+            capBadge.style.display = 'flex';
+            let gunlukSaat = DEFAULT_CAPACITY.varsayilan_gunluk_saat || 9;
+            let makineSayisi = 1;
+            if (DEFAULT_CAPACITY.istasyonlar) {
+                if (DEFAULT_CAPACITY.istasyonlar[activeStation]) {
+                    gunlukSaat = DEFAULT_CAPACITY.istasyonlar[activeStation].gunluk_saat || gunlukSaat;
+                    makineSayisi = DEFAULT_CAPACITY.istasyonlar[activeStation].makine_sayisi || makineSayisi;
+                } else {
+                    const normActive = activeStation.trim().toUpperCase().replace(/\s+/g, '');
+                    for (const [k, cfg] of Object.entries(DEFAULT_CAPACITY.istasyonlar)) {
+                        if (k.trim().toUpperCase().replace(/\s+/g, '') === normActive) {
+                            gunlukSaat = cfg.gunluk_saat || gunlukSaat;
+                            makineSayisi = cfg.makine_sayisi || makineSayisi;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            let totalHours = 0;
+            rows.forEach(r => {
+                let saatVal = parseFloat(r['Saat']) || 0;
+                if (saatVal > 0) {
+                    totalHours += (saatVal * 24);
+                } else {
+                    let topSure = parseFloat(r['Toplam Süre']) || 0;
+                    totalHours += (topSure / 3600);
+                }
+            });
+
+            const gunlukKapasite = gunlukSaat * makineSayisi;
+            const tahminiGun = gunlukKapasite > 0 ? (totalHours / gunlukKapasite) : 0;
+
+            capBadge.innerHTML = `
+                <span style="color: var(--text-dim); display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-gears text-blue"></i> <strong style="color:var(--text-primary); font-size:13px;">${makineSayisi}</strong> İstasyon
+                </span>
+                <span style="color: rgba(255,255,255,0.15);">|</span>
+                <span style="color: var(--text-dim); display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-clock text-yellow"></i> <strong style="color:var(--text-primary); font-size:13px;">${gunlukSaat}</strong> Saat/Gün
+                </span>
+                <span style="color: rgba(255,255,255,0.15);">|</span>
+                <span style="color: var(--text-dim); display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-calendar-check text-green"></i> Tahmini: <strong style="color:#10B981; font-weight:700; font-size:14px;">${tahminiGun.toFixed(1)}</strong> İş Günü
+                </span>
+            `;
+        }
+    }
+
     // 1. Text Search Filter
     let filtered = rows;
     if (searchVal) {
