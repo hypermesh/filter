@@ -2855,10 +2855,15 @@ async function exportStationDataToExcel() {
                     rowData.push(completionText);
                 } else {
                     let val = row[header];
-                    if (typeof val === 'number' && !Number.isInteger(val)) {
-                        val = parseFloat(val.toFixed(3));
+                    // Saat ve Kümülatif Süre: Ham ondalık değeri (günün kesri) sakla, format ayrıca uygulanacak
+                    if ((header === 'Saat' || header === 'Kümülatif Süre') && typeof val === 'number') {
+                        rowData.push(val); // Excel'in [h]:mm formatı için ham değer gerekli
+                    } else {
+                        if (typeof val === 'number' && !Number.isInteger(val)) {
+                            val = parseFloat(val.toFixed(3));
+                        }
+                        rowData.push(val !== undefined && val !== null ? val : '-');
                     }
-                    rowData.push(val !== undefined && val !== null ? val : '-');
                 }
             });
 
@@ -2874,6 +2879,13 @@ async function exportStationDataToExcel() {
                 };
                 
                 const header = headerNames[colNumber - 1];
+                
+                // Saat ve Kümülatif Süre hücrelerine [h]:mm formatı uygula
+                if (header === 'Saat' || header === 'Kümülatif Süre') {
+                    cell.numFmt = '[h]:mm';
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                }
+                
                 if (header === 'Durum') {
                     const statusStr = String(cell.value).toLowerCase();
                     if (statusStr.includes('hazır')) {
