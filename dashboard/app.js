@@ -991,6 +991,8 @@ function renderTab(tabId) {
         renderRotasizlarTab();
     } else if (tabId === 'stations') {
         renderStationsTab();
+    } else if (tabId === 'workload') {
+        renderWorkloadTab();
     } else if (tabId === 'performance') {
         renderPerformanceTab();
     }
@@ -3043,6 +3045,213 @@ const DEFAULT_CAPACITY = {
         "3D YAZICI GRUBU": { "gunluk_saat": 22, "makine_sayisi": 15 }
     }
 };
+
+window.selectStationAndGo = function(stName) {
+    activeStation = stName;
+    switchTab('stations');
+};
+
+// -------------------------------------------------------------
+// WORKLOAD & CAPACITY COMPARISON TAB
+// -------------------------------------------------------------
+function renderWorkloadTab() {
+    const kpiContainer = document.getElementById('workload-kpi-container');
+    const barsContainer = document.getElementById('workload-bars-container');
+    if (!barsContainer) return;
+
+    if (!stationList || stationList.length === 0) {
+        if (kpiContainer) kpiContainer.innerHTML = '';
+        barsContainer.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 40px;">Henüz istasyon verisi yüklenmedi.</div>';
+        return;
+    }
+
+    // 1. Tüm istasyonların iş yükü verilerini hesapla
+    const data = [];
+    let grandTotalHours = 0;
+
+    stationList.forEach(stName => {
+        const rows = stationSheetsMap[stName] || [];
+        if (rows.length === 0) return;
+
+        let gunlukSaat = DEFAULT_CAPACITY.varsayilan_gunluk_saat || 9;
+        let makineSayisi = 1;
+        if (DEFAULT_CAPACITY.istasyonlar) {
+            if (DEFAULT_CAPACITY.istasyonlar[stName]) {
+                gunlukSaat = DEFAULT_CAPACITY.istasyonlar[stName].gunluk_saat || gunlukSaat;
+                makineSayisi = DEFAULT_CAPACITY.istasyonlar[stName].makine_sayisi || makineSayisi;
+            } else {
+                const normSt = stName.trim().toUpperCase().replace(/\s+/g, '');
+                for (const [k, cfg] of Object.entries(DEFAULT_CAPACITY.istasyonlar)) {
+                    if (k.trim().toUpperCase().replace(/\s+/g, '') === normSt) {
+                        gunlukSaat = cfg.gunluk_saat || gunlukSaat;
+                        makineSayisi = cfg.makine_sayisi || makineSayisi;
+                        break;
+                    }
+                }
+            }
+        }
+
+        let stHours = 0;
+        rows.forEach(r => {
+            let saatVal = parseFloat(r['Saat']) || 0;
+            if (saatVal > 0) {
+                stHours += (saatVal * 24);
+            } else {
+                let topSure = parseFloat(r['Toplam Süre']) || 0;
+                stHours += (topSure / 3600);
+            }
+        });
+
+        const gunlukKapasite = gunlukSaat * makineSayisi;
+        const tahminiGun = gunlukKapasite > 0 ? (stHours / gunlukKapasite) : 0;
+        grandTotalHours += stHours;
+
+        data.push({
+            name: stName,
+            partsCount: rows.length,
+            gunlukSaat: gunlukSaat,
+            makineSayisi: makineSayisi,
+            gunlukKapasite: gunlukKapasite,
+            totalHours: stHours,
+            tahminiGun: tahminiGun
+        });
+    });
+
+    if (data.length === 0) {
+        barsContainer.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 40px;">İstasyonlarda iş listesi bulunamadı.</div>';
+        return;
+    }
+
+    // 2. Sıralama
+    const sortSelect = document.getElementById('workload-sort-select');
+    const sortMode = sortSelect ? sortSelect.value : 'days-desc';
+
+    if (sortMode === 'days-desc') {
+        data.sort((a, b) => b.tahminiGun - a.tahminiGun);
+    } else if (sortMode === 'days-asc') {
+        data.sort((a, b) => a.tahminiGun - b.tahminiGun);
+    } else if (sortMode === 'name-asc') {
+        data.sort((a, b) => a.name.localeCompare(b.name, 'tr', { sensitivity: 'base' }));
+    }
+
+    // 3. KPI Değerleri
+    const maxItem = [...data].sort((a, b) => b.tahminiGun - a.tahminiGun)[0];
+    const minItem = [...data].sort((a, b) => a.tahminiGun - b.tahminiGun)[0];
+    const grandTotalDays = (grandTotalHours / (9 * 1)).toFixed(1); // referans 9h tek istasyon eşdeğeri
+
+    if (kpiContainer) {
+        kpiContainer.innerHTML = `
+            <div class="kpi-card glass" style="padding: 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight:600; display:flex; justify-content:space-between;">
+                    <span>Aktif İstasyonlar</span>
+                    <i class="fa-solid fa-industry text-blue"></i>
+                </div>
+                <div style="font-size: 26px; font-weight: 700; color: var(--text-main); margin-top: 6px;">
+                    ${data.length} <span style="font-size: 13px; font-weight:400; color:var(--text-dim);">İstasyon</span>
+                </div>
+                <div style="font-size: 12px; color: #38bdf8; margin-top: 4px;">Tüm hatlar takipte</div>
+            </div>
+
+            <div class="kpi-card glass" style="padding: 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight:600; display:flex; justify-content:space-between;">
+                    <span>Toplam İş Yükü</span>
+                    <i class="fa-solid fa-clock text-yellow"></i>
+                </div>
+                <div style="font-size: 26px; font-weight: 700; color: var(--text-main); margin-top: 6px;">
+                    ${grandTotalHours.toFixed(1)} <span style="font-size: 13px; font-weight:400; color:var(--text-dim);">Saat</span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">Tüm parçaların toplamı</div>
+            </div>
+
+            <div class="kpi-card glass" style="padding: 16px; border-radius: 10px; border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.05);">
+                <div style="font-size: 11px; color: #f87171; text-transform: uppercase; font-weight:600; display:flex; justify-content:space-between;">
+                    <span>🚨 En Yoğun İstasyon (Darboğaz)</span>
+                    <i class="fa-solid fa-triangle-exclamation text-red"></i>
+                </div>
+                <div style="font-size: 22px; font-weight: 700; color: #f87171; margin-top: 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    ${maxItem ? maxItem.name : '-'}
+                </div>
+                <div style="font-size: 12px; color: #fca5a5; margin-top: 4px;">
+                    ${maxItem ? `<strong>${maxItem.tahminiGun.toFixed(1)}</strong> İş Günü (${maxItem.totalHours.toFixed(1)} Saat)` : '-'}
+                </div>
+            </div>
+
+            <div class="kpi-card glass" style="padding: 16px; border-radius: 10px; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.05);">
+                <div style="font-size: 11px; color: #34d399; text-transform: uppercase; font-weight:600; display:flex; justify-content:space-between;">
+                    <span>🟢 En Müsait İstasyon</span>
+                    <i class="fa-solid fa-feather text-green"></i>
+                </div>
+                <div style="font-size: 22px; font-weight: 700; color: #34d399; margin-top: 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    ${minItem ? minItem.name : '-'}
+                </div>
+                <div style="font-size: 12px; color: #6ee7b7; margin-top: 4px;">
+                    ${minItem ? `<strong>${minItem.tahminiGun.toFixed(1)}</strong> İş Günü (${minItem.totalHours.toFixed(1)} Saat)` : '-'}
+                </div>
+            </div>
+        `;
+    }
+
+    // 4. Barları Çiz
+    const maxDays = Math.max(...data.map(d => d.tahminiGun), 1);
+    let html = '';
+
+    data.forEach(d => {
+        const barPct = Math.min(100, Math.max(5, (d.tahminiGun / maxDays) * 100));
+
+        let colorGradient = 'linear-gradient(90deg, #10b981, #059669)';
+        let badgeHtml = '<span class="badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); font-size:11px; padding:3px 8px;"><i class="fa-solid fa-feather"></i> Müsait (&lt;2 Gün)</span>';
+        let dayColor = '#34d399';
+
+        if (d.tahminiGun >= 10) {
+            colorGradient = 'linear-gradient(90deg, #ef4444, #b91c1c)';
+            badgeHtml = '<span class="badge" style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); font-size:11px; padding:3px 8px; animation: pulseExcelBtn 2s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> Kritik Darboğaz (&gt;10 Gün)</span>';
+            dayColor = '#f87171';
+        } else if (d.tahminiGun >= 5) {
+            colorGradient = 'linear-gradient(90deg, #f59e0b, #d97706)';
+            badgeHtml = '<span class="badge" style="background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); font-size:11px; padding:3px 8px;"><i class="fa-solid fa-fire"></i> Yüksek Yük (5-10 Gün)</span>';
+            dayColor = '#fbbf24';
+        } else if (d.tahminiGun >= 2) {
+            colorGradient = 'linear-gradient(90deg, #3b82f6, #1d4ed8)';
+            badgeHtml = '<span class="badge" style="background:rgba(59,130,246,0.18); color:#60a5fa; border:1px solid rgba(59,130,246,0.35); font-size:11px; padding:3px 8px;"><i class="fa-solid fa-check"></i> Dengeli (2-5 Gün)</span>';
+            dayColor = '#60a5fa';
+        }
+
+        html += `
+            <div class="workload-item" onclick="selectStationAndGo('${d.name}')" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(59,130,246,0.4)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.06)';">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-industry text-blue" style="font-size:13px;"></i> ${d.name}
+                        </span>
+                        <span style="font-size: 12px; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">
+                            ${d.partsCount} Parça
+                        </span>
+                        <span style="font-size: 12px; color: var(--text-dim);">
+                            ⚙️ ${d.makineSayisi} Makine • ⏱️ ${d.gunlukSaat} Saat/Gün
+                        </span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        ${badgeHtml}
+                        <span style="font-size: 13px; color: var(--text-dim);">
+                            <strong style="color:var(--text-main); font-size:15px;">${d.totalHours.toFixed(1)}</strong> Saat
+                        </span>
+                        <span style="font-size: 16px; font-weight: 700; color: ${dayColor}; min-width: 90px; text-align: right;">
+                            ${d.tahminiGun.toFixed(1)} İş Günü
+                        </span>
+                        <i class="fa-solid fa-chevron-right" style="font-size: 11px; color: var(--text-dim);"></i>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden; position: relative;">
+                    <div style="width: ${barPct}%; height: 100%; background: ${colorGradient}; border-radius: 6px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                </div>
+            </div>
+        `;
+    });
+
+    barsContainer.innerHTML = html;
+}
 
 function renderPerformanceTab() {
     const container = document.getElementById('performance-cards-container');

@@ -79,6 +79,10 @@
                         <i class="fa-solid fa-microchip"></i>
                         <span>İstasyon İş Listeleri</span>
                     </button>
+                    <button class="nav-item" data-tab="workload">
+                        <i class="fa-solid fa-chart-column"></i>
+                        <span>İş Yükü & Kapasite</span>
+                    </button>
                     <button class="nav-item" data-tab="performance">
                         <i class="fa-solid fa-gauge-high"></i>
                         <span>Performans Karnesi</span>
@@ -400,8 +404,13 @@
                             <div class="card-header">
                                 <h2><i class="fa-solid fa-list-check text-blue"></i> İstasyonlar</h2>
                             </div>
-                            <div class="stations-list-group" id="stations-list">
+                            <div class="stations-list-group" id="stations-list" style="flex: 1; overflow-y: auto;">
                                 <!-- İstasyon isimleri listesi -->
+                            </div>
+                            <div style="padding: 12px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.15);">
+                                <button onclick="switchTab('workload')" class="btn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(16,185,129,0.18)); border: 1px solid rgba(59,130,246,0.35); color: #38bdf8; font-size: 12px; font-weight: 600; padding: 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg, rgba(59,130,246,0.3), rgba(16,185,129,0.3))'" onmouseout="this.style.background='linear-gradient(135deg, rgba(59,130,246,0.18), rgba(16,185,129,0.18))'">
+                                    <i class="fa-solid fa-chart-column text-blue"></i> Tüm İstasyonları Kıyasla
+                                </button>
                             </div>
                         </div>
 
@@ -459,6 +468,53 @@
                                         <!-- İstasyon satırları buraya gelecek -->
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+                <!-- TAB: İş Yükü & Kapasite Analizi -->
+                <section class="tab-content" id="tab-workload">
+                    <div class="section-card glass flex-col flex-1" style="overflow-y: auto; padding-bottom: 30px;">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                            <div>
+                                <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                                    <i class="fa-solid fa-chart-column text-blue"></i> İstasyon İş Yükü & Kapasite Kıyaslaması
+                                </h2>
+                                <p style="color: var(--text-dim); font-size: 13px; margin: 4px 0 0 0;">
+                                    Tüm istasyonların planlanan toplam iş saatleri, tahmini iş günleri ve darboğaz analizleri.
+                                </p>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <label style="font-size: 12px; color: var(--text-dim);">Sıralama:</label>
+                                <select id="workload-sort-select" class="select-input" onchange="renderWorkloadTab()" style="width: auto;">
+                                    <option value="days-desc">En Yoğun İstasyonlar (Önce)</option>
+                                    <option value="days-asc">En Hafif İstasyonlar (Önce)</option>
+                                    <option value="name-asc">İstasyon Adı (A-Z)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- KPI Kartları -->
+                        <div class="kpi-grid" id="workload-kpi-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; padding: 20px;">
+                            <!-- JS ile doldurulacak -->
+                        </div>
+
+                        <!-- Renkli İş Yükü Kıyaslama Listesi / Barları -->
+                        <div style="padding: 0 20px;">
+                            <div style="background: rgba(16, 22, 40, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                                    <h3 style="font-size: 15px; font-weight: 600; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fa-solid fa-layer-group text-green"></i> İstasyon Bazında Dağılım Çizelgesi
+                                    </h3>
+                                    <div style="display: flex; align-items: center; gap: 14px; font-size: 11px; flex-wrap: wrap;">
+                                        <span style="display: flex; align-items: center; gap: 5px;"><span style="width:10px; height:10px; border-radius:3px; background:#ef4444; display:inline-block;"></span> Kritik / Darboğaz (&gt;10 Gün)</span>
+                                        <span style="display: flex; align-items: center; gap: 5px;"><span style="width:10px; height:10px; border-radius:3px; background:#f59e0b; display:inline-block;"></span> Yüksek Yük (5-10 Gün)</span>
+                                        <span style="display: flex; align-items: center; gap: 5px;"><span style="width:10px; height:10px; border-radius:3px; background:#3b82f6; display:inline-block;"></span> Dengeli (2-5 Gün)</span>
+                                        <span style="display: flex; align-items: center; gap: 5px;"><span style="width:10px; height:10px; border-radius:3px; background:#10b981; display:inline-block;"></span> Düşük / Müsait (&lt;2 Gün)</span>
+                                    </div>
+                                </div>
+                                <div id="workload-bars-container" style="display: flex; flex-direction: column; gap: 16px;">
+                                    <!-- JS tarafından doldurulacak -->
+                                </div>
                             </div>
                         </div>
                     </div>
