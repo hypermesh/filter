@@ -2825,7 +2825,34 @@ async function exportStationDataToExcel() {
             };
         });
 
+        // Sütun indekslerini önceden belirle (formüller için sütun harfi lazım)
+        // headerNames is 0-indexed; Excel columns are 1-indexed
+        function colLetter(idx1based) {
+            // idx1based: 1 = A, 2 = B, etc.
+            let col = '';
+            let n = idx1based;
+            while (n > 0) {
+                const rem = (n - 1) % 26;
+                col = String.fromCharCode(65 + rem) + col;
+                n = Math.floor((n - 1) / 26);
+            }
+            return col;
+        }
+        
+        const colIdxOf = {}; // header name -> 1-based column index in Excel
+        headerNames.forEach((h, i) => { colIdxOf[h] = i + 1; });
+        
+        const hazirlikCol    = colIdxOf['Hazırlık Süresi']    ? colLetter(colIdxOf['Hazırlık Süresi'])    : null;
+        const birimCol       = colIdxOf['Birim İşlem Süresi'] ? colLetter(colIdxOf['Birim İşlem Süresi']) : null;
+        const miktarCol      = colIdxOf['Üretilecek Miktar']  ? colLetter(colIdxOf['Üretilecek Miktar'])  : null;
+        const toplamSureCol  = colIdxOf['Toplam Süre']        ? colLetter(colIdxOf['Toplam Süre'])        : null;
+        const saatCol        = colIdxOf['Saat']               ? colLetter(colIdxOf['Saat'])               : null;
+        const kumulatifCol   = colIdxOf['Kümülatif Süre']     ? colLetter(colIdxOf['Kümülatif Süre'])     : null;
+        const hammaddeMCol   = colIdxOf['Hammadde Miktar']    ? colLetter(colIdxOf['Hammadde Miktar'])    : null;
+        const toplamHammCol  = colIdxOf['Toplam Hammadde Miktarı'] ? colLetter(colIdxOf['Toplam Hammadde Miktarı']) : null;
+
         // Add data rows
+        let excelRowNum = 2; // row 1 is header
         paginationState.station.filtered.forEach(row => {
             const code = String(row['Kod'] || '').trim().toUpperCase();
             
@@ -2853,17 +2880,28 @@ async function exportStationDataToExcel() {
             headerNames.forEach(header => {
                 if (header === 'Durum') {
                     rowData.push(completionText);
+                } else if (header === 'Toplam Süre' && hazirlikCol && birimCol && miktarCol) {
+                    // Canlı formül: Hazırlık + (Birim * Adet)
+                    rowData.push({ formula: `=${hazirlikCol}${excelRowNum}+(${birimCol}${excelRowNum}*${miktarCol}${excelRowNum})` });
+                } else if (header === 'Saat' && toplamSureCol) {
+                    // Canlı formül: Toplam Süre / 86400
+                    rowData.push({ formula: `=${toplamSureCol}${excelRowNum}/86400` });
+                } else if (header === 'Kümülatif Süre' && saatCol) {
+                    // Canlı formül: kümülatif toplam
+                    if (excelRowNum === 2) {
+                        rowData.push({ formula: `=${saatCol}2` });
+                    } else {
+                        rowData.push({ formula: `=${kumulatifCol}${excelRowNum - 1}+${saatCol}${excelRowNum}` });
+                    }
+                } else if (header === 'Toplam Hammadde Miktarı' && miktarCol && hammaddeMCol) {
+                    // Canlı formül: Adet * Hammadde Miktar
+                    rowData.push({ formula: `=${miktarCol}${excelRowNum}*${hammaddeMCol}${excelRowNum}` });
                 } else {
                     let val = row[header];
-                    // Saat ve Kümülatif Süre: Ham ondalık değeri (günün kesri) sakla, format ayrıca uygulanacak
-                    if ((header === 'Saat' || header === 'Kümülatif Süre') && typeof val === 'number') {
-                        rowData.push(val); // Excel'in [h]:mm formatı için ham değer gerekli
-                    } else {
-                        if (typeof val === 'number' && !Number.isInteger(val)) {
-                            val = parseFloat(val.toFixed(3));
-                        }
-                        rowData.push(val !== undefined && val !== null ? val : '-');
+                    if (typeof val === 'number' && !Number.isInteger(val)) {
+                        val = parseFloat(val.toFixed(3));
                     }
+                    rowData.push(val !== undefined && val !== null ? val : '-');
                 }
             });
 
@@ -2912,6 +2950,8 @@ async function exportStationDataToExcel() {
                     }
                 }
             });
+            
+            excelRowNum++;
         });
 
         // Auto-fit columns
