@@ -2140,7 +2140,7 @@ function filterAndPaginateStationData() {
                 </span>
                 <span style="color: rgba(255,255,255,0.15);">|</span>
                 <span style="color: var(--text-dim); display: flex; align-items: center; gap: 6px;">
-                    <i class="fa-solid fa-calendar-check text-green"></i> Tahmini: <strong style="color:#10B981; font-weight:700; font-size:14px;">${tahminiGun.toFixed(1)}</strong> İş Günü
+                    <i class="fa-solid fa-calendar-check text-green"></i> Tahmini: <strong style="color:#10B981; font-weight:700; font-size:14px;">${tahminiGun.toFixed(1)}</strong> İş Günü <span style="color:rgba(255,255,255,0.65); font-weight:500; font-size:12px; margin-left:2px;">(${totalHours.toFixed(1)} Saat)</span>
                 </span>
             `;
         }
