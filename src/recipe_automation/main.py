@@ -2226,41 +2226,73 @@ def do_match_depo(
                             makine_sayisi = machine_counts.get(ws_name, 1)
 
                         last_row = ws.max_row
+                        box_start = last_row + 2
 
-                        # İstasyon Sayısı
-                        mach_row = last_row + 2
-                        ws[f"A{mach_row}"] = "İSTASYON SAYISI"
-                        ws[f"A{mach_row}"].font = Font(bold=True)
-                        ws[f"{toplam_sure_col_letter}{mach_row}"] = makine_sayisi
-                        ws[f"{toplam_sure_col_letter}{mach_row}"].font = Font(bold=True)
-
-                        # Toplam Saat
-                        hour_row = mach_row + 1
-                        ws[f"A{hour_row}"] = "TOPLAM SÜRE (SAAT)"
-                        ws[f"A{hour_row}"].font = Font(bold=True)
-                        ws[f"{toplam_sure_col_letter}{hour_row}"] = (
-                            f"=SUM({toplam_sure_col_letter}2:{toplam_sure_col_letter}{last_row})/3600"
+                        header_fill = PatternFill(start_color="1E293B", end_color="1E293B", fill_type="solid")
+                        header_font = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+                        label_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+                        label_font = Font(name="Calibri", size=10, bold=True, color="334155")
+                        val_font = Font(name="Calibri", size=10, bold=True, color="0F172A")
+                        
+                        box_border = Border(
+                            left=Side(style="thin", color="CBD5E1"),
+                            right=Side(style="thin", color="CBD5E1"),
+                            top=Side(style="thin", color="CBD5E1"),
+                            bottom=Side(style="thin", color="CBD5E1"),
                         )
-                        ws[f"{toplam_sure_col_letter}{hour_row}"].font = Font(bold=True)
-                        ws[f"{toplam_sure_col_letter}{hour_row}"].number_format = "#,##0.00"
 
-                        # Toplam İş Günü (Saat / (gunluk_saat * İstasyon Sayısı))
-                        day_row = hour_row + 1
-                        ws[f"A{day_row}"] = f"TOPLAM İŞ GÜNÜ ({gunluk_saat} Saat/Gün)"
-                        ws[f"A{day_row}"].font = Font(bold=True)
-                        ws[f"{toplam_sure_col_letter}{day_row}"] = (
-                            f"={toplam_sure_col_letter}{hour_row}/({gunluk_saat}*{toplam_sure_col_letter}{mach_row})"
-                        )
-                        ws[f"{toplam_sure_col_letter}{day_row}"].font = Font(bold=True)
-                        ws[f"{toplam_sure_col_letter}{day_row}"].number_format = "#,##0.00"
+                        # 1. Kart Başlığı (B-C Birleşik)
+                        ws.merge_cells(f"B{box_start}:C{box_start}")
+                        title_cell = ws[f"B{box_start}"]
+                        title_cell.value = "İSTASYON KAPASİTE ÖZETİ"
+                        title_cell.fill = header_fill
+                        title_cell.font = header_font
+                        title_cell.alignment = Alignment(horizontal="center", vertical="middle")
+                        ws[f"C{box_start}"].border = box_border
+                        title_cell.border = box_border
 
-                        # Dolgu ve kenarlık
-                        fill_color = PatternFill(
-                            start_color="D9EAD3", end_color="D9EAD3", fill_type="solid"
-                        )
-                        for r in range(mach_row, day_row + 1):
-                            ws[f"A{r}"].fill = fill_color
-                            ws[f"{toplam_sure_col_letter}{r}"].fill = fill_color
+                        # 2. İstasyon / Makine Sayısı Satırı
+                        r_mach = box_start + 1
+                        ws[f"B{r_mach}"] = "İstasyon (Makine) Sayısı"
+                        ws[f"B{r_mach}"].fill = label_fill
+                        ws[f"B{r_mach}"].font = label_font
+                        ws[f"B{r_mach}"].border = box_border
+                        ws[f"B{r_mach}"].alignment = Alignment(horizontal="left", vertical="middle")
+
+                        ws[f"C{r_mach}"] = makine_sayisi
+                        ws[f"C{r_mach}"].font = val_font
+                        ws[f"C{r_mach}"].border = box_border
+                        ws[f"C{r_mach}"].alignment = Alignment(horizontal="right", vertical="middle")
+                        ws[f"C{r_mach}"].number_format = '0" Adet"'
+
+                        # 3. Günlük Çalışma Saati Satırı
+                        r_hour = box_start + 2
+                        ws[f"B{r_hour}"] = "Günlük Çalışma Saati"
+                        ws[f"B{r_hour}"].fill = label_fill
+                        ws[f"B{r_hour}"].font = label_font
+                        ws[f"B{r_hour}"].border = box_border
+                        ws[f"B{r_hour}"].alignment = Alignment(horizontal="left", vertical="middle")
+
+                        ws[f"C{r_hour}"] = gunluk_saat
+                        ws[f"C{r_hour}"].font = val_font
+                        ws[f"C{r_hour}"].border = box_border
+                        ws[f"C{r_hour}"].alignment = Alignment(horizontal="right", vertical="middle")
+                        ws[f"C{r_hour}"].number_format = '0" Saat/Gün"'
+
+                        # 4. Tahmini İş Günü Satırı
+                        r_day = box_start + 3
+                        ws[f"B{r_day}"] = "Tahmini İş Günü"
+                        ws[f"B{r_day}"].fill = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
+                        ws[f"B{r_day}"].font = Font(name="Calibri", size=10, bold=True, color="166534")
+                        ws[f"B{r_day}"].border = box_border
+                        ws[f"B{r_day}"].alignment = Alignment(horizontal="left", vertical="middle")
+
+                        ws[f"C{r_day}"] = f"=SUM({toplam_sure_col_letter}2:{toplam_sure_col_letter}{last_row})/({gunluk_saat}*C{r_mach}*3600)"
+                        ws[f"C{r_day}"].fill = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
+                        ws[f"C{r_day}"].font = Font(name="Calibri", size=10, bold=True, color="166534")
+                        ws[f"C{r_day}"].border = box_border
+                        ws[f"C{r_day}"].alignment = Alignment(horizontal="right", vertical="middle")
+                        ws[f"C{r_day}"].number_format = '#,##0.0" Gün"'
 
                 elif ws_name == "Üretim Takip":
                     kaynak_col_idx = None
