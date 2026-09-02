@@ -377,6 +377,13 @@ def filter_id(
     ):
         haric_tut = True
 
+    create_montaj = True
+    if not Confirm.ask(
+        "[bold yellow]Soru:[/bold yellow] Montaj İzleme sayfaları (Montaj Otomasyon / Final Montaj) excel'e eklensin mi?",
+        default=True,
+    ):
+        create_montaj = False
+
     target_ops = load_group(group)
     console.print(
         f"[bold blue]Kullanılan Grup:[/bold blue] {group} ({len(target_ops)} adet operasyon kuralı)"
@@ -492,6 +499,7 @@ def filter_id(
                     file_totals=file_totals,
                     raw_df=single_raw_df,
                     input_path=path,
+                    create_montaj=create_montaj,
                 )
         else:
             if last_error:
@@ -511,7 +519,8 @@ def filter_id(
         console.print("\n[bold cyan]=== OTOMATİK DEPO EŞLEŞTİRME BAŞLATILIYOR ===[/bold cyan]")
         combined_raw = pd.concat(all_raw_dfs, ignore_index=True) if all_raw_dfs else None
         do_match_depo(
-            out_path, group=group, file_totals=file_totals, raw_df=combined_raw, input_path=path
+            out_path, group=group, file_totals=file_totals, raw_df=combined_raw, input_path=path,
+            create_montaj=create_montaj,
         )
 
     if genel_silinen_kodlar:
@@ -695,6 +704,7 @@ def filter_stock(
                     file_totals=file_totals,
                     raw_df=single_raw_df,
                     input_path=path,
+                    create_montaj=create_montaj,
                 )
         else:
             if last_error:
@@ -714,7 +724,8 @@ def filter_stock(
         console.print("\n[bold cyan]=== OTOMATİK DEPO EŞLEŞTİRME BAŞLATILIYOR ===[/bold cyan]")
         combined_raw = pd.concat(all_raw_dfs, ignore_index=True) if all_raw_dfs else None
         do_match_depo(
-            out_path, group=group, file_totals=file_totals, raw_df=combined_raw, input_path=path
+            out_path, group=group, file_totals=file_totals, raw_df=combined_raw, input_path=path,
+            create_montaj=create_montaj,
         )
 
     if genel_silinen_kodlar:
@@ -743,6 +754,7 @@ def do_match_depo(
     raw_df: pd.DataFrame = None,
     input_path: str = None,
     stock_basis: str = "kullanilabilir",
+    create_montaj: bool = True,
 ) -> None:
     """Core logic for match_depo, isolated to support dict arguments which Typer rejects."""
     parent_stats = {}
