@@ -631,11 +631,11 @@ function parseWorkbook() {
     // 5. Parse Station Sheets
     const excludedSheets = [
         "ÜRETİM LİSTESİ", "Tüm Veriler", "HAMMADDE SİPARİŞ",
-        "Üretim Takip", "Rotasızlar"
+        "Üretim Takip", "Rotasızlar", "HARİCİ_KODLAR"
     ];
 
     const hiddenStations = [
-        "HAMMADDE", "MONTAJ OTOMASYON İZLEME", "FINAL MONTAJ İZLEME"
+        "HAMMADDE", "MONTAJ OTOMASYON İZLEME", "FINAL MONTAJ İZLEME", "HARİCİ_KODLAR"
     ];
 
     for (const sName of workbook.SheetNames) {
