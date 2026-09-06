@@ -954,6 +954,7 @@ function recalculateAll() {
 // TAB SWITCH & NAVIGATION
 // -------------------------------------------------------------
 function switchTab(tabId) {
+    window.switchTab = switchTab;
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
         item.classList.remove('active');
         if (item.getAttribute('data-tab') === tabId) {
