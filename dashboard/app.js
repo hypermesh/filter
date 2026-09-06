@@ -3142,51 +3142,59 @@ function renderWorkloadTab() {
 
     if (kpiContainer) {
         kpiContainer.innerHTML = `
-            <div class="kpi-card glass" style="padding: 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
-                <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight:600; display:flex; justify-content:space-between;">
+            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
+                <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
                     <span>Aktif İstasyonlar</span>
-                    <i class="fa-solid fa-industry text-blue"></i>
+                    <span style="background: rgba(59,130,246,0.15); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-industry text-blue" style="font-size: 13px;"></i></span>
                 </div>
-                <div style="font-size: 26px; font-weight: 700; color: var(--text-main); margin-top: 6px;">
-                    ${data.length} <span style="font-size: 13px; font-weight:400; color:var(--text-dim);">İstasyon</span>
+                <div style="margin: 10px 0 4px 0;">
+                    <span style="font-size: 26px; font-weight: 800; color: var(--text-main);">${data.length}</span>
+                    <span style="font-size: 13px; font-weight: 500; color: var(--text-dim); margin-left: 4px;">İstasyon</span>
                 </div>
-                <div style="font-size: 12px; color: #38bdf8; margin-top: 4px;">Tüm hatlar takipte</div>
+                <div style="font-size: 12px; color: #38bdf8; display: flex; align-items: center; gap: 4px;">
+                    <i class="fa-solid fa-circle-check" style="font-size: 10px;"></i> Tüm hatlar takipte
+                </div>
             </div>
 
-            <div class="kpi-card glass" style="padding: 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
-                <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight:600; display:flex; justify-content:space-between;">
+            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
+                <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
                     <span>Toplam İş Yükü</span>
-                    <i class="fa-solid fa-clock text-yellow"></i>
+                    <span style="background: rgba(245,158,11,0.15); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-clock text-yellow" style="font-size: 13px;"></i></span>
                 </div>
-                <div style="font-size: 26px; font-weight: 700; color: var(--text-main); margin-top: 6px;">
-                    ${grandTotalHours.toFixed(1)} <span style="font-size: 13px; font-weight:400; color:var(--text-dim);">Saat</span>
+                <div style="margin: 10px 0 4px 0;">
+                    <span style="font-size: 26px; font-weight: 800; color: var(--text-main);">${grandTotalHours.toFixed(1)}</span>
+                    <span style="font-size: 13px; font-weight: 500; color: var(--text-dim); margin-left: 4px;">Saat</span>
                 </div>
-                <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">Tüm parçaların toplamı</div>
+                <div style="font-size: 12px; color: var(--text-dim);">Tüm parçaların toplamı</div>
             </div>
 
-            <div class="kpi-card glass" style="padding: 16px; border-radius: 10px; border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.05);">
-                <div style="font-size: 11px; color: #f87171; text-transform: uppercase; font-weight:600; display:flex; justify-content:space-between;">
-                    <span>🚨 En Yoğun İstasyon (Darboğaz)</span>
-                    <i class="fa-solid fa-triangle-exclamation text-red"></i>
+            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.04); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
+                <div style="font-size: 11px; color: #f87171; text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
+                    <span>🚨 En Yoğun (Darboğaz)</span>
+                    <span style="background: rgba(239,68,68,0.2); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 13px;"></i></span>
                 </div>
-                <div style="font-size: 22px; font-weight: 700; color: #f87171; margin-top: 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    ${maxItem ? maxItem.name : '-'}
+                <div style="margin: 8px 0 4px 0;">
+                    <div style="font-size: 18px; font-weight: 700; color: #f87171; word-break: break-word; line-height: 1.25;" title="${maxItem ? maxItem.name : ''}">
+                        ${maxItem ? maxItem.name : '-'}
+                    </div>
                 </div>
-                <div style="font-size: 12px; color: #fca5a5; margin-top: 4px;">
-                    ${maxItem ? `<strong>${maxItem.tahminiGun.toFixed(1)}</strong> İş Günü (${maxItem.totalHours.toFixed(1)} Saat)` : '-'}
+                <div style="font-size: 13px; color: #fca5a5; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    ${maxItem ? `<span style="font-weight:700; font-size:14px;">${maxItem.tahminiGun.toFixed(1)} İş Günü</span> <span style="opacity:0.8; font-size:12px;">(${maxItem.totalHours.toFixed(1)} Saat)</span>` : '-'}
                 </div>
             </div>
 
-            <div class="kpi-card glass" style="padding: 16px; border-radius: 10px; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.05);">
-                <div style="font-size: 11px; color: #34d399; text-transform: uppercase; font-weight:600; display:flex; justify-content:space-between;">
+            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.04); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
+                <div style="font-size: 11px; color: #34d399; text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
                     <span>🟢 En Müsait İstasyon</span>
-                    <i class="fa-solid fa-feather text-green"></i>
+                    <span style="background: rgba(16,185,129,0.2); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-feather" style="color: #10b981; font-size: 13px;"></i></span>
                 </div>
-                <div style="font-size: 22px; font-weight: 700; color: #34d399; margin-top: 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    ${minItem ? minItem.name : '-'}
+                <div style="margin: 8px 0 4px 0;">
+                    <div style="font-size: 18px; font-weight: 700; color: #34d399; word-break: break-word; line-height: 1.25;" title="${minItem ? minItem.name : ''}">
+                        ${minItem ? minItem.name : '-'}
+                    </div>
                 </div>
-                <div style="font-size: 12px; color: #6ee7b7; margin-top: 4px;">
-                    ${minItem ? `<strong>${minItem.tahminiGun.toFixed(1)}</strong> İş Günü (${minItem.totalHours.toFixed(1)} Saat)` : '-'}
+                <div style="font-size: 13px; color: #6ee7b7; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    ${minItem ? `<span style="font-weight:700; font-size:14px;">${minItem.tahminiGun.toFixed(1)} İş Günü</span> <span style="opacity:0.8; font-size:12px;">(${minItem.totalHours.toFixed(1)} Saat)</span>` : '-'}
                 </div>
             </div>
         `;
