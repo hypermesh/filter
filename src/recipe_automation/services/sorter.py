@@ -91,9 +91,74 @@ def calculate_row_priority(kaynak_metin: str, mapping: dict) -> int:
     return min_priority
 
 
-def sort_dataframe(df: pd.DataFrame, mapping: dict) -> pd.DataFrame:
+def load_completed_production_records(db_dir: str) -> set[tuple[str, str]]:
+    """
+    veritabanlari/uretim_gecmisi.json dosyasını okur.
+    Tamamlanmış (kaynak_dosya, parca_kodu) çiftlerini set olarak döner.
+    """
+    json_path = os.path.join(db_dir, "uretim_gecmisi.json")
+    if not os.path.exists(json_path):
+        return set()
+
+    try:
+        with open(json_path, encoding="utf-8") as f:
+            data = json.load(f)
+            completed_set = set()
+            if isinstance(data, list):
+                for item in data:
+                    if isinstance(item, dict):
+                        k_dosya = str(item.get("kaynak", item.get("kaynak_dosya", ""))).strip().upper()
+                        k_kod = str(item.get("kod", item.get("parca_kodu", ""))).strip().upper()
+                        is_done = item.get("tamamlandi", True)
+                        if k_kod and is_done:
+                            completed_set.add((k_dosya, k_kod))
+            return completed_set
+    except Exception as e:
+        print(f"Uyarı: Üretim geçmişi dosyası okunamadı: {e}")
+        return set()
+
+
+def is_row_completed(row: pd.Series, completed_set: set[tuple[str, str]]) -> bool:
+    """
+    Bir satırın uretim_gecmisi.json veritabanına göre tamamlanıp tamamlanmadığını kontrol eder.
+    """
+    if not completed_set:
+        return False
+
+    kod_col = settings.col_depo_kod if settings.col_depo_kod in row else ("Kod" if "Kod" in row else None)
+    if not kod_col:
+        return False
+
+    kod_val = str(row.get(kod_col, "")).strip().upper()
+    if not kod_val:
+        return False
+
+    kaynak_val = str(row.get("KAYNAK DOSYA", "")).strip().upper()
+    kaynak_names = extract_file_names(kaynak_val)
+
+    # 1. Tam eşleşme veya genel kod eşleşmesi
+    if ("", kod_val) in completed_set:
+        return True
+
+    # 2. Kaynak dosya bazlı eşleşme
+    for k_name in kaynak_names:
+        k_upper = k_name.strip().upper()
+        if (k_upper, kod_val) in completed_set:
+            return True
+
+    return False
+
+
+def sort_dataframe(
+    df: pd.DataFrame,
+    mapping: dict,
+    completed_set: set[tuple[str, str]] | None = None,
+    sort_completed_to_top: bool = False,
+) -> pd.DataFrame:
     """
     DataFrame'i KAYNAK DOSYA sütunundaki değerlere göre önceliklendirip sıralar.
+    Eğer sort_completed_to_top=True ise, tamamlanmış olanlar (Yapıldı) en üste (Grup 0),
+    üretilecek aktif olanlar ise normal öncelik sırasına göre (Grup 1) sıralanır.
     """
     if df is None or df.empty:
         return df
@@ -101,20 +166,33 @@ def sort_dataframe(df: pd.DataFrame, mapping: dict) -> pd.DataFrame:
     if "KAYNAK DOSYA" not in df.columns:
         return df
 
-    # Her satırın önceliğini hesapla
     df_sorted = df.copy()
+
+    # Öncelik değerlerini hesapla
     oncelik_degerleri = df_sorted["KAYNAK DOSYA"].apply(
         lambda x: calculate_row_priority(x, mapping)
     )
 
     # "Öncelik Sırası" sütununu uygun konuma ekle (Örn: Kod sütununun soluna)
-    hedef_index = 1  # Varsayılan olarak KAYNAK DOSYA'dan hemen sonra
-    if settings.col_depo_kod in df_sorted.columns:
-        hedef_index = df_sorted.columns.get_loc(settings.col_depo_kod)
+    if "Öncelik Sırası" not in df_sorted.columns:
+        hedef_index = 1  # Varsayılan olarak KAYNAK DOSYA'dan hemen sonra
+        if settings.col_depo_kod in df_sorted.columns:
+            hedef_index = df_sorted.columns.get_loc(settings.col_depo_kod)
+        df_sorted.insert(hedef_index, "Öncelik Sırası", oncelik_degerleri)
+    else:
+        df_sorted["Öncelik Sırası"] = oncelik_degerleri
 
-    df_sorted.insert(hedef_index, "Öncelik Sırası", oncelik_degerleri)
-
-    # Öncelik Sırası'na ve Kaynak Dosya adına göre sırala
-    df_sorted = df_sorted.sort_values(by=["Öncelik Sırası", "KAYNAK DOSYA"])
+    if sort_completed_to_top and completed_set:
+        # Tamamlanma durumunu hesapla: 0 = Tamamlandı (En üst), 1 = Aktif Üretilecek
+        df_sorted["__is_completed_group__"] = df_sorted.apply(
+            lambda r: 0 if is_row_completed(r, completed_set) else 1, axis=1
+        )
+        df_sorted = df_sorted.sort_values(
+            by=["__is_completed_group__", "Öncelik Sırası", "KAYNAK DOSYA"]
+        )
+        df_sorted = df_sorted.drop(columns=["__is_completed_group__"])
+    else:
+        # Öncelik Sırası'na ve Kaynak Dosya adına göre sırala
+        df_sorted = df_sorted.sort_values(by=["Öncelik Sırası", "KAYNAK DOSYA"])
 
     return df_sorted

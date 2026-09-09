@@ -16,6 +16,34 @@
         "3D YAZICI GRUBU": {
             "gunluk_saat": 22,
             "makine_sayisi": 15
+        },
+        "ARION2000S": {
+            "gunluk_saat": 9,
+            "makine_sayisi": 1
+        },
+        "ARION2142": {
+            "gunluk_saat": 9,
+            "makine_sayisi": 1
+        },
+        "MATKAP&KILAVUZ": {
+            "gunluk_saat": 9,
+            "makine_sayisi": 1
+        },
+        "NEX110": {
+            "gunluk_saat": 9,
+            "makine_sayisi": 1
+        },
+        "PHOEBUS": {
+            "gunluk_saat": 9,
+            "makine_sayisi": 1
+        },
+        "SN50": {
+            "gunluk_saat": 9,
+            "makine_sayisi": 1
+        },
+        "SN71": {
+            "gunluk_saat": 9,
+            "makine_sayisi": 1
         }
     }
 }

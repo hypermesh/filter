@@ -1776,13 +1776,23 @@ def do_match_depo(
 
             sheet_dfs["Üretim Takip"] = takip_df
 
-        # --- YENİ EKLENTİ: KAYNAK DOSYA ÖNCELİK SIRALAMASI ---
+        # --- YENİ EKLENTİ: KAYNAK DOSYA ÖNCELİK SIRALAMASI VE ÜRETİLMİŞLERİN EN ÜSTE ALINMASI ---
+        from recipe_automation.services.sorter import load_completed_production_records, is_row_completed
         priority_mapping = load_priority_mapping(db_dir)
-        df_uretim = sort_dataframe(df_uretim, priority_mapping)
-        matched_df = sort_dataframe(matched_df, priority_mapping)
+        completed_records_set = load_completed_production_records(db_dir)
+
+        df_uretim = sort_dataframe(df_uretim, priority_mapping, completed_records_set, sort_completed_to_top=False)
+        matched_df = sort_dataframe(matched_df, priority_mapping, completed_records_set, sort_completed_to_top=False)
 
         for s_name, s_df in sheet_dfs.items():
-            sheet_dfs[s_name] = sort_dataframe(s_df, priority_mapping)
+            # İstasyon sayfalarında ve Üretim Takip'te tamamlananları en üste al
+            is_station_or_takip = s_name not in ["HAMMADDE", "HAMMADDE SİPARİŞ", "Rotasızlar"]
+            sheet_dfs[s_name] = sort_dataframe(
+                s_df,
+                priority_mapping,
+                completed_records_set,
+                sort_completed_to_top=is_station_or_takip,
+            )
 
         # --- YENİ EKLENTİ: METİN OLARAK SAKLANAN SAYILARI GERÇEK SAYIYA ÇEVİRME ---
         def convert_numbers_to_real(df):
@@ -2108,9 +2118,12 @@ def do_match_depo(
                             ws[f"{uretilecek_col_letter}{row_idx}"] = vlookup_formula
 
                     if uretilecek_col_letter and ham_miktar_col_letter and toplam_col_letter:
-                        # ÇARPIM Formülü (Örn: =D2*E2)
+                        # ÇARPIM Formülü: Üretim Takip'te üretilmişse 0, değilse Üretilecek * Hammadde Miktar
                         for row_idx in range(2, ws.max_row + 1):
-                            formula = f"={uretilecek_col_letter}{row_idx}*{ham_miktar_col_letter}{row_idx}"
+                            if dk_col_letter:
+                                formula = f"=IF(COUNTIF('Üretim Takip'!$I$2:$I${global_max_row}, {dk_col_letter}{row_idx})>0, 0, {uretilecek_col_letter}{row_idx}*{ham_miktar_col_letter}{row_idx})"
+                            else:
+                                formula = f"={uretilecek_col_letter}{row_idx}*{ham_miktar_col_letter}{row_idx}"
                             ws[f"{toplam_col_letter}{row_idx}"] = formula
 
                     if (
@@ -2119,9 +2132,12 @@ def do_match_depo(
                         and birim_col_letter
                         and toplam_sure_col_letter
                     ):
-                        # TOPLAM SÜRE Formülü (Örn: =U2+(V2*C2))
+                        # TOPLAM SÜRE Formülü: Üretim Takip'te üretilmişse 0, değilse Hazırlık + (Birim * Üretilecek)
                         for row_idx in range(2, ws.max_row + 1):
-                            formula = f"={hazirlik_col_letter}{row_idx}+({birim_col_letter}{row_idx}*{uretilecek_col_letter}{row_idx})"
+                            if dk_col_letter:
+                                formula = f"=IF(COUNTIF('Üretim Takip'!$I$2:$I${global_max_row}, {dk_col_letter}{row_idx})>0, 0, {hazirlik_col_letter}{row_idx}+({birim_col_letter}{row_idx}*{uretilecek_col_letter}{row_idx}))"
+                            else:
+                                formula = f"={hazirlik_col_letter}{row_idx}+({birim_col_letter}{row_idx}*{uretilecek_col_letter}{row_idx})"
                             ws[f"{toplam_sure_col_letter}{row_idx}"] = formula
 
                     # YENİ EKLENTİ: Saat ve Kümülatif Süre

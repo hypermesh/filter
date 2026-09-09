@@ -1,198 +1,12 @@
 // Global App State
 let workbook = null;
 let currentTab = 'dashboard';
-let loadedExcelFileName = ''; // Yüklü Excel dosya adı (localStorage anahtarı için)
+let activeFileHandle = null; // Used for direct saving using File System Access API
 
 // Parsed Data Structures
 let uretimTakipRows = []; // Üretim Takip requirements (Col A-G)
 let productionLog = [];    // Üretim Takip logs entered (Col I-K)
 let dosyaTakipRows = [];   // Üretim Takip summary (Col M-Q)
-let downtimeMap = {};      // İstasyon duruş saatleri { "ISTASYON_ADI": saat }
-let hiddenStationCols = new Set(); // Kullanıcının gizlediği sütun başlıkları
-let productionHistory = []; // Genel Üretim Geçmişi (veritabanlari/uretim_gecmisi.json karşılığı)
-
-// --- LocalStorage Yardımcı Fonksiyonlar ---
-function getStorageKey() {
-    return `prodLog_${loadedExcelFileName}`;
-}
-function saveProductionLogToStorage() {
-    try {
-        localStorage.setItem(getStorageKey(), JSON.stringify(productionLog));
-    } catch(e) {
-        console.warn('localStorage kayıt hatası:', e);
-    }
-}
-function loadProductionLogFromStorage() {
-    try {
-        const raw = localStorage.getItem(getStorageKey());
-        if (raw) {
-            const saved = JSON.parse(raw);
-            if (Array.isArray(saved) && saved.length > 0) {
-                productionLog = saved;
-                console.log(`[Storage] ${saved.length} üretim kaydı geri yüklendi (${loadedExcelFileName})`);
-            }
-        }
-    } catch(e) {
-        console.warn('localStorage okuma hatası:', e);
-    }
-}
-
-// Global Üretim Geçmişi Storage Fonksiyonları
-function saveProductionHistoryToStorage() {
-    try {
-        localStorage.setItem('filter_global_production_history', JSON.stringify(productionHistory));
-    } catch(e) {
-        console.warn('localStorage üretim geçmişi kayıt hatası:', e);
-    }
-}
-function loadProductionHistoryFromStorage() {
-    try {
-        const raw = localStorage.getItem('filter_global_production_history');
-        if (raw) {
-            const saved = JSON.parse(raw);
-            if (Array.isArray(saved)) {
-                productionHistory = saved;
-            }
-        }
-    } catch(e) {
-        console.warn('localStorage üretim geçmişi okuma hatası:', e);
-    }
-}
-
-function autoApplyHistoricalCompletions() {
-    if (!productionHistory || productionHistory.length === 0) return;
-    
-    let appliedCount = 0;
-    
-    // Her bir geçmiş kayıt için kontrol et
-    productionHistory.forEach(hist => {
-        if (!hist.kod || hist.tamamlandi === false) return;
-        const code = String(hist.kod).trim().toUpperCase();
-        const histKaynak = String(hist.kaynak || '').trim().toUpperCase();
-        const station = hist.istasyon || 'Tüm İstasyonlar';
-        
-        // Üretim Takip satırlarında bu kod var mı?
-        const matchingReqs = uretimTakipRows.filter(u => {
-            const matchCode = u.kod === code;
-            if (!matchCode) return false;
-            if (histKaynak) {
-                const uKaynak = String(u.kaynak || '').trim().toUpperCase();
-                return uKaynak === histKaynak || uKaynak.includes(histKaynak) || histKaynak.includes(uKaynak);
-            }
-            return true;
-        });
-        
-        if (matchingReqs.length > 0) {
-            // Zaten productionLog'da var mı kontrol et
-            const existingStLogs = productionLog.filter(log => log.kod === code && (log.station === station || log.station === 'Tüm İstasyonlar' || !log.station));
-            const existingStProd = existingStLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
-            const totalNeeded = matchingReqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
-            
-            const neededToAdd = Math.max(0.0, totalNeeded - existingStProd);
-            if (neededToAdd > 0) {
-                productionLog.push({
-                    rowIndex: uretimTakipRows.length + productionLog.length + 5,
-                    kod: code,
-                    adet: neededToAdd,
-                    fazla: 0,
-                    station: station,
-                    autoCompleted: true
-                });
-                appliedCount++;
-            }
-        }
-    });
-    
-    if (appliedCount > 0) {
-        saveProductionLogToStorage();
-        console.log(`[AutoMatch] ${appliedCount} adet geçmiş üretim kaydı yeni dosyaya otomatik uygulandı.`);
-    }
-}
-
-function exportProductionHistoryJSON() {
-    loadProductionHistoryFromStorage();
-    // Eğer productionHistory boşsa ama productionLog varsa senkronize et
-    if (productionHistory.length === 0 && productionLog.length > 0) {
-        productionLog.forEach(log => {
-            const req = uretimTakipRows.find(u => u.kod === log.kod);
-            productionHistory.push({
-                kaynak: req ? (req.kaynak || '') : '',
-                kod: log.kod,
-                adet: log.adet,
-                istasyon: log.station || 'Tüm İstasyonlar',
-                tarih: new Date().toISOString(),
-                tamamlandi: true
-            });
-        });
-        saveProductionHistoryToStorage();
-    }
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(productionHistory, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "uretim_gecmisi.json");
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-    showToast("Üretim geçmişi 'uretim_gecmisi.json' olarak indirildi.", "success");
-}
-window.exportProductionHistoryJSON = exportProductionHistoryJSON;
-
-function importProductionHistoryJSON(file) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const parsed = JSON.parse(e.target.result);
-            if (Array.isArray(parsed)) {
-                productionHistory = parsed;
-                saveProductionHistoryToStorage();
-                autoApplyHistoricalCompletions();
-                recalculateAll();
-                renderTab(currentTab);
-                showToast(`${parsed.length} adet üretim geçmişi kaydı başarıyla yüklendi ve uygulandı!`, "success");
-            } else {
-                showToast("Geçersiz JSON formatı! Liste formatında veri bekleniyor.", "error");
-            }
-        } catch(err) {
-            console.error(err);
-            showToast("JSON dosyası okunurken hata oluştu!", "error");
-        }
-    };
-    reader.readAsText(file);
-}
-window.importProductionHistoryJSON = importProductionHistoryJSON;
-
-function saveDowntimeMapToStorage() {
-    try {
-        localStorage.setItem(`downtime_${loadedExcelFileName}`, JSON.stringify(downtimeMap));
-    } catch(e) {}
-}
-function loadDowntimeMapFromStorage() {
-    try {
-        const raw = localStorage.getItem(`downtime_${loadedExcelFileName}`);
-        if (raw) {
-            downtimeMap = JSON.parse(raw);
-        } else {
-            downtimeMap = {};
-        }
-    } catch(e) {
-        downtimeMap = {};
-    }
-}
-function saveHiddenColsToStorage() {
-    try { localStorage.setItem('hiddenStationCols', JSON.stringify([...hiddenStationCols])); } catch(e) {}
-}
-function loadHiddenColsFromStorage() {
-    try {
-        const raw = localStorage.getItem('hiddenStationCols');
-        hiddenStationCols = raw ? new Set(JSON.parse(raw)) : new Set();
-    } catch(e) { hiddenStationCols = new Set(); }
-}
-function clearProductionLogStorage(fileName) {
-    try {
-        localStorage.removeItem(`prodLog_${fileName}`);
-    } catch(e) {}
-}
 
 let montajOtomasyonLeft = [];  // MONTAJ OTOMASYON İZLEME child rows (Col A-I)
 let montajOtomasyonRight = []; // MONTAJ OTOMASYON İZLEME parent rows (Col K-R)
@@ -213,8 +27,6 @@ let codeToNameMap = {};        // Map of code -> material name
 let uretimListesiMap = {};     // Map of code -> Üretilecek Miktar in ÜRETİM LİSTESİ
 let uretimListesiRows = [];    // Rows of ÜRETİM LİSTESİ sheet
 let excludedHariciKodlar = new Set(); // Codes that are excluded (Merdane, Boru vs.)
-let rawMaterialsRows = [];    // Rows of Hammadde Sipariş Listesi
-let hammaddeSheetRows = [];   // Rows from Excel HAMMADDE / HAMMADDE SİPARİŞ sheet
 
 // Pagination States
 const PAGE_SIZE = 12;
@@ -223,8 +35,7 @@ let paginationState = {
     assemblyLeft: { page: 1, total: 0, filtered: [] },
     assemblyRight: { page: 1, total: 0, filtered: [] },
     station: { page: 1, total: 0, filtered: [] },
-    ul: { page: 1, total: 0, filtered: [] },
-    raw: { page: 1, total: 0, filtered: [] }
+    ul: { page: 1, total: 0, filtered: [] }
 };
 
 // UI Elements
@@ -234,15 +45,18 @@ const selectFileBtn = document.getElementById('select-file-btn');
 const appContainer = document.getElementById('app-container');
 const loadedFileName = document.getElementById('loaded-file-name');
 const changeFileBtn = document.getElementById('change-file-btn');
-const exportBtn = document.getElementById('export-btn');
+const saveBtn = document.getElementById('save-btn');
+const exportBtn = document.getElementById('export-btn'); // The fallback button
 
 // Toast notification helper
+let toastTimeout;
 function showToast(message, type = 'info') {
     const toast = document.getElementById('toast');
     toast.className = `toast show toast-${type}`;
     toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info'}"></i> ${message}`;
     
-    setTimeout(() => {
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
         toast.classList.remove('show');
     }, 3500);
 }
@@ -258,20 +72,62 @@ window.addEventListener('dragleave', (e) => {
     dropZone.classList.remove('dragover');
 });
 
-window.addEventListener('drop', (e) => {
+window.addEventListener('drop', async (e) => {
     e.preventDefault();
     dropZone.classList.remove('dragover');
-    if (!workbook && e.dataTransfer.files.length > 0) {
+    if (!workbook && e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+        const item = e.dataTransfer.items[0];
+        if (item.kind === 'file') {
+            try {
+                if (item.getAsFileSystemHandle) {
+                    const handle = await item.getAsFileSystemHandle();
+                    if (handle && handle.kind === 'file') {
+                        activeFileHandle = handle;
+                    }
+                }
+            } catch(err) { console.error("File handle error:", err); }
+            
+            const file = item.getAsFile();
+            if (file) handleFile(file);
+        }
+    } else if (!workbook && e.dataTransfer.files.length > 0) {
         handleFile(e.dataTransfer.files[0]);
     }
 });
 
-selectFileBtn.addEventListener('click', () => {
-    fileInput.click();
+selectFileBtn.addEventListener('click', async () => {
+    if (window.showOpenFilePicker) {
+        try {
+            const [fileHandle] = await window.showOpenFilePicker({
+                types: [
+                    {
+                        description: 'Excel Dosyaları',
+                        accept: {
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+                            'application/vnd.ms-excel': ['.xls']
+                        }
+                    }
+                ],
+                excludeAcceptAllOption: false,
+                multiple: false
+            });
+            activeFileHandle = fileHandle;
+            const file = await fileHandle.getFile();
+            handleFile(file);
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.error(err);
+                fileInput.click();
+            }
+        }
+    } else {
+        fileInput.click();
+    }
 });
 
 fileInput.addEventListener('change', (e) => {
     if (e.target.files.length > 0) {
+        activeFileHandle = null; // reset if using traditional input
         handleFile(e.target.files[0]);
     }
 });
@@ -301,25 +157,7 @@ function handleFile(file) {
             });
             
             loadedFileName.textContent = `Yüklenen Dosya: ${file.name}`;
-            loadedExcelFileName = file.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
             parseWorkbook();
-            loadProductionHistoryFromStorage(); // Global üretim geçmişini yükle
-            loadProductionLogFromStorage(); // localStorage'dan mevcut dosya logunu geri yükle
-            autoApplyHistoricalCompletions(); // Geçmişte yapılmış parçaları otomatik eşleştir
-            loadDowntimeMapFromStorage();
-            loadHiddenColsFromStorage();
-            
-            // YENİ: Montaj sayfası var mı kontrol et, yoksa menüden gizle
-            const assemblyBtn = document.querySelector('button[data-tab="assembly"]');
-            if (assemblyBtn) {
-                if (workbook.Sheets["MONTAJ OTOMASYON İZLEME"] || workbook.Sheets["FINAL MONTAJ İZLEME"]) {
-                    assemblyBtn.style.display = 'flex';
-                } else {
-                    assemblyBtn.style.display = 'none';
-                    // Eğer montaj tabındayken yeniden dosya yüklenirse ve montaj yoksa dashboarda dön
-                    if (currentTab === 'assembly') switchTab('dashboard');
-                }
-            }
             
             // Switch view
             dropZone.style.display = 'none';
@@ -352,7 +190,6 @@ function parseWorkbook() {
     uretimTakipRows = [];
     productionLog = [];
     dosyaTakipRows = [];
-    downtimeMap = {};
     montajOtomasyonLeft = [];
     montajOtomasyonRight = [];
     finalMontajLeft = [];
@@ -365,7 +202,6 @@ function parseWorkbook() {
     codeToNameMap = {};
     uretimListesiMap = {};
     uretimListesiRows = [];
-    unitTimeMap = {}; // { 'KOD': { 'ISTASYON_ADI': süre_dk } }
 
     // First scan other sheets to extract part code names and populate maps
     for (const sName of workbook.SheetNames) {
@@ -436,32 +272,6 @@ function parseWorkbook() {
                                 uretilecek: qty,
                                 orijinalUretilecek: qty
                             });
-                        }
-                    }
-                }
-            }
-            
-            // Eğer sayfa "Tüm Veriler" ise birim işlem sürelerini çıkar
-            if (sName.toUpperCase().replace(/I/g, 'İ').includes('TÜM VERİLER') || sName.toUpperCase().includes('TUM VERILER')) {
-                const kodIdx = headers.indexOf('kod');
-                const istasyonIdx = headers.findIndex(h => h.includes('iş istasyonu') || h.includes('is istasyonu'));
-                const sureIdx = headers.findIndex(h => h.includes('birim işlem süresi') || h.includes('birim islem suresi'));
-                const setupIdx = headers.findIndex(h => h.includes('hazırlık süresi') || h.includes('hazirlik suresi'));
-                
-                if (kodIdx !== -1 && istasyonIdx !== -1 && sureIdx !== -1) {
-                    for (let r = range.s.r + 1; r <= range.e.r; r++) {
-                        const kodCell = sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + kodIdx })];
-                        const istCell = sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + istasyonIdx })];
-                        const sureCell = sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + sureIdx })];
-                        
-                        if (kodCell && kodCell.v && istCell && istCell.v) {
-                            const code = String(kodCell.v).trim().toUpperCase();
-                            const istasyon = String(istCell.v).trim().toUpperCase();
-                            const sure = sureCell ? parseFloat(sureCell.v) || 0 : 0;
-                            const setup = (setupIdx !== -1) ? (sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + setupIdx })] ? parseFloat(sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + setupIdx })].v) || 0 : 0) : 0;
-                            
-                            if (!unitTimeMap[code]) unitTimeMap[code] = {};
-                            unitTimeMap[code][istasyon] = { sure: sure, setup: setup };
                         }
                     }
                 }
@@ -763,11 +573,11 @@ function parseWorkbook() {
     // 5. Parse Station Sheets
     const excludedSheets = [
         "ÜRETİM LİSTESİ", "Tüm Veriler", "HAMMADDE SİPARİŞ",
-        "Üretim Takip", "Rotasızlar", "HARİCİ_KODLAR"
+        "Üretim Takip", "Rotasızlar"
     ];
 
     const hiddenStations = [
-        "HAMMADDE", "MONTAJ OTOMASYON İZLEME", "FINAL MONTAJ İZLEME", "HARİCİ_KODLAR"
+        "HAMMADDE", "MONTAJ OTOMASYON İZLEME", "FINAL MONTAJ İZLEME"
     ];
 
     for (const sName of workbook.SheetNames) {
@@ -783,25 +593,7 @@ function parseWorkbook() {
         // Read Headers
         for (let c = range.s.c; c <= range.e.c; c++) {
             const hCell = sheet[XLSX.utils.encode_cell({ r: range.s.r, c: c })];
-            let rawHeader = hCell ? String(hCell.v).trim() : `Sütun ${c+1}`;
-            
-            const upHeader = rawHeader.toUpperCase();
-            if (upHeader === 'KOD') rawHeader = 'Kod';
-            else if (upHeader === 'ÖNCELİK SIRASI' || upHeader === 'ONCELIK SIRASI') rawHeader = 'Öncelik Sırası';
-            else if (upHeader === 'MALZEME ADI') rawHeader = 'Malzeme Adı';
-            else if (upHeader === 'HAMMADDE KOD' || upHeader === 'HAMMADDE KODU') rawHeader = 'Hammadde Kod';
-            else if (upHeader === 'HAMMADDE') rawHeader = 'Hammadde';
-            else if (upHeader === 'REZERVE EDİLECEK MİKTAR') rawHeader = 'Rezerve Edilecek Miktar';
-            else if (upHeader === 'ÜRETİLECEK MİKTAR' || upHeader === 'URETILECEK MIKTAR') rawHeader = 'Üretilecek Miktar';
-            else if (upHeader === 'TOPLAM HAMMADDE MİKTARI') rawHeader = 'Toplam Hammadde Miktarı';
-            else if (upHeader === 'DURUM') rawHeader = 'Durum';
-            else if (upHeader === 'HAZIRLIK SÜRESİ' || upHeader === 'HAZIRLIK SURESI') rawHeader = 'Hazırlık Süresi';
-            else if (upHeader === 'BİRİM İŞLEM SÜRESİ' || upHeader === 'BIRIM ISLEM SURESI' || upHeader === 'BİRİM İŞLEM' || upHeader === 'Birim İşlem') rawHeader = 'Birim İşlem Süresi';
-            else if (upHeader === 'TOPLAM SÜRE' || upHeader === 'TOPLAM SURE') rawHeader = 'Toplam Süre';
-            else if (upHeader === 'SAAT') rawHeader = 'Saat';
-            else if (upHeader === 'KÜMÜLATİF SÜRE' || upHeader === 'KÜMÜLATİF' || upHeader === 'KUMULATIF SURE') rawHeader = 'Kümülatif Süre';
-
-            headers.push(rawHeader);
+            headers.push(hCell ? String(hCell.v).trim() : `Sütun ${c+1}`);
         }
 
         // Read Rows
@@ -830,7 +622,6 @@ function parseWorkbook() {
                 }
                 
                 rowObj.rowIndex = r + 1; // Excel row is 1-indexed
-                
                 rows.push(rowObj);
             }
         }
@@ -866,78 +657,6 @@ function parseWorkbook() {
         stationList.sort();
     }
     if (stationList.length > 0) activeStation = stationList[0];
-
-    // 6. Parse HAMMADDE / HAMMADDE SİPARİŞ Sheet (Strictly Raw Materials)
-    hammaddeSheetRows = [];
-    const hamSheet = workbook.Sheets["HAMMADDE"] || workbook.Sheets["Hammadde"];
-    if (hamSheet && hamSheet['!ref']) {
-        const range = XLSX.utils.decode_range(hamSheet['!ref']);
-        let headers = [];
-        for (let c = range.s.c; c <= range.e.c; c++) {
-            const cell = hamSheet[XLSX.utils.encode_cell({ r: range.s.r, c: c })];
-            headers.push(cell ? String(cell.v).trim().toLowerCase() : `sütun ${c+1}`);
-        }
-        const kodIdx = headers.indexOf('kod');
-        const hKodIdx = headers.findIndex(h => h === 'hammadde kod' || h === 'hammadde kodu' || h.includes('hammadde kod'));
-        const hAdIdx = headers.findIndex(h => h === 'hammadde' || h === 'hammadde adı' || h === 'hammadde adi');
-        const hMiktarIdx = headers.findIndex(h => h === 'hammadde miktar' || h === 'hammadde miktarı');
-        const uMiktarIdx = headers.findIndex(h => h.includes('üretilecek') && h.includes('miktar'));
-
-        if (hKodIdx !== -1) {
-            for (let r = range.s.r + 1; r <= range.e.r; r++) {
-                const cellHKod = hamSheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + hKodIdx })];
-                if (!cellHKod || cellHKod.v === undefined || cellHKod.v === null) continue;
-                const hKodVal = String(cellHKod.v).trim();
-                if (!hKodVal || hKodVal === '-' || hKodVal.toUpperCase() === 'NAN') continue;
-
-                const cellKod = kodIdx !== -1 ? hamSheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + kodIdx })] : null;
-                const cellHAd = hAdIdx !== -1 ? hamSheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + hAdIdx })] : null;
-                const cellHMiktar = hMiktarIdx !== -1 ? hamSheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + hMiktarIdx })] : null;
-                const cellUMiktar = uMiktarIdx !== -1 ? hamSheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + uMiktarIdx })] : null;
-
-                const pKod = cellKod && cellKod.v ? String(cellKod.v).trim().toUpperCase() : '';
-                const hAd = cellHAd && cellHAd.v ? String(cellHAd.v).trim() : '';
-                const hMiktar = cellHMiktar ? parseFloat(cellHMiktar.v) || 0 : 1.0;
-                const uMiktar = cellUMiktar ? parseFloat(cellUMiktar.v) || 0 : 0;
-
-                hammaddeSheetRows.push({
-                    parcaKodu: pKod,
-                    hKod: hKodVal,
-                    hAd: hAd,
-                    hBirimMiktar: hMiktar,
-                    uretilecek: uMiktar
-                });
-            }
-        }
-    }
-
-    // Eğer HAMMADDE sayfası yoksa fallback: HAMMADDE SİPARİŞ sayfasını oku
-    if (hammaddeSheetRows.length === 0) {
-        const hsSheet = workbook.Sheets["HAMMADDE SİPARİŞ"] || workbook.Sheets["HAMMADDE SİPARİŞİ"] || workbook.Sheets["HAMMADDE SIPARIS"];
-        if (hsSheet && hsSheet['!ref']) {
-            const range = XLSX.utils.decode_range(hsSheet['!ref']);
-            for (let r = range.s.r + 1; r <= range.e.r; r++) {
-                const cellA = hsSheet[XLSX.utils.encode_cell({ r: r, c: 0 })]; // Hammadde Kod
-                const cellB = hsSheet[XLSX.utils.encode_cell({ r: r, c: 1 })]; // Hammadde Adı
-                const cellC = hsSheet[XLSX.utils.encode_cell({ r: r, c: 2 })]; // Toplam Miktar
-                if (cellA && cellA.v) {
-                    const hKod = String(cellA.v).trim();
-                    const hAd = cellB && cellB.v ? String(cellB.v).trim() : '';
-                    const qty = cellC ? parseFloat(cellC.v) || 0 : 0;
-                    if (hKod && hKod !== '-' && hKod.toUpperCase() !== 'NAN' && !hKod.toUpperCase().includes('HAMMADDE')) {
-                        hammaddeSheetRows.push({
-                            parcaKodu: '',
-                            hKod: hKod,
-                            hAd: hAd,
-                            hBirimMiktar: 1.0,
-                            uretilecek: qty,
-                            isDirectOrder: true
-                        });
-                    }
-                }
-            }
-        }
-    }
 }
 
 // Live spreadsheet calculation engine (SUMIF, SUMIFS, FIFO matching, limits, sets)
@@ -1120,124 +839,13 @@ function recalculateAll() {
                 row[tHammaddeKey] = uretilecekMiktarVal * hMiktarVal;
             }
         }
-
-        // Formül hesaplamaları (Üretilecek Miktar güncellendikten sonra yapılmalı)
-        let kumulatif = 0;
-        for (const row of rows) {
-            const code = String(row['Kod'] || '').trim().toUpperCase();
-            let hazirlikKey = Object.keys(row).find(k => k.toLowerCase() === 'hazırlık süresi') || 'Hazırlık Süresi';
-            let birimKey = Object.keys(row).find(k => k.toLowerCase() === 'birim işlem süresi') || 'Birim İşlem Süresi';
-            let miktarKey = Object.keys(row).find(k => k.toLowerCase() === 'üretilecek miktar') || 'Üretilecek Miktar';
-            let toplamSureKey = Object.keys(row).find(k => k.toLowerCase() === 'toplam süre') || 'Toplam Süre';
-            let saatKey = Object.keys(row).find(k => k.toLowerCase() === 'saat') || 'Saat';
-            let kumulatifKey = Object.keys(row).find(k => k.toLowerCase() === 'kümülatif süre') || 'Kümülatif Süre';
-            
-            const hazirlik = parseFloat(row[hazirlikKey]) || 0;
-            const birim = parseFloat(row[birimKey]) || 0;
-            const miktar = parseFloat(row[miktarKey]) || 0;
-            
-            // Tamamlanma kontrolü
-            const reqs = uretimTakipRows.filter(u => u.kod === code);
-            let isDone = false;
-            if (reqs.length > 0) {
-                const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
-                const stLogs = productionLog.filter(log => log.kod === code && (log.station === stName || log.station === 'Tüm İstasyonlar' || !log.station));
-                const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
-                if (totalReq > 0 && stProd >= totalReq) {
-                    isDone = true;
-                }
-            }
-
-            if (isDone) {
-                row[toplamSureKey] = 0;
-                row[saatKey] = 0;
-            } else {
-                row[toplamSureKey] = hazirlik + (birim * miktar);
-                row[saatKey] = row[toplamSureKey] / 86400;
-            }
-            
-            const saatVal = parseFloat(row[saatKey]) || 0;
-            kumulatif += saatVal;
-            row[kumulatifKey] = kumulatif;
-        }
     }
-
-    // 6. Update Raw Materials (Hammadde Sipariş) calculation
-    const rawAgg = {};
-    if (hammaddeSheetRows.length > 0) {
-        hammaddeSheetRows.forEach(row => {
-            const hKod = row.hKod;
-            if (!hKod) return;
-
-            let totalReq = row.uretilecek || 0;
-            let totalProd = 0;
-
-            if (row.parcaKodu) {
-                const pKod = row.parcaKodu;
-                const reqs = uretimTakipRows.filter(u => u.kod === pKod);
-                if (reqs.length > 0) {
-                    totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
-                } else {
-                    totalReq = uretimListesiMap[pKod] || row.uretilecek || 0;
-                }
-
-                // Bu parçaya ait üretim logları (Global veya herhangi bir istasyonda girilen en yüksek miktar)
-                const allLogs = productionLog.filter(log => log.kod === pKod);
-                const globalSum = allLogs.filter(log => !log.station || log.station === 'Tüm İstasyonlar').reduce((sum, l) => sum + parseFloat(l.adet), 0.0);
-
-                const stSums = {};
-                allLogs.filter(log => log.station && log.station !== 'Tüm İstasyonlar').forEach(l => {
-                    stSums[l.station] = (stSums[l.station] || 0) + parseFloat(l.adet);
-                });
-                const maxStSum = Object.values(stSums).length > 0 ? Math.max(...Object.values(stSums)) : 0;
-
-                totalProd = Math.min(totalReq, Math.max(globalSum, maxStSum));
-            } else if (row.isDirectOrder) {
-                totalReq = row.uretilecek || 0;
-                totalProd = 0;
-            }
-
-            const hBirim = row.hBirimMiktar || 1.0;
-            const hToplam = totalReq * hBirim;
-            const hUretilen = totalProd * hBirim;
-            const hKalan = Math.max(0, hToplam - hUretilen);
-
-            if (!rawAgg[hKod]) {
-                rawAgg[hKod] = {
-                    kod: hKod,
-                    ad: row.hAd || '-',
-                    toplamGereken: 0,
-                    uretilenDusulen: 0,
-                    kalanSiparis: 0,
-                    details: []
-                };
-            } else if ((!rawAgg[hKod].ad || rawAgg[hKod].ad === '-') && row.hAd) {
-                rawAgg[hKod].ad = row.hAd;
-            }
-            rawAgg[hKod].toplamGereken += hToplam;
-            rawAgg[hKod].uretilenDusulen += hUretilen;
-            rawAgg[hKod].kalanSiparis += hKalan;
-            // Parça bazlı detay bilgisi
-            if (row.parcaKodu) {
-                rawAgg[hKod].details.push({
-                    parcaKodu: row.parcaKodu,
-                    birimMiktar: row.hBirimMiktar || 1,
-                    uretilecek: totalReq,
-                    toplamMiktar: hToplam,
-                    uretilenMiktar: hUretilen,
-                    kalanMiktar: hKalan
-                });
-            }
-        });
-    }
-    rawMaterialsRows = Object.values(rawAgg);
 }
 
 // -------------------------------------------------------------
 // TAB SWITCH & NAVIGATION
 // -------------------------------------------------------------
 function switchTab(tabId) {
-    window.switchTab = switchTab;
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
         item.classList.remove('active');
         if (item.getAttribute('data-tab') === tabId) {
@@ -1275,12 +883,6 @@ function renderTab(tabId) {
         renderRotasizlarTab();
     } else if (tabId === 'stations') {
         renderStationsTab();
-    } else if (tabId === 'workload') {
-        renderWorkloadTab();
-    } else if (tabId === 'raw-materials') {
-        renderRawMaterialsTab();
-    } else if (tabId === 'performance') {
-        renderPerformanceTab();
     }
 }
 
@@ -1491,26 +1093,6 @@ if (closeBtn) {
     });
 }
 
-// Helper to bind search inputs robustly (handles input, keyup, and Enter key)
-function bindSearchInput(inputId, callback) {
-    const inputEl = document.getElementById(inputId);
-    if (!inputEl) return;
-    let timeout;
-    const trigger = () => {
-        clearTimeout(timeout);
-        callback();
-    };
-    inputEl.addEventListener('input', () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(trigger, 300);
-    });
-    inputEl.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') {
-            trigger();
-        }
-    });
-}
-
 const modalOverlay = document.getElementById('details-modal');
 if (modalOverlay) {
     modalOverlay.addEventListener('click', (e) => {
@@ -1521,8 +1103,12 @@ if (modalOverlay) {
     });
 }
 
-bindSearchInput('modal-search', renderModalData);
-bindSearchInput('dashboard-search', renderDashboard);
+const modalSearch = document.getElementById('modal-search');
+if (modalSearch) {
+    modalSearch.addEventListener('input', renderModalData);
+}
+
+document.getElementById('dashboard-search').addEventListener('input', renderDashboard);
 
 // -------------------------------------------------------------
 // 2. PRODUCTION VIEW & LOGIC
@@ -1739,7 +1325,6 @@ document.getElementById('production-form').addEventListener('submit', function(e
         station: selectedStation
     });
 
-    saveProductionLogToStorage(); // localStorage'a kaydet
     showToast(`"${code}" kodu için ${qty} adet üretim girildi.`, "success");
     document.getElementById('prod-qty').value = '';
     if (stationSelect) {
@@ -1758,7 +1343,6 @@ document.getElementById('production-form').addEventListener('submit', function(e
 function deleteLogEntry(index) {
     const deletedCode = productionLog[index].kod;
     productionLog.splice(index, 1);
-    saveProductionLogToStorage(); // localStorage güncelle
     showToast(`Üretim kaydı silindi.`, "info");
     
     recalculateAll();
@@ -1804,11 +1388,10 @@ function togglePartCompletion(code, shouldComplete, stationName) {
     if (reqs.length === 0) return;
     
     const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
-    const targetStation = stationName || 'Tüm İstasyonlar';
     
     if (shouldComplete) {
         // Calculate production for this station
-        const stLogs = productionLog.filter(log => log.kod === code && (log.station === targetStation || log.station === 'Tüm İstasyonlar' || !log.station));
+        const stLogs = productionLog.filter(log => log.kod === code && (log.station === stationName || log.station === 'Tüm İstasyonlar' || !log.station));
         const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
         const needed = Math.max(0.0, totalReq - stProd);
         
@@ -1818,36 +1401,15 @@ function togglePartCompletion(code, shouldComplete, stationName) {
                 kod: code,
                 adet: needed,
                 fazla: 0,
-                station: targetStation,
+                station: stationName || 'Tüm İstasyonlar',
                 autoCompleted: true
             });
-            saveProductionLogToStorage(); // localStorage güncelle
+            showToast(`"${code}" parçası ${stationName ? stationName + ' istasyonunda' : ''} tamamlandı olarak işaretlendi.`, "success");
         }
-
-        // Global Üretim Geçmişine (uretim_gecmisi) ekle / güncelle
-        reqs.forEach(r => {
-            const existingIdx = productionHistory.findIndex(h => h.kod === code && h.kaynak === r.kaynak && (h.istasyon === targetStation || h.istasyon === 'Tüm İstasyonlar'));
-            if (existingIdx !== -1) {
-                productionHistory[existingIdx].tamamlandi = true;
-                productionHistory[existingIdx].adet = r.uretilecek;
-                productionHistory[existingIdx].tarih = new Date().toISOString();
-            } else {
-                productionHistory.push({
-                    kaynak: r.kaynak || '',
-                    kod: code,
-                    adet: r.uretilecek,
-                    istasyon: targetStation,
-                    tarih: new Date().toISOString(),
-                    tamamlandi: true
-                });
-            }
-        });
-        saveProductionHistoryToStorage();
-        showToast(`"${code}" parçası ${stationName ? stationName + ' istasyonunda' : ''} tamamlandı olarak işaretlendi ve geçmişe kaydedildi.`, "success");
     } else {
         // Remove autoCompleted logs for this code and station
         productionLog = productionLog.filter(log => {
-            const isMatch = log.kod === code && log.autoCompleted && (log.station === targetStation || !stationName || log.station === 'Tüm İstasyonlar');
+            const isMatch = log.kod === code && log.autoCompleted && (log.station === stationName || !stationName || log.station === 'Tüm İstasyonlar');
             return !isMatch;
         });
         
@@ -1855,24 +1417,14 @@ function togglePartCompletion(code, shouldComplete, stationName) {
         recalculateAll();
         
         // Check completion for this station
-        const stLogs = productionLog.filter(log => log.kod === code && (log.station === targetStation || log.station === 'Tüm İstasyonlar' || !log.station));
+        const stLogs = productionLog.filter(log => log.kod === code && (log.station === stationName || log.station === 'Tüm İstasyonlar' || !log.station));
         const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
         const stPct = totalReq > 0 ? (stProd / totalReq) * 100 : 0;
         
         if (stPct >= 100) {
             // Delete all logs matching this station to force it under 100%
-            productionLog = productionLog.filter(log => !(log.kod === code && (log.station === targetStation || !stationName || log.station === 'Tüm İstasyonlar')));
+            productionLog = productionLog.filter(log => !(log.kod === code && (log.station === stationName || !stationName || log.station === 'Tüm İstasyonlar')));
         }
-
-        // Global Üretim Geçmişinden kaldır veya tamamlandi=false yap
-        reqs.forEach(r => {
-            const existingIdx = productionHistory.findIndex(h => h.kod === code && h.kaynak === r.kaynak && (h.istasyon === targetStation || h.istasyon === 'Tüm İstasyonlar'));
-            if (existingIdx !== -1) {
-                productionHistory.splice(existingIdx, 1);
-            }
-        });
-        saveProductionHistoryToStorage();
-        saveProductionLogToStorage();
         
         showToast(`"${code}" parçasının ${stationName ? stationName + ' istasyonundaki' : ''} tamamlandı işareti kaldırıldı.`, "info");
     }
@@ -1966,13 +1518,13 @@ function renderTakipTable() {
 }
 
 // Pagination controls for Takip table
-document.getElementById('takip-prev-btn')?.addEventListener('click', () => {
+document.getElementById('takip-prev-btn').addEventListener('click', () => {
     if (paginationState.takip.page > 1) {
         paginationState.takip.page--;
         renderTakipTable();
     }
 });
-document.getElementById('takip-next-btn')?.addEventListener('click', () => {
+document.getElementById('takip-next-btn').addEventListener('click', () => {
     const maxPage = Math.ceil(paginationState.takip.total / PAGE_SIZE);
     if (paginationState.takip.page < maxPage) {
         paginationState.takip.page++;
@@ -1980,7 +1532,7 @@ document.getElementById('takip-next-btn')?.addEventListener('click', () => {
     }
 });
 
-bindSearchInput('takip-search', () => {
+document.getElementById('takip-search').addEventListener('input', () => {
     paginationState.takip.page = 1;
     filterAndPaginateTakipTable();
 });
@@ -2226,7 +1778,7 @@ function renderAssemblyRightTable() {
 }
 
 // Assembly search input events
-bindSearchInput('assembly-right-search', () => {
+document.getElementById('assembly-right-search').addEventListener('input', () => {
     paginationState.assemblyRight.page = 1;
     filterAndPaginateAssembly();
 });
@@ -2240,13 +1792,13 @@ document.getElementById('assembly-right-sort').addEventListener('change', () => 
 });
 
 // Right pagination buttons
-document.getElementById('assembly-right-prev-btn')?.addEventListener('click', () => {
+document.getElementById('assembly-right-prev-btn').addEventListener('click', () => {
     if (paginationState.assemblyRight.page > 1) {
         paginationState.assemblyRight.page--;
         renderAssemblyRightTable();
     }
 });
-document.getElementById('assembly-right-next-btn')?.addEventListener('click', () => {
+document.getElementById('assembly-right-next-btn').addEventListener('click', () => {
     const maxPage = Math.ceil(paginationState.assemblyRight.total / PAGE_SIZE);
     if (paginationState.assemblyRight.page < maxPage) {
         paginationState.assemblyRight.page++;
@@ -2293,7 +1845,7 @@ function renderRotasizlarTab() {
     });
 }
 
-bindSearchInput('rotasiz-search', renderRotasizlarTab);
+document.getElementById('rotasiz-search').addEventListener('input', renderRotasizlarTab);
 
 // -------------------------------------------------------------
 // 5. STATIONS VIEW
@@ -2410,61 +1962,6 @@ function filterAndPaginateStationData() {
 
     document.getElementById('current-station-title').innerHTML = `<i class="fa-solid fa-industry text-green"></i> ${activeStation} İstasyon İş Listesi`;
 
-    // İstasyon Kapasite Rozetini Güncelle
-    const capBadge = document.getElementById('station-capacity-badge');
-    if (capBadge) {
-        if (!activeStation || rows.length === 0) {
-            capBadge.style.display = 'none';
-        } else {
-            capBadge.style.display = 'flex';
-            let gunlukSaat = DEFAULT_CAPACITY.varsayilan_gunluk_saat || 9;
-            let makineSayisi = 1;
-            if (DEFAULT_CAPACITY.istasyonlar) {
-                if (DEFAULT_CAPACITY.istasyonlar[activeStation]) {
-                    gunlukSaat = DEFAULT_CAPACITY.istasyonlar[activeStation].gunluk_saat || gunlukSaat;
-                    makineSayisi = DEFAULT_CAPACITY.istasyonlar[activeStation].makine_sayisi || makineSayisi;
-                } else {
-                    const normActive = activeStation.trim().toUpperCase().replace(/\s+/g, '');
-                    for (const [k, cfg] of Object.entries(DEFAULT_CAPACITY.istasyonlar)) {
-                        if (k.trim().toUpperCase().replace(/\s+/g, '') === normActive) {
-                            gunlukSaat = cfg.gunluk_saat || gunlukSaat;
-                            makineSayisi = cfg.makine_sayisi || makineSayisi;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            let totalHours = 0;
-            rows.forEach(r => {
-                let saatVal = parseFloat(r['Saat']) || 0;
-                if (saatVal > 0) {
-                    totalHours += (saatVal * 24);
-                } else {
-                    let topSure = parseFloat(r['Toplam Süre']) || 0;
-                    totalHours += (topSure / 3600);
-                }
-            });
-
-            const gunlukKapasite = gunlukSaat * makineSayisi;
-            const tahminiGun = gunlukKapasite > 0 ? (totalHours / gunlukKapasite) : 0;
-
-            capBadge.innerHTML = `
-                <span style="color: var(--text-dim); display: flex; align-items: center; gap: 6px;">
-                    <i class="fa-solid fa-gears text-blue"></i> <strong style="color:var(--text-primary); font-size:13px;">${makineSayisi}</strong> İstasyon
-                </span>
-                <span style="color: rgba(255,255,255,0.15);">|</span>
-                <span style="color: var(--text-dim); display: flex; align-items: center; gap: 6px;">
-                    <i class="fa-solid fa-clock text-yellow"></i> <strong style="color:var(--text-primary); font-size:13px;">${gunlukSaat}</strong> Saat/Gün
-                </span>
-                <span style="color: rgba(255,255,255,0.15);">|</span>
-                <span style="color: var(--text-dim); display: flex; align-items: center; gap: 6px;">
-                    <i class="fa-solid fa-calendar-check text-green"></i> Tahmini: <strong style="color:#10B981; font-weight:700; font-size:14px;">${tahminiGun.toFixed(1)}</strong> İş Günü <span style="color:rgba(255,255,255,0.65); font-weight:500; font-size:12px; margin-left:2px;">(${totalHours.toFixed(1)} Saat)</span>
-                </span>
-            `;
-        }
-    }
-
     // 1. Text Search Filter
     let filtered = rows;
     if (searchVal) {
@@ -2496,26 +1993,24 @@ function filterAndPaginateStationData() {
     }
 
     // 3. Sorting
-    if (sortVal !== 'custom') {
-        filtered.sort((a, b) => {
-            if (sortVal === 'priority-asc' || sortVal === 'priority-desc') {
-                const priorityA = parseInt(a['Öncelik Sırası']) || 99999;
-                const priorityB = parseInt(b['Öncelik Sırası']) || 99999;
-                return sortVal === 'priority-asc' ? priorityA - priorityB : priorityB - priorityA;
-            }
-            if (sortVal === 'code-asc') {
-                const codeA = String(a['Kod'] || '');
-                const codeB = String(b['Kod'] || '');
-                return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
-            }
-            if (sortVal === 'uretilecek-desc') {
-                const qtyA = parseFloat(a['Üretilecek Miktar']) || 0;
-                const qtyB = parseFloat(b['Üretilecek Miktar']) || 0;
-                return qtyB - qtyA;
-            }
-            return 0;
-        });
-    }
+    filtered.sort((a, b) => {
+        if (sortVal === 'priority-asc' || sortVal === 'priority-desc') {
+            const priorityA = parseInt(a['Öncelik Sırası']) || 99999;
+            const priorityB = parseInt(b['Öncelik Sırası']) || 99999;
+            return sortVal === 'priority-asc' ? priorityA - priorityB : priorityB - priorityA;
+        }
+        if (sortVal === 'code-asc') {
+            const codeA = String(a['Kod'] || '');
+            const codeB = String(b['Kod'] || '');
+            return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
+        }
+        if (sortVal === 'uretilecek-desc') {
+            const qtyA = parseFloat(a['Üretilecek Miktar']) || 0;
+            const qtyB = parseFloat(b['Üretilecek Miktar']) || 0;
+            return qtyB - qtyA;
+        }
+        return 0;
+    });
 
     paginationState.station.filtered = filtered;
     paginationState.station.total = filtered.length;
@@ -2541,23 +2036,16 @@ function renderStationTable(headers) {
     }
 
     // Select the key columns to display
-    const ALL_DISPLAY_COLS = [
-        'Öncelik Sırası', 'Kod', 'Malzeme Adı', 'Hammadde Kod', 'Hammadde',
-        'Rezerve Edilecek Miktar', 'Üretilecek Miktar', 'Hammadde Miktar', 'Toplam Hammadde Miktarı',
-        'Hazırlık Süresi', 'Birim İşlem Süresi', 'Toplam Süre', 'Saat', 'Kümülatif Süre', 'Durum'
-    ];
+    const displayCols = headers.filter(h => [
+        'Öncelik Sırası', 'Kod', 'Malzeme Adı', 'Hammadde Kod', 'Hammadde', 
+        'Rezerve Edilecek Miktar', 'Üretilecek Miktar', 'Toplam Hammadde Miktarı', 'Durum'
+    ].includes(h) || h === 'Kod' || h.includes('Miktar') || h.includes('Öncelik'));
 
-    // Sadece bu sayfanın headers'ında bulunanları al (Saat / Kümülatif Süre dahil)
-    const displayCols = ALL_DISPLAY_COLS.filter(c => c === 'Durum' || headers.includes(c));
+    const colsToShow = displayCols.length > 0 ? displayCols : headers.slice(0, 8);
 
-    // Kullanıcının gizlediği sütunları çıkar
-    const colsToShow = displayCols.filter(c => !hiddenStationCols.has(c));
-
-    // Sütun seçici dropdown'ı güncelle
-    _updateColPickerUI(displayCols);
-
-    // Add Status header (always visible)
-    const finalHeaders = colsToShow.includes('Durum') ? colsToShow : [...colsToShow, 'Durum'];
+    // Add Status header
+    const finalHeaders = [...colsToShow];
+    if (!finalHeaders.includes('Durum')) finalHeaders.push('Durum');
 
     // Create table header cells
     const trHead = document.createElement('tr');
@@ -2578,45 +2066,25 @@ function renderStationTable(headers) {
         const reqs = uretimTakipRows.filter(u => u.kod === code);
         let completionText = '-';
         let completionPct = 0;
-        let isOverproduced = false;
         let badgeHtml = '<span class="badge badge-danger">Eksik</span>';
         
         if (reqs.length > 0) {
             const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
-            const allLogs = productionLog.filter(log => log.kod === code);
-            const stLogs = allLogs.filter(log => log.station === activeStation || log.station === 'Tüm İstasyonlar' || !log.station);
+            const stLogs = productionLog.filter(log => log.kod === code && (log.station === activeStation || log.station === 'Tüm İstasyonlar' || !log.station));
             const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
-            const rawPct = totalReq > 0 ? Math.round((stProd / totalReq) * 100) : 0;
-            completionPct = Math.min(100, rawPct);
+            completionPct = totalReq > 0 ? Math.min(100, Math.round((stProd / totalReq) * 100)) : 0;
             completionText = `${stProd} / ${totalReq}`;
-
-            if (stProd > totalReq && totalReq > 0) {
-                // Fazla Üretim: üretilen > hedef
-                isOverproduced = true;
-                const fazla = Math.round((stProd - totalReq) * 1000) / 1000;
-                badgeHtml = `<span class="badge badge-overproduced"><i class="fa-solid fa-arrow-trend-up" style="font-size:10px;"></i> Fazla Üretim (+${fazla})</span>`;
-            } else if (completionPct >= 100) {
-                badgeHtml = `<span class="badge badge-success"><i class="fa-solid fa-check" style="font-size:10px;"></i> Tamamlandı</span>`;
+            
+            if (completionPct >= 100) {
+                badgeHtml = `<span class="badge badge-success">Hazır (${completionPct}%)</span>`;
             } else if (completionPct > 0) {
                 badgeHtml = `<span class="badge badge-warning">Üretimde (${completionPct}%)</span>`;
             }
         }
 
         const tr = document.createElement('tr');
-        if (isOverproduced) {
-            tr.classList.add('station-row-overproduced');
-        } else if (completionPct >= 100) {
+        if (completionPct >= 100) {
             tr.classList.add('station-row-completed');
-        }
-        
-        tr.draggable = true;
-        tr.dataset.index = pState.filtered.indexOf(row);
-        if (window.handleStationRowDragStart) {
-            tr.addEventListener('dragstart', window.handleStationRowDragStart);
-            tr.addEventListener('dragover', window.handleStationRowDragOver);
-            tr.addEventListener('dragleave', window.handleStationRowDragLeave);
-            tr.addEventListener('drop', window.handleStationRowDrop);
-            tr.addEventListener('dragend', window.handleStationRowDragEnd);
         }
 
         finalHeaders.forEach(h => {
@@ -2624,35 +2092,18 @@ function renderStationTable(headers) {
             
             if (h === 'Durum') {
                 if (reqs.length > 0) {
-                    const isDone = completionPct >= 100 || isOverproduced;
                     td.innerHTML = `
                         <div class="status-cell-container" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-                            <input type="checkbox" class="station-complete-checkbox" ${isDone ? 'checked' : ''} onchange="togglePartCompletion('${code}', this.checked, '${activeStation}')" title="Bitti / Üretildi Olarak İşaretle">
+                            <input type="checkbox" class="station-complete-checkbox" ${completionPct >= 100 ? 'checked' : ''} onchange="togglePartCompletion('${code}', this.checked, '${activeStation}')" title="Bitti / Üretildi Olarak İşaretle">
                             ${badgeHtml}
                         </div>
                     `;
                 } else {
                     td.innerHTML = badgeHtml;
                 }
-
             } else {
                 let val = row[h];
-                
-                // Saat ve Kümülatif Süre formatı
-                if ((h === 'Saat' || h === 'Kümülatif Süre') && typeof val === 'number') {
-                    // val is decimal fraction of a day (e.g. 0.025)
-                    const totalHours = Math.floor(val * 24);
-                    let totalMins = Math.round((val * 24 * 60) % 60);
-                    
-                    // Handle edge case where rounding minutes makes it 60
-                    let displayHours = totalHours;
-                    if (totalMins === 60) {
-                        displayHours += 1;
-                        totalMins = 0;
-                    }
-                    val = `${displayHours}:${totalMins.toString().padStart(2, '0')}`;
-                } 
-                else if (typeof val === 'number') {
+                if (typeof val === 'number') {
                     if (!Number.isInteger(val)) {
                         val = parseFloat(val.toFixed(3));
                     }
@@ -2662,10 +2113,9 @@ function renderStationTable(headers) {
                 // Styling specific columns
                 if (h === 'Kod') {
                     td.style.fontWeight = '700';
-                    td.style.whiteSpace = 'nowrap';
                     if (excludedHariciKodlar.has(code)) {
                         td.style.color = '#fda4af';
-                        td.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>${td.textContent}`;
+                        td.innerHTML = `${td.textContent} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px; margin-left:6px; opacity:0.8;" title="Harici İşlem / Harici Kod"></i>`;
                     } else {
                         td.style.color = 'white';
                     }
@@ -2685,7 +2135,7 @@ function renderStationTable(headers) {
 }
 
 // Station navigation events
-bindSearchInput('station-search', () => {
+document.getElementById('station-search').addEventListener('input', () => {
     paginationState.station.page = 1;
     renderStationsTab();
 });
@@ -2706,13 +2156,13 @@ if (document.getElementById('station-sort')) {
     });
 }
 
-document.getElementById('station-prev-btn')?.addEventListener('click', () => {
+document.getElementById('station-prev-btn').addEventListener('click', () => {
     if (paginationState.station.page > 1) {
         paginationState.station.page--;
         filterAndPaginateStationData();
     }
 });
-document.getElementById('station-next-btn')?.addEventListener('click', () => {
+document.getElementById('station-next-btn').addEventListener('click', () => {
     const maxPage = Math.ceil(paginationState.station.total / PAGE_SIZE);
     if (paginationState.station.page < maxPage) {
         paginationState.station.page++;
@@ -2723,10 +2173,13 @@ document.getElementById('station-next-btn')?.addEventListener('click', () => {
 // -------------------------------------------------------------
 // 6. EXPORT BACK TO EXCEL WORKBOOK
 // -------------------------------------------------------------
-exportBtn.addEventListener('click', () => {
+async function saveExcelFile(isSaveAs = false) {
     if (!workbook) return;
     
-    showToast("Güncel veriler Excel dosyasına yazılıyor...", "info");
+    showToast("Güncel veriler hazırlanıyor...", "info");
+    
+    // Allow the browser to render the toast before freezing the UI
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     try {
         // 1. Write the new production log entries to columns I and J in "Üretim Takip" sheet
@@ -2945,7 +2398,25 @@ exportBtn.addEventListener('click', () => {
             }
         }
 
-        // Export workbook to download file
+        // Export workbook to download file OR save to file system
+        if (!isSaveAs && activeFileHandle && window.showSaveFilePicker) {
+            try {
+                showToast("Dosya üzerine yazılıyor...", "info");
+                await new Promise(resolve => setTimeout(resolve, 100)); // allow render
+                
+                const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                const writable = await activeFileHandle.createWritable();
+                await writable.write(wbout);
+                await writable.close();
+                showToast(`Excel başarıyla kaydedildi!`, "success");
+                return; // Done
+            } catch (err) {
+                console.error("Direct write failed, falling back to download:", err);
+                showToast("Üzerine yazma başarısız oldu, dosya indiriliyor...", "warning");
+                await new Promise(resolve => setTimeout(resolve, 100)); // allow render
+            }
+        }
+
         const origFileName = loadedFileName.textContent.replace("Yüklenen Dosya: ", "").replace(".xlsx", "");
         const exportName = `${origFileName}_Guncel.xlsx`;
         
@@ -2956,7 +2427,10 @@ exportBtn.addEventListener('click', () => {
         console.error(err);
         showToast("Excel dosyasına yazılırken hata oluştu!", "error");
     }
-});
+}
+
+saveBtn.addEventListener('click', () => saveExcelFile(false));
+exportBtn.addEventListener('click', () => saveExcelFile(true));
 
 // -------------------------------------------------------------
 // 7. ÜRETİM LİSTESİ VIEW
@@ -3078,7 +2552,7 @@ function renderUlTable() {
         tr.innerHTML = `
             <td style="font-size:12px; color:var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.kaynak}">${row.kaynak}</td>
             <td>${row.oncelik}</td>
-            <td style="font-weight:700; white-space:nowrap; color:${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '#fda4af' : 'white'};">${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>' : ''}${row.kod}</td>
+            <td style="font-weight:700; color:${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '#fda4af' : 'white'};">${row.kod}${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? ' <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px; margin-left:6px; opacity:0.8;" title="Harici İşlem / Harici Kod"></i>' : ''}</td>
             <td style="color:var(--text-dim);">${row.malzeme}</td>
             <td style="font-size:12px; color:var(--text-muted);">${row.hKod}</td>
             <td style="color:var(--text-dim);">${row.hammadde}</td>
@@ -3137,7 +2611,7 @@ function renderUlTable() {
 }
 
 // Üretim Listesi navigation events
-bindSearchInput('ul-search', () => {
+document.getElementById('ul-search').addEventListener('input', () => {
     paginationState.ul.page = 1;
     filterAndPaginateUlTable();
 });
@@ -3147,14 +2621,14 @@ document.getElementById('ul-sort').addEventListener('change', () => {
     filterAndPaginateUlTable();
 });
 
-document.getElementById('ul-prev-btn')?.addEventListener('click', () => {
+document.getElementById('ul-prev-btn').addEventListener('click', () => {
     if (paginationState.ul.page > 1) {
         paginationState.ul.page--;
         renderUlTable();
     }
 });
 
-document.getElementById('ul-next-btn')?.addEventListener('click', () => {
+document.getElementById('ul-next-btn').addEventListener('click', () => {
     const maxPage = Math.ceil(paginationState.ul.total / PAGE_SIZE);
     if (paginationState.ul.page < maxPage) {
         paginationState.ul.page++;
@@ -3164,7 +2638,6 @@ document.getElementById('ul-next-btn')?.addEventListener('click', () => {
 
 // --- EXCEL EXPORT USING EXCELJS ---
 async function exportStationDataToExcel() {
-    console.log("İstasyon Excel İndirme başlatıldı...");
     if (!paginationState.station.filtered || paginationState.station.filtered.length === 0) {
         alert("Dışa aktarılacak veri bulunamadı.");
         return;
@@ -3184,7 +2657,7 @@ async function exportStationDataToExcel() {
         // Get headers from the table currently displayed
         const thead = document.getElementById('station-thead');
         const thElements = thead.querySelectorAll('th');
-        const headerNames = Array.from(thElements).map(th => th.textContent.trim());
+        const headerNames = Array.from(thElements).map(th => th.innerText.trim());
 
         // Add headers
         const headerRow = worksheet.addRow(headerNames);
@@ -3199,34 +2672,7 @@ async function exportStationDataToExcel() {
             };
         });
 
-        // Sütun indekslerini önceden belirle (formüller için sütun harfi lazım)
-        // headerNames is 0-indexed; Excel columns are 1-indexed
-        function colLetter(idx1based) {
-            // idx1based: 1 = A, 2 = B, etc.
-            let col = '';
-            let n = idx1based;
-            while (n > 0) {
-                const rem = (n - 1) % 26;
-                col = String.fromCharCode(65 + rem) + col;
-                n = Math.floor((n - 1) / 26);
-            }
-            return col;
-        }
-        
-        const colIdxOf = {}; // header name -> 1-based column index in Excel
-        headerNames.forEach((h, i) => { colIdxOf[h] = i + 1; });
-        
-        const hazirlikCol    = colIdxOf['Hazırlık Süresi']    ? colLetter(colIdxOf['Hazırlık Süresi'])    : null;
-        const birimCol       = colIdxOf['Birim İşlem Süresi'] ? colLetter(colIdxOf['Birim İşlem Süresi']) : null;
-        const miktarCol      = colIdxOf['Üretilecek Miktar']  ? colLetter(colIdxOf['Üretilecek Miktar'])  : null;
-        const toplamSureCol  = colIdxOf['Toplam Süre']        ? colLetter(colIdxOf['Toplam Süre'])        : null;
-        const saatCol        = colIdxOf['Saat']               ? colLetter(colIdxOf['Saat'])               : null;
-        const kumulatifCol   = colIdxOf['Kümülatif Süre']     ? colLetter(colIdxOf['Kümülatif Süre'])     : null;
-        const hammaddeMCol   = colIdxOf['Hammadde Miktar']    ? colLetter(colIdxOf['Hammadde Miktar'])    : null;
-        const toplamHammCol  = colIdxOf['Toplam Hammadde Miktarı'] ? colLetter(colIdxOf['Toplam Hammadde Miktarı']) : null;
-
         // Add data rows
-        let excelRowNum = 2; // row 1 is header
         paginationState.station.filtered.forEach(row => {
             const code = String(row['Kod'] || '').trim().toUpperCase();
             
@@ -3254,22 +2700,6 @@ async function exportStationDataToExcel() {
             headerNames.forEach(header => {
                 if (header === 'Durum') {
                     rowData.push(completionText);
-                } else if (header === 'Toplam Süre' && hazirlikCol && birimCol && miktarCol) {
-                    // Canlı formül: Hazırlık + (Birim * Adet)
-                    rowData.push({ formula: `=${hazirlikCol}${excelRowNum}+(${birimCol}${excelRowNum}*${miktarCol}${excelRowNum})` });
-                } else if (header === 'Saat' && toplamSureCol) {
-                    // Canlı formül: Toplam Süre / 86400
-                    rowData.push({ formula: `=${toplamSureCol}${excelRowNum}/86400` });
-                } else if (header === 'Kümülatif Süre' && saatCol) {
-                    // Canlı formül: kümülatif toplam
-                    if (excelRowNum === 2) {
-                        rowData.push({ formula: `=${saatCol}2` });
-                    } else {
-                        rowData.push({ formula: `=${kumulatifCol}${excelRowNum - 1}+${saatCol}${excelRowNum}` });
-                    }
-                } else if (header === 'Toplam Hammadde Miktarı' && miktarCol && hammaddeMCol) {
-                    // Canlı formül: Adet * Hammadde Miktar
-                    rowData.push({ formula: `=${miktarCol}${excelRowNum}*${hammaddeMCol}${excelRowNum}` });
                 } else {
                     let val = row[header];
                     if (typeof val === 'number' && !Number.isInteger(val)) {
@@ -3291,13 +2721,6 @@ async function exportStationDataToExcel() {
                 };
                 
                 const header = headerNames[colNumber - 1];
-                
-                // Saat ve Kümülatif Süre hücrelerine [h]:mm formatı uygula
-                if (header === 'Saat' || header === 'Kümülatif Süre') {
-                    cell.numFmt = '[h]:mm';
-                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                }
-                
                 if (header === 'Durum') {
                     const statusStr = String(cell.value).toLowerCase();
                     if (statusStr.includes('hazır')) {
@@ -3324,8 +2747,6 @@ async function exportStationDataToExcel() {
                     }
                 }
             });
-            
-            excelRowNum++;
         });
 
         // Auto-fit columns
@@ -3341,741 +2762,14 @@ async function exportStationDataToExcel() {
         // Generate and save file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showToast(`İstasyon iş listesi indirildi: "${fileName}"`, "success");
+        saveAs(blob, fileName);
     } catch (err) {
         console.error("Excel dışa aktarma hatası:", err);
         alert("Excel oluşturulurken bir hata oluştu: " + err.message);
     }
 }
 
-
-// -------------------------------------------------------------
-// X. PERFORMANCE TAB RENDERING
-// -------------------------------------------------------------
-const DEFAULT_CAPACITY = {
-    "varsayilan_gunluk_saat": 9,
-    "istasyonlar": {
-        "CY": { "gunluk_saat": 9, "makine_sayisi": 3 },
-        "QUASER": { "gunluk_saat": 9, "makine_sayisi": 3 },
-        "3D PRINT": { "gunluk_saat": 22, "makine_sayisi": 15 },
-        "3D YAZICI GRUBU": { "gunluk_saat": 22, "makine_sayisi": 15 }
-    }
-};
-
-window.selectStationAndGo = function(stName) {
-    activeStation = stName;
-    switchTab('stations');
-};
-
-// -------------------------------------------------------------
-// WORKLOAD & CAPACITY COMPARISON TAB
-// -------------------------------------------------------------
-function renderWorkloadTab() {
-    const kpiContainer = document.getElementById('workload-kpi-container');
-    const barsContainer = document.getElementById('workload-bars-container');
-    if (!barsContainer) return;
-
-    if (!stationList || stationList.length === 0) {
-        if (kpiContainer) kpiContainer.innerHTML = '';
-        barsContainer.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 40px;">Henüz istasyon verisi yüklenmedi.</div>';
-        return;
-    }
-
-    // 1. Tüm istasyonların iş yükü verilerini hesapla
-    const data = [];
-    let grandTotalHours = 0;
-
-    stationList.forEach(stName => {
-        const rows = stationSheetsMap[stName] || [];
-        if (rows.length === 0) return;
-
-        let gunlukSaat = DEFAULT_CAPACITY.varsayilan_gunluk_saat || 9;
-        let makineSayisi = 1;
-        if (DEFAULT_CAPACITY.istasyonlar) {
-            if (DEFAULT_CAPACITY.istasyonlar[stName]) {
-                gunlukSaat = DEFAULT_CAPACITY.istasyonlar[stName].gunluk_saat || gunlukSaat;
-                makineSayisi = DEFAULT_CAPACITY.istasyonlar[stName].makine_sayisi || makineSayisi;
-            } else {
-                const normSt = stName.trim().toUpperCase().replace(/\s+/g, '');
-                for (const [k, cfg] of Object.entries(DEFAULT_CAPACITY.istasyonlar)) {
-                    if (k.trim().toUpperCase().replace(/\s+/g, '') === normSt) {
-                        gunlukSaat = cfg.gunluk_saat || gunlukSaat;
-                        makineSayisi = cfg.makine_sayisi || makineSayisi;
-                        break;
-                    }
-                }
-            }
-        }
-
-        let stHours = 0;
-        rows.forEach(r => {
-            let saatVal = parseFloat(r['Saat']) || 0;
-            if (saatVal > 0) {
-                stHours += (saatVal * 24);
-            } else {
-                let topSure = parseFloat(r['Toplam Süre']) || 0;
-                stHours += (topSure / 3600);
-            }
-        });
-
-        const gunlukKapasite = gunlukSaat * makineSayisi;
-        const tahminiGun = gunlukKapasite > 0 ? (stHours / gunlukKapasite) : 0;
-        grandTotalHours += stHours;
-
-        data.push({
-            name: stName,
-            partsCount: rows.length,
-            gunlukSaat: gunlukSaat,
-            makineSayisi: makineSayisi,
-            gunlukKapasite: gunlukKapasite,
-            totalHours: stHours,
-            tahminiGun: tahminiGun
-        });
-    });
-
-    if (data.length === 0) {
-        barsContainer.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 40px;">İstasyonlarda iş listesi bulunamadı.</div>';
-        return;
-    }
-
-    // 2. Sıralama
-    const sortSelect = document.getElementById('workload-sort-select');
-    const sortMode = sortSelect ? sortSelect.value : 'days-desc';
-
-    if (sortMode === 'days-desc') {
-        data.sort((a, b) => b.tahminiGun - a.tahminiGun);
-    } else if (sortMode === 'days-asc') {
-        data.sort((a, b) => a.tahminiGun - b.tahminiGun);
-    } else if (sortMode === 'name-asc') {
-        data.sort((a, b) => a.name.localeCompare(b.name, 'tr', { sensitivity: 'base' }));
-    }
-
-    // 3. KPI Değerleri
-    const maxItem = [...data].sort((a, b) => b.tahminiGun - a.tahminiGun)[0];
-    const minItem = [...data].sort((a, b) => a.tahminiGun - b.tahminiGun)[0];
-    const grandTotalDays = (grandTotalHours / (9 * 1)).toFixed(1); // referans 9h tek istasyon eşdeğeri
-
-    if (kpiContainer) {
-        kpiContainer.innerHTML = `
-            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
-                <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
-                    <span>Aktif İstasyonlar</span>
-                    <span style="background: rgba(59,130,246,0.15); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-industry text-blue" style="font-size: 13px;"></i></span>
-                </div>
-                <div style="margin: 10px 0 4px 0;">
-                    <span style="font-size: 26px; font-weight: 800; color: var(--text-main);">${data.length}</span>
-                    <span style="font-size: 13px; font-weight: 500; color: var(--text-dim); margin-left: 4px;">İstasyon</span>
-                </div>
-                <div style="font-size: 12px; color: #38bdf8; display: flex; align-items: center; gap: 4px;">
-                    <i class="fa-solid fa-circle-check" style="font-size: 10px;"></i> Tüm hatlar takipte
-                </div>
-            </div>
-
-            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
-                <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
-                    <span>Toplam İş Yükü</span>
-                    <span style="background: rgba(245,158,11,0.15); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-clock text-yellow" style="font-size: 13px;"></i></span>
-                </div>
-                <div style="margin: 10px 0 4px 0;">
-                    <span style="font-size: 26px; font-weight: 800; color: var(--text-main);">${grandTotalHours.toFixed(1)}</span>
-                    <span style="font-size: 13px; font-weight: 500; color: var(--text-dim); margin-left: 4px;">Saat</span>
-                </div>
-                <div style="font-size: 12px; color: var(--text-dim);">Tüm parçaların toplamı</div>
-            </div>
-
-            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.04); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
-                <div style="font-size: 11px; color: #f87171; text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
-                    <span>🚨 En Yoğun (Darboğaz)</span>
-                    <span style="background: rgba(239,68,68,0.2); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 13px;"></i></span>
-                </div>
-                <div style="margin: 8px 0 4px 0;">
-                    <div style="font-size: 18px; font-weight: 700; color: #f87171; word-break: break-word; line-height: 1.25;" title="${maxItem ? maxItem.name : ''}">
-                        ${maxItem ? maxItem.name : '-'}
-                    </div>
-                </div>
-                <div style="font-size: 13px; color: #fca5a5; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                    ${maxItem ? `<span style="font-weight:700; font-size:14px;">${maxItem.tahminiGun.toFixed(1)} İş Günü</span> <span style="opacity:0.8; font-size:12px;">(${maxItem.totalHours.toFixed(1)} Saat)</span>` : '-'}
-                </div>
-            </div>
-
-            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.04); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
-                <div style="font-size: 11px; color: #34d399; text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
-                    <span>🟢 En Müsait İstasyon</span>
-                    <span style="background: rgba(16,185,129,0.2); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-feather" style="color: #10b981; font-size: 13px;"></i></span>
-                </div>
-                <div style="margin: 8px 0 4px 0;">
-                    <div style="font-size: 18px; font-weight: 700; color: #34d399; word-break: break-word; line-height: 1.25;" title="${minItem ? minItem.name : ''}">
-                        ${minItem ? minItem.name : '-'}
-                    </div>
-                </div>
-                <div style="font-size: 13px; color: #6ee7b7; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                    ${minItem ? `<span style="font-weight:700; font-size:14px;">${minItem.tahminiGun.toFixed(1)} İş Günü</span> <span style="opacity:0.8; font-size:12px;">(${minItem.totalHours.toFixed(1)} Saat)</span>` : '-'}
-                </div>
-            </div>
-        `;
-    }
-
-    // 4. Barları Çiz
-    const maxDays = Math.max(...data.map(d => d.tahminiGun), 1);
-    let html = '';
-
-    data.forEach(d => {
-        const barPct = Math.min(100, Math.max(5, (d.tahminiGun / maxDays) * 100));
-
-        let colorGradient = 'linear-gradient(90deg, #10b981, #059669)';
-        let badgeHtml = '<span class="badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); font-size:11px; padding:3px 8px;"><i class="fa-solid fa-feather"></i> Müsait (&lt;2 Gün)</span>';
-        let dayColor = '#34d399';
-
-        if (d.tahminiGun >= 10) {
-            colorGradient = 'linear-gradient(90deg, #ef4444, #b91c1c)';
-            badgeHtml = '<span class="badge" style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); font-size:11px; padding:3px 8px; animation: pulseExcelBtn 2s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> Kritik Darboğaz (&gt;10 Gün)</span>';
-            dayColor = '#f87171';
-        } else if (d.tahminiGun >= 5) {
-            colorGradient = 'linear-gradient(90deg, #f59e0b, #d97706)';
-            badgeHtml = '<span class="badge" style="background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); font-size:11px; padding:3px 8px;"><i class="fa-solid fa-fire"></i> Yüksek Yük (5-10 Gün)</span>';
-            dayColor = '#fbbf24';
-        } else if (d.tahminiGun >= 2) {
-            colorGradient = 'linear-gradient(90deg, #3b82f6, #1d4ed8)';
-            badgeHtml = '<span class="badge" style="background:rgba(59,130,246,0.18); color:#60a5fa; border:1px solid rgba(59,130,246,0.35); font-size:11px; padding:3px 8px;"><i class="fa-solid fa-check"></i> Dengeli (2-5 Gün)</span>';
-            dayColor = '#60a5fa';
-        }
-
-        html += `
-            <div class="workload-item" onclick="selectStationAndGo('${d.name}')" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(59,130,246,0.4)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.06)';">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-industry text-blue" style="font-size:13px;"></i> ${d.name}
-                        </span>
-                        <span style="font-size: 12px; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">
-                            ${d.partsCount} Parça
-                        </span>
-                        <span style="font-size: 12px; color: var(--text-dim);">
-                            ⚙️ ${d.makineSayisi} Makine • ⏱️ ${d.gunlukSaat} Saat/Gün
-                        </span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        ${badgeHtml}
-                        <span style="font-size: 13px; color: var(--text-dim);">
-                            <strong style="color:var(--text-main); font-size:15px;">${d.totalHours.toFixed(1)}</strong> Saat
-                        </span>
-                        <span style="font-size: 16px; font-weight: 700; color: ${dayColor}; min-width: 90px; text-align: right;">
-                            ${d.tahminiGun.toFixed(1)} İş Günü
-                        </span>
-                        <i class="fa-solid fa-chevron-right" style="font-size: 11px; color: var(--text-dim);"></i>
-                    </div>
-                </div>
-                
-                <!-- Progress Bar -->
-                <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden; position: relative;">
-                    <div style="width: ${barPct}%; height: 100%; background: ${colorGradient}; border-radius: 6px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);"></div>
-                </div>
-            </div>
-        `;
-    });
-
-    barsContainer.innerHTML = html;
+const exportStationBtn = document.getElementById('export-station-btn');
+if (exportStationBtn) {
+    exportStationBtn.addEventListener('click', exportStationDataToExcel);
 }
-
-function renderPerformanceTab() {
-    const container = document.getElementById('performance-cards-container');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    if (stationList.length === 0) {
-        container.innerHTML = '<div style="color: var(--text-dim); width: 100%; text-align: center;">Excel verisi yüklenmedi.</div>';
-        return;
-    }
-    
-    // Varsayılan çalışma günü sayısı (Kullanıcı 5 güne düşürdü)
-    const HAFTALIK_CALISMA_GUNU = 5;
-    
-    stationList.forEach(stName => {
-        // Kapasite bul
-        let gunlukSaat = DEFAULT_CAPACITY.varsayilan_gunluk_saat;
-        let makineSayisi = 1;
-        
-        if (DEFAULT_CAPACITY.istasyonlar[stName]) {
-            gunlukSaat = DEFAULT_CAPACITY.istasyonlar[stName].gunluk_saat || gunlukSaat;
-            makineSayisi = DEFAULT_CAPACITY.istasyonlar[stName].makine_sayisi || makineSayisi;
-        } else {
-            // Eğer isminde Quaser, 3D vs varsa yakalamaya çalış
-            const upSt = stName.toUpperCase();
-            if (upSt.includes("QUASER")) { gunlukSaat = 9; makineSayisi = 3; }
-            else if (upSt.includes("CY")) { gunlukSaat = 9; makineSayisi = 3; }
-            else if (upSt.includes("3D")) { gunlukSaat = 22; makineSayisi = 15; }
-        }
-        
-        const downtimeHours = downtimeMap[stName] || 0;
-        // Toplam kapasiteden duruşu (dk cinsinden) düşüyoruz
-        const netKapasiteDk = Math.max(0, (gunlukSaat * makineSayisi * HAFTALIK_CALISMA_GUNU * 60) - (downtimeHours * 60));
-        const haftalikKapasiteDk = netKapasiteDk;
-        
-        // Üretilen iş (Standart Saat) hesapla
-        let uretilenStandartDk = 0;
-        
-        // Bu istasyona giren parçaları bul
-        const stRows = stationSheetsMap[stName] || [];
-        const uniqueCodes = new Set(stRows.map(r => String(r.Kod || '').trim().toUpperCase()).filter(k => k));
-        
-        uniqueCodes.forEach(code => {
-            const logs = productionLog.filter(l => l.kod === code && (l.station === stName || l.station === 'Tüm İstasyonlar'));
-            const stProd = logs.reduce((sum, l) => sum + l.adet, 0);
-            
-            let unitTime = 0;
-            let setupTime = 0;
-            if (unitTimeMap[code] && unitTimeMap[code][stName]) {
-                unitTime = unitTimeMap[code][stName].sure || 0;
-                setupTime = unitTimeMap[code][stName].setup || 0;
-            }
-            
-            if (stProd > 0) {
-                // Eğer hiç üretildiyse 1 kere setupTime ekle, üstüne (adet * unitTime) ekle
-                uretilenStandartDk += setupTime + (stProd * unitTime);
-            }
-        });
-        
-        const kapasiteSaat = Math.round(haftalikKapasiteDk / 60);
-        const uretilenSaat = Math.round(uretilenStandartDk / 60);
-        const yuzde = haftalikKapasiteDk > 0 ? Math.min(100, Math.round((uretilenStandartDk / haftalikKapasiteDk) * 100)) : 0;
-        const overCapacity = yuzde >= 100;
-        
-        const cardHTML = `
-            <div class="perf-card">
-                <h3>
-                    <span><i class="fa-solid fa-industry text-blue"></i> ${stName}</span>
-                    <span style="color: ${overCapacity ? '#ef4444' : '#00f0ff'};">${yuzde}%</span>
-                </h3>
-                <div class="perf-bar-bg">
-                    <div class="perf-bar-fill ${overCapacity ? 'over-capacity' : ''}" style="width: ${yuzde}%;"></div>
-                </div>
-                <div class="perf-stats">
-                    <span><strong>${uretilenSaat}</strong> Saat Üretildi</span>
-                    <span><strong>${kapasiteSaat}</strong> Saat Kapasite</span>
-                </div>
-                <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-align: right;">
-                    (Makine: ${makineSayisi} | Günlük: ${gunlukSaat}s)
-                </div>
-                <div class="perf-stats" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-                    <span style="display:flex; align-items:center; gap:5px;">
-                        <i class="fa-solid fa-pause-circle text-orange"></i> Duruş (Saat):
-                    </span>
-                    <input type="number" min="0" step="0.5" class="downtime-input" value="${downtimeHours}" 
-                        onchange="updateDowntime('${stName.replace(/'/g, "\\'")}', this.value)" 
-                        style="width: 60px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; padding: 2px 5px; text-align: center;">
-                </div>
-            </div>
-        `;
-        
-        container.insertAdjacentHTML('beforeend', cardHTML);
-    });
-}
-
-function updateDowntime(stName, value) {
-    const val = parseFloat(value) || 0;
-    downtimeMap[stName] = val;
-    saveDowntimeMapToStorage();
-    renderPerformanceTab();
-}
-
-// ---- Sütun Gizle/Göster ----
-function toggleColPicker() {
-    const dd = document.getElementById('col-picker-dropdown');
-    if (dd) dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
-}
-
-// Dropdown kapanması için dışarı tıklama
-document.addEventListener('click', function(e) {
-    const btn = document.getElementById('col-picker-btn');
-    const dd = document.getElementById('col-picker-dropdown');
-    if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
-        dd.style.display = 'none';
-    }
-});
-
-function _updateColPickerUI(displayCols) {
-    const list = document.getElementById('col-picker-list');
-    if (!list) return;
-    // Yalnızca değiştiğinde yeniden çiz (dil değiştirme döngüsünü engelle)
-    const key = displayCols.join(',');
-    if (list.dataset.lastCols === key) {
-        // Sadece checkbox durumlarını güncelle
-        list.querySelectorAll('input[type=checkbox]').forEach(cb => {
-            cb.checked = !hiddenStationCols.has(cb.dataset.col);
-        });
-        return;
-    }
-    list.dataset.lastCols = key;
-    list.innerHTML = '';
-    // "Durum" her zaman görünür olsun, gizlenemez
-    const toggleableCols = displayCols.filter(c => c !== 'Durum');
-    toggleableCols.forEach(col => {
-        const label = document.createElement('label');
-        label.style.cssText = 'display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer; font-size:13px; color:var(--text-primary);';
-        const cb = document.createElement('input');
-        cb.type = 'checkbox';
-        cb.dataset.col = col;
-        cb.checked = !hiddenStationCols.has(col);
-        cb.style.cssText = 'width:14px; height:14px; cursor:pointer; accent-color: #00f0ff;';
-        cb.onchange = () => toggleColVisibility(col, cb.checked);
-        label.appendChild(cb);
-        label.appendChild(document.createTextNode(col));
-        list.appendChild(label);
-    });
-}
-
-function toggleColVisibility(colName, isVisible) {
-    if (isVisible) {
-        hiddenStationCols.delete(colName);
-    } else {
-        hiddenStationCols.add(colName);
-    }
-    saveHiddenColsToStorage();
-    renderStationTable(stationHeadersMap[activeStation] || []);
-}
-
-// ---- Sidebar Toggle ----
-document.addEventListener('DOMContentLoaded', () => {
-    const toggleBtn = document.getElementById('toggle-sidebar-btn');
-    const sidebar = document.getElementById('main-sidebar');
-    
-    // Load state from local storage
-    if (localStorage.getItem('sidebarCollapsed') === 'true') {
-        sidebar.classList.add('collapsed');
-    }
-
-    if (toggleBtn && sidebar) {
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-        });
-    }
-
-    // Export butonları — onclick yerine burada bağla (çift tetiklenmeyi önler)
-    document.getElementById('export-station-btn')?.addEventListener('click', exportStationDataToExcel);
-    document.getElementById('export-raw-excel-btn')?.addEventListener('click', exportRawMaterialsToExcel);
-});
-
-
-// ---- DRAG AND DROP REORDERING ----
-let draggedStationRow = null;
-
-window.handleStationRowDragStart = function(e) {
-    draggedStationRow = this;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', this.dataset.index);
-    this.style.opacity = '0.4';
-};
-
-window.handleStationRowDragOver = function(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const rect = this.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
-    this.classList.remove('drag-over-top', 'drag-over-bottom');
-    if (offset > rect.height / 2) {
-        this.classList.add('drag-over-bottom');
-    } else {
-        this.classList.add('drag-over-top');
-    }
-};
-
-window.handleStationRowDragLeave = function(e) {
-    this.classList.remove('drag-over-top', 'drag-over-bottom');
-};
-
-window.handleStationRowDragEnd = function(e) {
-    this.style.opacity = '1';
-    document.querySelectorAll('#station-tbody tr').forEach(tr => tr.classList.remove('drag-over-top', 'drag-over-bottom'));
-};
-
-window.handleStationRowDrop = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.classList.remove('drag-over-top', 'drag-over-bottom');
-    
-    if (draggedStationRow === this || !draggedStationRow) return;
-
-    const tbody = this.parentNode;
-    const allRows = Array.from(tbody.children);
-    const dragIndex = parseInt(draggedStationRow.dataset.index);
-    const dropIndex = parseInt(this.dataset.index);
-
-    const rect = this.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
-    const insertAfter = offset > rect.height / 2;
-
-    // Özel Sıralamaya geç
-    const sortSelect = document.getElementById('station-sort');
-    if (sortSelect) sortSelect.value = 'custom';
-
-    const originalArray = stationSheetsMap[activeStation];
-    if (!originalArray) return;
-    
-    const dragDataRow = paginationState.station.filtered[dragIndex];
-    const targetDataRow = paginationState.station.filtered[dropIndex];
-    
-    const originalDragIndex = originalArray.indexOf(dragDataRow);
-    const originalDropIndex = originalArray.indexOf(targetDataRow);
-    
-    if (originalDragIndex > -1 && originalDropIndex > -1) {
-        // Eski yerinden çıkar
-        originalArray.splice(originalDragIndex, 1);
-        
-        // Yeni hedefin güncel indeksini bul (dizi kaymış olabilir)
-        const newTargetIndex = originalArray.indexOf(targetDataRow);
-        
-        let finalInsertIndex = newTargetIndex;
-        if (insertAfter) {
-            finalInsertIndex = newTargetIndex + 1;
-        }
-        
-        // Yeni yerine ekle
-        originalArray.splice(finalInsertIndex, 0, dragDataRow);
-        
-        // Kümülatif süreyi baştan hesapla
-        recalcKumulatifSureForStation(activeStation);
-        
-        // Yeniden render
-        filterAndPaginateStationData();
-    }
-};
-
-function recalcKumulatifSureForStation(stName) {
-    const rows = stationSheetsMap[stName];
-    if (!rows) return;
-    let kumulatif = 0;
-    for (const row of rows) {
-        const code = String(row['Kod'] || '').trim().toUpperCase();
-        let hazirlikKey = Object.keys(row).find(k => k.toLowerCase() === 'hazırlık süresi') || 'Hazırlık Süresi';
-        let birimKey = Object.keys(row).find(k => k.toLowerCase() === 'birim işlem süresi') || 'Birim İşlem Süresi';
-        let miktarKey = Object.keys(row).find(k => k.toLowerCase() === 'üretilecek miktar') || 'Üretilecek Miktar';
-        let toplamSureKey = Object.keys(row).find(k => k.toLowerCase() === 'toplam süre') || 'Toplam Süre';
-        let saatKey = Object.keys(row).find(k => k.toLowerCase() === 'saat') || 'Saat';
-        let kumulatifKey = Object.keys(row).find(k => k.toLowerCase() === 'kümülatif süre') || 'Kümülatif Süre';
-        
-        const hazirlik = parseFloat(row[hazirlikKey]) || 0;
-        const birim = parseFloat(row[birimKey]) || 0;
-        const miktar = parseFloat(row[miktarKey]) || 0;
-        
-        const reqs = uretimTakipRows.filter(u => u.kod === code);
-        let isDone = false;
-        if (reqs.length > 0) {
-            const totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
-            const stLogs = productionLog.filter(log => log.kod === code && (log.station === stName || log.station === 'Tüm İstasyonlar' || !log.station));
-            const stProd = stLogs.reduce((sum, log) => sum + parseFloat(log.adet), 0.0);
-            if (totalReq > 0 && stProd >= totalReq) {
-                isDone = true;
-            }
-        }
-
-        if (isDone) {
-            row[toplamSureKey] = 0;
-            row[saatKey] = 0;
-        } else {
-            row[toplamSureKey] = hazirlik + (birim * miktar);
-            row[saatKey] = row[toplamSureKey] / 86400;
-        }
-        
-        const saatVal = parseFloat(row[saatKey]) || 0;
-        kumulatif += saatVal;
-        row[kumulatifKey] = kumulatif;
-    }
-}
-
-// -------------------------------------------------------------
-// 8. HAMMADDE SİPARİŞİ VIEW
-// -------------------------------------------------------------
-function renderRawMaterialsTab() {
-    filterAndPaginateRawMaterials();
-}
-
-function filterAndPaginateRawMaterials() {
-    const searchInput = document.getElementById('raw-search');
-    const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
-    const statusSelect = document.getElementById('raw-filter-status');
-    const statusVal = statusSelect ? statusSelect.value : 'all';
-
-    let filtered = rawMaterialsRows;
-
-    if (searchVal) {
-        filtered = filtered.filter(r => {
-            const kod = String(r.kod || '').toLowerCase();
-            const ad = String(r.ad || '').toLowerCase();
-            return kod.includes(searchVal) || ad.includes(searchVal);
-        });
-    }
-
-    if (statusVal === 'needed') {
-        filtered = filtered.filter(r => r.kalanSiparis > 0);
-    } else if (statusVal === 'completed') {
-        filtered = filtered.filter(r => r.kalanSiparis === 0 && r.toplamGereken > 0);
-    }
-
-    // Sıralama (Kalan sipariş miktarına göre azalan)
-    filtered.sort((a, b) => b.kalanSiparis - a.kalanSiparis);
-
-    paginationState.raw.filtered = filtered;
-    paginationState.raw.total = filtered.length;
-
-    // KPI Güncellemeleri
-    const totalVariety = rawMaterialsRows.length;
-    const totalQty = rawMaterialsRows.reduce((sum, r) => sum + r.toplamGereken, 0);
-    const remQty = rawMaterialsRows.reduce((sum, r) => sum + r.kalanSiparis, 0);
-    const compQty = rawMaterialsRows.reduce((sum, r) => sum + r.uretilenDusulen, 0);
-
-    const kpiTotalVariety = document.getElementById('kpi-raw-total-variety');
-    const kpiTotalQty = document.getElementById('kpi-raw-total-qty');
-    const kpiRemQty = document.getElementById('kpi-raw-remaining-qty');
-    const kpiCompQty = document.getElementById('kpi-raw-completed-qty');
-
-    if (kpiTotalVariety) kpiTotalVariety.textContent = totalVariety.toLocaleString();
-    if (kpiTotalQty) kpiTotalQty.textContent = (Math.round(totalQty * 100) / 100).toLocaleString();
-    if (kpiRemQty) kpiRemQty.textContent = (Math.round(remQty * 100) / 100).toLocaleString();
-    if (kpiCompQty) kpiCompQty.textContent = (Math.round(compQty * 100) / 100).toLocaleString();
-
-    renderRawMaterialsTable();
-}
-window.filterAndPaginateRawMaterials = filterAndPaginateRawMaterials;
-
-function renderRawMaterialsTable() {
-    const tbody = document.getElementById('raw-table-body');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    const pState = paginationState.raw;
-    if (pState.total === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="color:var(--text-dim); padding:20px;">Hammadde kaydı bulunamadı.</td></tr>';
-        return;
-    }
-
-    pState.filtered.forEach((row, idx) => {
-        const tr = document.createElement('tr');
-        const isDone = row.kalanSiparis === 0 && row.toplamGereken > 0;
-        const isPartial = row.uretilenDusulen > 0 && row.kalanSiparis > 0;
-        const hasDetails = row.details && row.details.length > 0;
-
-        let badgeHtml = '<span class="badge badge-danger">Sipariş Edilecek</span>';
-        if (isDone) {
-            badgeHtml = '<span class="badge badge-success"><i class="fa-solid fa-check" style="font-size:10px;"></i> Tamamlandı</span>';
-            tr.classList.add('station-row-completed');
-        } else if (isPartial) {
-            badgeHtml = '<span class="badge badge-warning">Kısmi Karşılandı</span>';
-        }
-
-        const detailBtnHtml = hasDetails
-            ? `<button class="raw-detail-btn" title="Parça detaylarını göster" onclick="toggleRawDetail(this, ${idx})" style="background:none;border:1px solid var(--border);border-radius:4px;padding:2px 7px;cursor:pointer;color:var(--text-muted);font-size:11px;margin-left:6px;">▼</button>`
-            : '';
-
-        tr.innerHTML = `
-            <td>${idx + 1}</td>
-            <td style="font-weight:700; color:white; white-space:nowrap;">${row.kod}${detailBtnHtml}</td>
-            <td style="color:var(--text-muted);">${row.ad}</td>
-            <td class="text-right" style="font-weight:600;">${row.toplamGereken % 1 === 0 ? row.toplamGereken : row.toplamGereken.toFixed(2)}</td>
-            <td class="text-right" style="color:var(--success); font-weight:600;">${row.uretilenDusulen % 1 === 0 ? row.uretilenDusulen : row.uretilenDusulen.toFixed(2)}</td>
-            <td class="text-right" style="color:var(--warning); font-weight:700; font-size:14px;">${row.kalanSiparis % 1 === 0 ? row.kalanSiparis : row.kalanSiparis.toFixed(2)}</td>
-            <td>${badgeHtml}</td>
-        `;
-        tr.dataset.detailIdx = idx;
-        tbody.appendChild(tr);
-
-        // Detay satırı (gizli, tıklanınca açılır)
-        if (hasDetails) {
-            const detailTr = document.createElement('tr');
-            detailTr.className = 'raw-detail-row';
-            detailTr.style.display = 'none';
-            detailTr.dataset.parentIdx = idx;
-
-            const detailRows = row.details.map(d => {
-                const birimStr = d.birimMiktar !== 1 ? ` × ${d.birimMiktar} birim/adet` : '';
-                const kalanColor = d.kalanMiktar > 0 ? 'var(--warning)' : 'var(--success)';
-                return `
-                    <tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid var(--border);">
-                        <td style="padding:5px 12px; font-weight:700; color:#a78bfa; white-space:nowrap;">${d.parcaKodu}</td>
-                        <td style="padding:5px 12px; color:var(--text-muted);">Adet: <b style="color:white;">${d.uretilecek}</b>${birimStr}</td>
-                        <td style="padding:5px 12px; text-align:right;">Toplam: <b style="color:white;">${d.toplamMiktar % 1 === 0 ? d.toplamMiktar : d.toplamMiktar.toFixed(2)}</b></td>
-                        <td style="padding:5px 12px; text-align:right;">Kullanılan: <b style="color:var(--success);">${d.uretilenMiktar % 1 === 0 ? d.uretilenMiktar : d.uretilenMiktar.toFixed(2)}</b></td>
-                        <td style="padding:5px 12px; text-align:right;">Kalan: <b style="color:${kalanColor};">${d.kalanMiktar % 1 === 0 ? d.kalanMiktar : d.kalanMiktar.toFixed(2)}</b></td>
-                    </tr>`;
-            }).join('');
-
-            detailTr.innerHTML = `
-                <td colspan="7" style="padding:0; background:rgba(99,102,241,0.05); border-left:3px solid #6366f1;">
-                    <table style="width:100%; border-collapse:collapse; font-size:12px;">
-                        <thead>
-                            <tr style="background:rgba(99,102,241,0.1);">
-                                <th style="padding:5px 12px; text-align:left; color:#a78bfa;">Parça Kodu</th>
-                                <th style="padding:5px 12px; text-align:left; color:#a78bfa;">Üretilecek Adet</th>
-                                <th style="padding:5px 12px; text-align:right; color:#a78bfa;">Toplam Miktar</th>
-                                <th style="padding:5px 12px; text-align:right; color:#a78bfa;">Kullanılan</th>
-                                <th style="padding:5px 12px; text-align:right; color:#a78bfa;">Kalan</th>
-                            </tr>
-                        </thead>
-                        <tbody>${detailRows}</tbody>
-                    </table>
-                </td>
-            `;
-            tbody.appendChild(detailTr);
-        }
-    });
-}
-
-function toggleRawDetail(btn, idx) {
-    const tbody = document.getElementById('raw-table-body');
-    const detailRow = tbody.querySelector(`.raw-detail-row[data-parent-idx="${idx}"]`);
-    if (!detailRow) return;
-    const isOpen = detailRow.style.display !== 'none';
-    detailRow.style.display = isOpen ? 'none' : 'table-row';
-    btn.textContent = isOpen ? '▼' : '▲';
-}
-window.toggleRawDetail = toggleRawDetail;
-
-
-
-function exportRawMaterialsToExcel() {
-    // Sadece sipariş ihtiyacı kalanları (kalanSiparis > 0) al (Tamamlananlar hariç)
-    const neededRows = rawMaterialsRows.filter(r => r.kalanSiparis > 0);
-    
-    if (neededRows.length === 0) {
-        showToast("Sipariş edilecek kalan hammadde bulunamadı (Tüm hammadde ihtiyaçları karşılanmış).", "info");
-        return;
-    }
-
-    // Yeni Excel çalışma kitabı oluştur
-    const wb = XLSX.utils.book_new();
-    
-    // Satır verilerini hazırla (Excel'deki HAMMADDE SİPARİŞ formatı)
-    const exportData = neededRows.map(r => ({
-        "Hammadde Kod": r.kod,
-        "Hammadde / Malzeme Adı": r.ad,
-        "Sipariş Miktarı": r.kalanSiparis % 1 === 0 ? r.kalanSiparis : parseFloat(r.kalanSiparis.toFixed(3))
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    
-    // Sütun genişlikleri ayarla
-    ws['!cols'] = [
-        { wch: 25 }, // Hammadde Kod
-        { wch: 65 }, // Hammadde / Malzeme Adı
-        { wch: 18 }  // Sipariş Miktarı
-    ];
-
-    XLSX.utils.book_append_sheet(wb, ws, "HAMMADDE SİPARİŞ");
-
-    const origFileName = loadedFileName ? loadedFileName.textContent.replace("Yüklenen Dosya: ", "").replace(".xlsx", "") : "Hammadde";
-    const exportName = `${origFileName}_Hammadde_Siparis_Listesi.xlsx`;
-
-    XLSX.writeFile(wb, exportName);
-    showToast(`Kalan hammadde sipariş listesi indirildi: "${exportName}"`, "success");
-}
-window.exportRawMaterialsToExcel = exportRawMaterialsToExcel;
-
-

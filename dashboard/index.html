@@ -46,8 +46,15 @@
                 </div>
             </div>
             <div class="header-actions">
+                <input type="file" id="import-history-input" accept=".json" style="display: none;" onchange="if(this.files.length>0) importProductionHistoryJSON(this.files[0])">
+                <button class="btn btn-secondary" id="import-history-btn" onclick="document.getElementById('import-history-input').click()" title="Üretim geçmişi (uretim_gecmisi.json) yükle">
+                    <i class="fa-solid fa-file-import"></i> Geçmiş Yükle
+                </button>
+                <button class="btn btn-secondary" id="export-history-btn" onclick="exportProductionHistoryJSON()" title="Üretim geçmişi veritabanını (uretim_gecmisi.json) indir">
+                    <i class="fa-solid fa-download"></i> Geçmişi İndir (JSON)
+                </button>
                 <button class="btn btn-secondary" id="change-file-btn">
-                    <i class="fa-solid fa-file-import"></i> Yeni Dosya Yükle
+                    <i class="fa-solid fa-rotate-left"></i> Yeni Dosya Yükle
                 </button>
                 <button class="btn btn-success" id="export-btn">
                     <i class="fa-solid fa-file-export"></i> Güncel Excel Olarak İndir
@@ -82,6 +89,10 @@
                     <button class="nav-item" data-tab="workload">
                         <i class="fa-solid fa-chart-column"></i>
                         <span>İş Yükü & Kapasite</span>
+                    </button>
+                    <button class="nav-item" data-tab="raw-materials">
+                        <i class="fa-solid fa-cubes-stacked"></i>
+                        <span>Hammadde Siparişi</span>
                     </button>
                     <button class="nav-item" data-tab="performance">
                         <i class="fa-solid fa-gauge-high"></i>
@@ -425,7 +436,7 @@
                                         <div id="station-capacity-badge" style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 5px 12px; border-radius: 6px; font-size: 13px;">
                                         </div>
                                     </div>
-                                    <button id="export-station-btn" onclick="exportStationDataToExcel()" class="btn btn-success" title="İstasyonu Excel Olarak İndir" style="padding: 6px 12px; font-size: 13px; border-radius: 6px; animation: pulseExcelBtn 2s infinite ease-in-out;">
+                                    <button id="export-station-btn" class="btn btn-success" title="İstasyonu Excel Olarak İndir" style="padding: 6px 12px; font-size: 13px; border-radius: 6px; animation: pulseExcelBtn 2s infinite ease-in-out;">
                                         <i class="fa-solid fa-file-excel"></i> İndir
                                     </button>
                                 </div>
@@ -518,6 +529,78 @@
                                     <!-- JS tarafından doldurulacak -->
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: Hammadde Siparişi -->
+                <section class="tab-content" id="tab-raw-materials">
+                    <div class="kpi-grid">
+                        <div class="kpi-card glass">
+                            <div class="kpi-icon icon-blue"><i class="fa-solid fa-cubes-stacked"></i></div>
+                            <div class="kpi-info">
+                                <h3>Toplam Hammadde Çeşidi</h3>
+                                <div class="value" id="kpi-raw-total-variety">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass">
+                            <div class="kpi-icon icon-purple"><i class="fa-solid fa-boxes-packing"></i></div>
+                            <div class="kpi-info">
+                                <h3>Toplam Hammadde İhtiyacı</h3>
+                                <div class="value" id="kpi-raw-total-qty">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass">
+                            <div class="kpi-icon icon-orange"><i class="fa-solid fa-truck-ramp-box"></i></div>
+                            <div class="kpi-info">
+                                <h3>Kalan Sipariş İhtiyacı</h3>
+                                <div class="value" id="kpi-raw-remaining-qty">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass">
+                            <div class="kpi-icon icon-green"><i class="fa-solid fa-circle-check"></i></div>
+                            <div class="kpi-info">
+                                <h3>Karşılanan / Üretilen</h3>
+                                <div class="value" id="kpi-raw-completed-qty">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card glass flex-col flex-1 mt-4">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-cubes-stacked text-blue"></i> Hammadde Sipariş Listesi</h2>
+                            <div class="header-filters">
+                                <div class="search-bar">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="raw-search" placeholder="Hammadde kodu veya adı ara..." oninput="filterAndPaginateRawMaterials()">
+                                </div>
+                                <select id="raw-filter-status" class="select-input" onchange="filterAndPaginateRawMaterials()">
+                                    <option value="all">Tüm Hammaddeler</option>
+                                    <option value="needed">Sipariş İhtiyacı Olanlar</option>
+                                    <option value="completed">Tamamlananlar</option>
+                                </select>
+                                <button class="btn btn-success" id="export-raw-excel-btn" style="padding: 6px 14px; font-size: 13px; display: flex; align-items: center; gap: 6px; white-space: nowrap;" title="Sadece kalan sipariş ihtiyacı olan hammaddeleri Excel olarak indir">
+                                    <i class="fa-solid fa-file-excel"></i> Sipariş Listesini İndir
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-wrapper flex-1">
+                            <table class="table" id="raw-table">
+                                <thead>
+                                    <tr>
+                                        <th>Sıra</th>
+                                        <th>Hammadde Kodu</th>
+                                        <th>Hammadde / Malzeme Adı</th>
+                                        <th class="text-right">Toplam İhtiyaç</th>
+                                        <th class="text-right">Üretilen / Düşülen</th>
+                                        <th class="text-right text-orange">Kalan Sipariş Miktarı</th>
+                                        <th>Durum</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="raw-table-body">
+                                    <!-- Hammadde satırları JS tarafından doldurulacak -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </section>
