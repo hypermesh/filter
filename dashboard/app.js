@@ -1174,11 +1174,16 @@ function recalculateAll() {
 
             if (row.parcaKodu) {
                 const pKod = row.parcaKodu;
-                const reqs = uretimTakipRows.filter(u => u.kod === pKod);
-                if (reqs.length > 0) {
-                    totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
+                // Önce kullanıcının değiştirdiği miktara bak (uretimListesiMap), yoksa orijinal Excel değeri
+                if (uretimListesiMap[pKod] !== undefined) {
+                    totalReq = uretimListesiMap[pKod];
                 } else {
-                    totalReq = uretimListesiMap[pKod] || row.uretilecek || 0;
+                    const reqs = uretimTakipRows.filter(u => u.kod === pKod);
+                    if (reqs.length > 0) {
+                        totalReq = reqs.reduce((sum, u) => sum + u.uretilecek, 0.0);
+                    } else {
+                        totalReq = row.uretilecek || 0;
+                    }
                 }
 
                 // Bu parçaya ait üretim logları (Global veya herhangi bir istasyonda girilen en yüksek miktar)

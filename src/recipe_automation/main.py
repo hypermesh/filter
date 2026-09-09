@@ -519,7 +519,11 @@ def filter_id(
         console.print("\n[bold cyan]=== OTOMATİK DEPO EŞLEŞTİRME BAŞLATILIYOR ===[/bold cyan]")
         combined_raw = pd.concat(all_raw_dfs, ignore_index=True) if all_raw_dfs else None
         do_match_depo(
-            out_path, group=group, file_totals=file_totals, raw_df=combined_raw, input_path=path,
+            out_path,
+            group=group,
+            file_totals=file_totals,
+            raw_df=combined_raw,
+            input_path=path,
             create_montaj=create_montaj,
         )
 
@@ -724,7 +728,11 @@ def filter_stock(
         console.print("\n[bold cyan]=== OTOMATİK DEPO EŞLEŞTİRME BAŞLATILIYOR ===[/bold cyan]")
         combined_raw = pd.concat(all_raw_dfs, ignore_index=True) if all_raw_dfs else None
         do_match_depo(
-            out_path, group=group, file_totals=file_totals, raw_df=combined_raw, input_path=path,
+            out_path,
+            group=group,
+            file_totals=file_totals,
+            raw_df=combined_raw,
+            input_path=path,
             create_montaj=create_montaj,
         )
 
@@ -1777,12 +1785,19 @@ def do_match_depo(
             sheet_dfs["Üretim Takip"] = takip_df
 
         # --- YENİ EKLENTİ: KAYNAK DOSYA ÖNCELİK SIRALAMASI VE ÜRETİLMİŞLERİN EN ÜSTE ALINMASI ---
-        from recipe_automation.services.sorter import load_completed_production_records, is_row_completed
+        from recipe_automation.services.sorter import (
+            load_completed_production_records,
+        )
+
         priority_mapping = load_priority_mapping(db_dir)
         completed_records_set = load_completed_production_records(db_dir)
 
-        df_uretim = sort_dataframe(df_uretim, priority_mapping, completed_records_set, sort_completed_to_top=False)
-        matched_df = sort_dataframe(matched_df, priority_mapping, completed_records_set, sort_completed_to_top=False)
+        df_uretim = sort_dataframe(
+            df_uretim, priority_mapping, completed_records_set, sort_completed_to_top=False
+        )
+        matched_df = sort_dataframe(
+            matched_df, priority_mapping, completed_records_set, sort_completed_to_top=False
+        )
 
         for s_name, s_df in sheet_dfs.items():
             # İstasyon sayfalarında ve Üretim Takip'te tamamlananları en üste al
@@ -1833,7 +1848,7 @@ def do_match_depo(
                 sheet_dfs[s_name]["Setup Yükü (%)"] = None
                 sheet_dfs[s_name]["Önerilen Verimli Adet"] = None
                 sheet_dfs[s_name]["Güncel Setup Yükü (%)"] = None
-                
+
                 # --- YENİ: Saat ve Kümülatif Süre sütunlarını ekle ---
                 if "Toplam Süre" in sheet_dfs[s_name].columns:
                     ts_idx = list(sheet_dfs[s_name].columns).index("Toplam Süre")
@@ -2141,11 +2156,7 @@ def do_match_depo(
                             ws[f"{toplam_sure_col_letter}{row_idx}"] = formula
 
                     # YENİ EKLENTİ: Saat ve Kümülatif Süre
-                    if (
-                        toplam_sure_col_letter
-                        and saat_col_letter
-                        and kumulatif_col_letter
-                    ):
+                    if toplam_sure_col_letter and saat_col_letter and kumulatif_col_letter:
                         for row_idx in range(2, ws.max_row + 1):
                             cell_saat = ws[f"{saat_col_letter}{row_idx}"]
                             cell_saat.value = f"={toplam_sure_col_letter}{row_idx}/86400"
@@ -2155,7 +2166,9 @@ def do_match_depo(
                             if row_idx == 2:
                                 cell_kumulatif.value = f"={saat_col_letter}2"
                             else:
-                                cell_kumulatif.value = f"={kumulatif_col_letter}{row_idx-1}+{saat_col_letter}{row_idx}"
+                                cell_kumulatif.value = (
+                                    f"={kumulatif_col_letter}{row_idx-1}+{saat_col_letter}{row_idx}"
+                                )
                             cell_kumulatif.number_format = "[h]:mm"
 
                     # YENİ EKLENTİ: Setup ve Verimlilik Formülleri

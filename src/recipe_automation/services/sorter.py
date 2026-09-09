@@ -107,7 +107,9 @@ def load_completed_production_records(db_dir: str) -> set[tuple[str, str]]:
             if isinstance(data, list):
                 for item in data:
                     if isinstance(item, dict):
-                        k_dosya = str(item.get("kaynak", item.get("kaynak_dosya", ""))).strip().upper()
+                        k_dosya = (
+                            str(item.get("kaynak", item.get("kaynak_dosya", ""))).strip().upper()
+                        )
                         k_kod = str(item.get("kod", item.get("parca_kodu", ""))).strip().upper()
                         is_done = item.get("tamamlandi", True)
                         if k_kod and is_done:
@@ -125,7 +127,9 @@ def is_row_completed(row: pd.Series, completed_set: set[tuple[str, str]]) -> boo
     if not completed_set:
         return False
 
-    kod_col = settings.col_depo_kod if settings.col_depo_kod in row else ("Kod" if "Kod" in row else None)
+    kod_col = (
+        settings.col_depo_kod if settings.col_depo_kod in row else ("Kod" if "Kod" in row else None)
+    )
     if not kod_col:
         return False
 
