@@ -371,11 +371,6 @@ def filter_id(
 
     console.print("\n[bold cyan]=== FİLTRELEME İŞLEMİ BAŞLATILIYOR ===[/bold cyan]")
     haric_tut = False
-    if Confirm.ask(
-        "[bold yellow]Soru:[/bold yellow] Merdane, boru, kaynak vb. parçalar (haric_tutulacak_parcalar.json listesindeki) yoksayılsın mı?",
-        default=False,
-    ):
-        haric_tut = True
 
     create_montaj = True
     if not Confirm.ask(
@@ -580,11 +575,6 @@ def filter_stock(
 
     console.print("\n[bold cyan]=== FİLTRELEME İŞLEMİ BAŞLATILIYOR ===[/bold cyan]")
     haric_tut = False
-    if Confirm.ask(
-        "[bold yellow]Soru:[/bold yellow] Merdane, boru, kaynak vb. parçalar (haric_tutulacak_parcalar.json listesindeki) yoksayılsın mı?",
-        default=False,
-    ):
-        haric_tut = True
 
     create_montaj = True
     if not Confirm.ask(

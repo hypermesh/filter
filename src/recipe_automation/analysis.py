@@ -131,11 +131,8 @@ def run_capacity_analysis():
     else:
         stock_bases = ["kullanilabilir"]
 
-    # 4. Hariç Tutma Sorusu
-    haric_tut = Confirm.ask(
-        "[bold yellow]Soru:[/bold yellow] Merdane, boru, kaynak vb. parçalar (haric_tutulacak_parcalar.json listesindeki) yoksayılsın mı?",
-        default=False,
-    )
+    # 4. Hariç Tutma (Varsayılan olarak hayır, morla işaretlenir)
+    haric_tut = False
 
     # 5. Dosyaları Bul
     input_dir = os.getcwd()
