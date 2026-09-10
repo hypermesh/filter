@@ -3984,13 +3984,30 @@ function renderRawMaterialsTable() {
         const matchInDetails = searchVal && hasDetails && row.details.some(d => String(d.parcaKodu || '').toLowerCase().includes(searchVal));
         const autoOpen = !!matchInDetails;
 
-        let badgeHtml = '<span class="badge badge-danger">Sipariş Edilecek</span>';
-        if (isDone) {
-            badgeHtml = '<span class="badge badge-success"><i class="fa-solid fa-check" style="font-size:10px;"></i> Tamamlandı</span>';
+        // Karşılanma Oranı ve İlerleme Çubuğu
+        const compPct = row.toplamGereken > 0 ? Math.min(100, Math.round((row.uretilenDusulen / row.toplamGereken) * 100)) : (row.uretilenDusulen > 0 ? 100 : 0);
+        let barColor = '#ef4444'; // Kırmızı (Bekliyor)
+        let statusLabel = 'Bekliyor';
+        if (isDone || compPct >= 100) {
+            barColor = 'var(--success)';
+            statusLabel = 'Tamamlandı';
             tr.classList.add('station-row-completed');
-        } else if (isPartial) {
-            badgeHtml = '<span class="badge badge-warning">Kısmi Karşılandı</span>';
+        } else if (compPct > 0) {
+            barColor = 'var(--warning)';
+            statusLabel = 'Karşılanıyor';
         }
+
+        const progressHtml = `
+            <div style="min-width: 120px; display: flex; flex-direction: column; gap: 4px;">
+                <div style="height: 6px; width: 100%; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;">
+                    <div style="width: ${compPct}%; background-color: ${barColor}; height: 100%; border-radius: 3px; transition: width 0.3s ease;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 600;">
+                    <span style="color: ${barColor};">${statusLabel}</span>
+                    <span style="color: var(--text-dim);">${compPct}%</span>
+                </div>
+            </div>
+        `;
 
         const detailBtnHtml = hasDetails
             ? `<button class="raw-detail-btn" title="Parça detaylarını göster" onclick="toggleRawDetail(this, ${idx})" style="background:${autoOpen ? 'rgba(99,102,241,0.2)' : 'none'};border:1px solid ${autoOpen ? '#6366f1' : 'var(--border)'};border-radius:4px;padding:2px 7px;cursor:pointer;color:${autoOpen ? '#a78bfa' : 'var(--text-muted)'};font-size:11px;margin-left:6px;">${autoOpen ? '▲' : '▼'}</button>`
@@ -4003,7 +4020,7 @@ function renderRawMaterialsTable() {
             <td class="text-right" style="font-weight:600;">${row.toplamGereken % 1 === 0 ? row.toplamGereken : row.toplamGereken.toFixed(2)}</td>
             <td class="text-right" style="color:var(--success); font-weight:600;">${row.uretilenDusulen % 1 === 0 ? row.uretilenDusulen : row.uretilenDusulen.toFixed(2)}</td>
             <td class="text-right" style="color:var(--warning); font-weight:700; font-size:14px;">${row.kalanSiparis % 1 === 0 ? row.kalanSiparis : row.kalanSiparis.toFixed(2)}</td>
-            <td>${badgeHtml}</td>
+            <td>${progressHtml}</td>
         `;
         tr.dataset.detailIdx = idx;
         tbody.appendChild(tr);
