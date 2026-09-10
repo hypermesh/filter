@@ -1954,8 +1954,10 @@ function renderTakipTable() {
         
         tr.innerHTML = `
             <td style="font-size:12px; color:var(--text-muted);">${r.kaynak}</td>
-            <td>${r.oncelik}</td>
-            <td style="font-weight:700; color:white;">${r.kod}</td>
+            <td style="font-weight:700; color:white; white-space:nowrap;">
+                ${r.kod}
+                <button class="part-img-btn" onclick="event.stopPropagation(); openPartImageModal('${r.kod}', '')" title="Görseli Görüntüle"><i class="fa-solid fa-image"></i></button>
+            </td>
             <td class="text-right" style="font-weight:600;">${r.uretilecek}</td>
             <td class="text-right" style="color:${r.uretilen > 0 ? 'var(--success)' : 'var(--text-dim)'};">${r.uretilen}</td>
             <td class="text-right" style="color:${r.kalan > 0 ? 'var(--danger)' : 'var(--text-dim)'};">${r.kalan}</td>
@@ -2668,11 +2670,14 @@ function renderStationTable(headers) {
                 if (h === 'Kod') {
                     td.style.fontWeight = '700';
                     td.style.whiteSpace = 'nowrap';
+                    const matName = row['Malzeme Adı'] || '';
+                    const imgBtn = `<button class="part-img-btn" onclick="event.stopPropagation(); openPartImageModal('${code}', '${encodeURIComponent(matName)}')" title="Görseli Görüntüle"><i class="fa-solid fa-image"></i></button>`;
                     if (excludedHariciKodlar.has(code)) {
                         td.style.color = '#fda4af';
-                        td.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>${td.textContent}`;
+                        td.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>${code}${imgBtn}`;
                     } else {
                         td.style.color = 'white';
+                        td.innerHTML = `${code}${imgBtn}`;
                     }
                 } else if (h === 'Malzeme Adı') {
                     td.style.color = 'var(--text-muted)';
@@ -3082,8 +3087,11 @@ function renderUlTable() {
 
         tr.innerHTML = `
             <td style="font-size:12px; color:var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.kaynak}">${row.kaynak}</td>
-            <td>${row.oncelik}</td>
-            <td style="font-weight:700; white-space:nowrap; color:${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '#fda4af' : 'white'};">${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>' : ''}${row.kod}</td>
+            <td style="font-weight:700; white-space:nowrap; color:${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '#fda4af' : 'white'};">
+                ${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>' : ''}
+                ${row.kod}
+                <button class="part-img-btn" onclick="openPartImageModal('${row.kod}', '${encodeURIComponent(row.malzeme || '')}')" title="Görseli Görüntüle"><i class="fa-solid fa-image"></i></button>
+            </td>
             <td style="color:var(--text-dim);">${row.malzeme}</td>
             <td style="font-size:12px; color:var(--text-muted);">${row.hKod}</td>
             <td style="color:var(--text-dim);">${row.hammadde}</td>
@@ -4008,7 +4016,9 @@ function renderRawMaterialsTable() {
             detailTr.dataset.parentIdx = idx;
 
             const detailRows = row.details.map(d => {
-                const birimStr = d.birimMiktar !== 1 ? ` × ${d.birimMiktar} birim/adet` : '';
+                const bMiktarFloat = parseFloat(d.birimMiktar) || 0;
+                const mmVal = Math.round(bMiktarFloat * 1000 * 100) / 100;
+                const birimStr = ` × ${mmVal} mm/adet`;
                 const kalanColor = d.kalanMiktar > 0 ? 'var(--warning)' : 'var(--success)';
                 const isMatchedPart = searchVal && String(d.parcaKodu || '').toLowerCase().includes(searchVal);
                 const partBg = isMatchedPart ? 'rgba(99,102,241,0.18)' : 'rgba(255,255,255,0.03)';
@@ -4016,7 +4026,9 @@ function renderRawMaterialsTable() {
                 return `
                     <tr style="background:${partBg}; border-bottom:1px solid var(--border); ${partBorder}">
                         <td style="padding:5px 12px; font-weight:700; color:${isMatchedPart ? '#38bdf8' : '#a78bfa'}; white-space:nowrap;">
-                            ${d.parcaKodu}${isMatchedPart ? ' <span style="font-size:10px; background:#6366f1; color:white; padding:1px 5px; border-radius:3px; margin-left:4px;">Eşleşti</span>' : ''}
+                            ${d.parcaKodu}
+                            <button class="part-img-btn" onclick="openPartImageModal('${d.parcaKodu}', '')" title="Parça Görselini Görüntüle"><i class="fa-solid fa-image"></i></button>
+                            ${isMatchedPart ? ' <span style="font-size:10px; background:#6366f1; color:white; padding:1px 5px; border-radius:3px; margin-left:4px;">Eşleşti</span>' : ''}
                         </td>
                         <td style="padding:5px 12px; color:var(--text-muted);">Adet: <b style="color:white;">${d.uretilecek}</b>${birimStr}</td>
                         <td style="padding:5px 12px; text-align:right;">Toplam: <b style="color:white;">${d.toplamMiktar % 1 === 0 ? d.toplamMiktar : d.toplamMiktar.toFixed(2)}</b></td>
@@ -4095,5 +4107,110 @@ function exportRawMaterialsToExcel() {
     showToast(`Kalan hammadde sipariş listesi indirildi: "${exportName}"`, "success");
 }
 window.exportRawMaterialsToExcel = exportRawMaterialsToExcel;
+
+// -------------------------------------------------------------
+// 9. PARÇA GÖRSELİ MODALI (POP-UP)
+// -------------------------------------------------------------
+function openPartImageModal(kod, matName) {
+    const modal = document.getElementById('part-image-modal');
+    const titleEl = document.getElementById('part-img-modal-title');
+    const container = document.getElementById('part-img-preview-container');
+    const infoEl = document.getElementById('part-img-modal-info');
+    if (!modal || !container) return;
+
+    const decodedMatName = matName ? decodeURIComponent(matName) : '';
+    const cleanKod = String(kod || '').trim();
+    
+    if (titleEl) {
+        titleEl.textContent = `Parça Görseli: ${cleanKod}${decodedMatName ? ' - ' + decodedMatName : ''}`;
+    }
+    if (infoEl) {
+        infoEl.innerHTML = `<i class="fa-solid fa-folder-open"></i> dashboard/images/parcalar/${cleanKod}.png`;
+    }
+
+    container.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--text-muted); padding:30px;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:32px; color:#818cf8;"></i>
+            <span style="font-size:13px;">Görsel aranıyor...</span>
+        </div>
+    `;
+
+    modal.classList.add('active');
+
+    // Uzantı deneme sırası: .png -> .jpg -> .jpeg -> .webp
+    const extensions = ['png', 'jpg', 'jpeg', 'webp', 'PNG', 'JPG'];
+    let extIndex = 0;
+
+    function tryNextExtension() {
+        if (extIndex >= extensions.length) {
+            // Hiçbiri bulunamadı
+            container.innerHTML = `
+                <div style="text-align:center; padding:35px 20px; max-width:440px;">
+                    <div style="width:64px; height:64px; border-radius:50%; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.25); display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+                        <i class="fa-regular fa-image" style="font-size:28px; color:#818cf8;"></i>
+                    </div>
+                    <h4 style="margin:0 0 8px 0; color:white; font-size:16px;">Görsel Henüz Eklenmemiş</h4>
+                    <p style="color:var(--text-muted); font-size:13px; line-height:1.5; margin:0 0 16px 0;">
+                        Bu parça için sistemde görsel bulunamadı.
+                    </p>
+                    <div style="background:rgba(0,0,0,0.4); border:1px dashed rgba(99,102,241,0.3); border-radius:8px; padding:12px; font-size:12px; color:#c7d2fe; text-align:left;">
+                        <i class="fa-solid fa-circle-info" style="color:#818cf8; margin-right:4px;"></i> <b>Nasıl Eklenir?</b><br>
+                        Görselinizi aşağıdaki konuma bu adla kopyalayın:<br>
+                        <code style="display:block; margin-top:6px; background:#1e1b4b; padding:6px 8px; border-radius:4px; color:#38bdf8; word-break:break-all;">dashboard/images/parcalar/${cleanKod}.png</code>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        const ext = extensions[extIndex++];
+        const imgSrc = `images/parcalar/${cleanKod}.${ext}?v=${Date.now()}`;
+        const img = new Image();
+
+        img.onload = function() {
+            container.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
+                    <img src="${imgSrc}" alt="${cleanKod}" style="max-width:100%; max-height:55vh; object-fit:contain; border-radius:8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <div style="margin-top:10px; font-size:11.5px; color:var(--text-dim); display:flex; gap:12px;">
+                        <span><i class="fa-solid fa-file-image"></i> ${cleanKod}.${ext}</span>
+                        <span><i class="fa-solid fa-expand"></i> ${this.naturalWidth} x ${this.naturalHeight} px</span>
+                    </div>
+                </div>
+            `;
+        };
+
+        img.onerror = function() {
+            tryNextExtension();
+        };
+
+        img.src = imgSrc;
+    }
+
+    tryNextExtension();
+}
+
+function closePartImageModal() {
+    const modal = document.getElementById('part-image-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+function handlePartModalOverlayClick(event) {
+    if (event.target.id === 'part-image-modal') {
+        closePartImageModal();
+    }
+}
+
+// ESC tuşu ile modal kapatma
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePartImageModal();
+    }
+});
+
+window.openPartImageModal = openPartImageModal;
+window.closePartImageModal = closePartImageModal;
+window.handlePartModalOverlayClick = handlePartModalOverlayClick;
 
 
