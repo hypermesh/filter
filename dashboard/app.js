@@ -4142,54 +4142,80 @@ function openPartImageModal(kod, matName) {
         titleEl.textContent = `Parça Görseli: ${cleanKod}${decodedMatName ? ' - ' + decodedMatName : ''}`;
     }
     if (infoEl) {
-        infoEl.innerHTML = `<i class="fa-solid fa-folder-open"></i> dashboard/images/parcalar/${cleanKod}.png`;
+        infoEl.innerHTML = `<i class="fa-solid fa-folder-open"></i> dashboard/images/parcalar/${cleanKod}.jpg (veya .png)`;
     }
 
     container.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--text-muted); padding:30px;">
             <i class="fa-solid fa-spinner fa-spin" style="font-size:32px; color:#818cf8;"></i>
-            <span style="font-size:13px;">Görsel aranıyor...</span>
+            <span style="font-size:13px;">Görsel aranıyor (${cleanKod})...</span>
         </div>
     `;
 
     modal.classList.add('active');
 
-    // Uzantı deneme sırası: .png -> .jpg -> .jpeg -> .webp
-    const extensions = ['png', 'jpg', 'jpeg', 'webp', 'PNG', 'JPG'];
-    let extIndex = 0;
+    // file:// protokolünde ?v= query param DOSYA YOLUNU BOZAR! Sadece http(s) iken eklenir.
+    const isHttp = window.location.protocol.startsWith('http');
+    const queryParam = isHttp ? `?v=${Date.now()}` : '';
 
-    function tryNextExtension() {
-        if (extIndex >= extensions.length) {
+    // Denenecek olası dosya adları ve uzantılar
+    const kodVariants = [cleanKod];
+    // Baştaki sıfırları atılmış varyant (Örn: 05540 -> 5540)
+    const strippedZero = cleanKod.replace(/^0+/, '');
+    if (strippedZero && strippedZero !== cleanKod) {
+        kodVariants.push(strippedZero);
+    }
+    // Tire veya alt çizgi temizliği
+    const noSpecial = cleanKod.replace(/[\/\\]/g, '_');
+    if (noSpecial !== cleanKod) {
+        kodVariants.push(noSpecial);
+    }
+
+    const extensions = ['jpg', 'png', 'jpeg', 'webp', 'JPG', 'PNG'];
+    const searchQueue = [];
+    kodVariants.forEach(k => {
+        extensions.forEach(ext => {
+            searchQueue.push({ kod: k, ext: ext, path: `images/parcalar/${k}.${ext}${queryParam}` });
+        });
+    });
+
+    let queueIndex = 0;
+
+    function tryNext() {
+        if (queueIndex >= searchQueue.length) {
             // Hiçbiri bulunamadı
             container.innerHTML = `
-                <div style="text-align:center; padding:35px 20px; max-width:440px;">
-                    <div style="width:64px; height:64px; border-radius:50%; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.25); display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+                <div style="text-align:center; padding:30px 20px; max-width:460px;">
+                    <div style="width:64px; height:64px; border-radius:50%; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.25); display:inline-flex; align-items:center; justify-content:center; margin-bottom:14px;">
                         <i class="fa-regular fa-image" style="font-size:28px; color:#818cf8;"></i>
                     </div>
-                    <h4 style="margin:0 0 8px 0; color:white; font-size:16px;">Görsel Henüz Eklenmemiş</h4>
-                    <p style="color:var(--text-muted); font-size:13px; line-height:1.5; margin:0 0 16px 0;">
-                        Bu parça için sistemde görsel bulunamadı.
+                    <h4 style="margin:0 0 8px 0; color:white; font-size:16px;">Görsel Bulunamadı</h4>
+                    <p style="color:var(--text-muted); font-size:13px; line-height:1.5; margin:0 0 14px 0;">
+                        <b>${cleanKod}</b> kodlu parça için klasörde görsel dosyası tespit edilemedi.
                     </p>
-                    <div style="background:rgba(0,0,0,0.4); border:1px dashed rgba(99,102,241,0.3); border-radius:8px; padding:12px; font-size:12px; color:#c7d2fe; text-align:left;">
-                        <i class="fa-solid fa-circle-info" style="color:#818cf8; margin-right:4px;"></i> <b>Nasıl Eklenir?</b><br>
-                        Görselinizi aşağıdaki konuma bu adla kopyalayın:<br>
-                        <code style="display:block; margin-top:6px; background:#1e1b4b; padding:6px 8px; border-radius:4px; color:#38bdf8; word-break:break-all;">dashboard/images/parcalar/${cleanKod}.png</code>
+                    <div style="background:rgba(0,0,0,0.45); border:1px dashed rgba(99,102,241,0.3); border-radius:8px; padding:12px; font-size:12px; color:#c7d2fe; text-align:left; margin-bottom:14px;">
+                        <i class="fa-solid fa-circle-info" style="color:#818cf8; margin-right:4px;"></i> <b>Klasör Konumu:</b><br>
+                        Görselinizi aşağıdaki konuma bu adla yerleştirdiğinizde otomatik algılanır:<br>
+                        <code style="display:block; margin-top:6px; background:#1e1b4b; padding:6px 8px; border-radius:4px; color:#38bdf8; word-break:break-all;">dashboard/images/parcalar/${cleanKod}.jpg (veya .png)</code>
                     </div>
+                    <input type="file" id="part-file-browser" accept="image/*" style="display:none;" onchange="handleDirectImagePreview(this)">
+                    <button class="btn btn-primary btn-sm" onclick="document.getElementById('part-file-browser').click()" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 14px;">
+                        <i class="fa-solid fa-upload"></i> Bilgisayardan Görsel Seçip Göster
+                    </button>
                 </div>
             `;
             return;
         }
 
-        const ext = extensions[extIndex++];
-        const imgSrc = `images/parcalar/${cleanKod}.${ext}?v=${Date.now()}`;
+        const item = searchQueue[queueIndex++];
         const img = new Image();
 
         img.onload = function() {
             container.innerHTML = `
                 <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
-                    <img src="${imgSrc}" alt="${cleanKod}" style="max-width:100%; max-height:55vh; object-fit:contain; border-radius:8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                    <div style="margin-top:10px; font-size:11.5px; color:var(--text-dim); display:flex; gap:12px;">
-                        <span><i class="fa-solid fa-file-image"></i> ${cleanKod}.${ext}</span>
+                    <img src="${item.path}" alt="${cleanKod}" style="max-width:100%; max-height:55vh; object-fit:contain; border-radius:8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <div style="margin-top:10px; font-size:11.5px; color:var(--text-dim); display:flex; gap:16px;">
+                        <span><i class="fa-solid fa-file-image"></i> ${item.kod}.${item.ext}</span>
                         <span><i class="fa-solid fa-expand"></i> ${this.naturalWidth} x ${this.naturalHeight} px</span>
                     </div>
                 </div>
@@ -4197,14 +4223,36 @@ function openPartImageModal(kod, matName) {
         };
 
         img.onerror = function() {
-            tryNextExtension();
+            tryNext();
         };
 
-        img.src = imgSrc;
+        img.src = item.path;
     }
 
-    tryNextExtension();
+    tryNext();
 }
+
+function handleDirectImagePreview(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        const container = document.getElementById('part-img-preview-container');
+        reader.onload = function(e) {
+            if (container) {
+                container.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
+                        <img src="${e.target.result}" alt="Önizleme" style="max-width:100%; max-height:55vh; object-fit:contain; border-radius:8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <div style="margin-top:10px; font-size:11.5px; color:var(--success); display:flex; gap:8px;">
+                            <span><i class="fa-solid fa-check-circle"></i> Seçilen Görsel Yüklendi: ${file.name}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+window.handleDirectImagePreview = handleDirectImagePreview;
 
 function closePartImageModal() {
     const modal = document.getElementById('part-image-modal');
