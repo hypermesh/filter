@@ -3915,7 +3915,8 @@ function filterAndPaginateRawMaterials() {
         filtered = filtered.filter(r => {
             const kod = String(r.kod || '').toLowerCase();
             const ad = String(r.ad || '').toLowerCase();
-            return kod.includes(searchVal) || ad.includes(searchVal);
+            const matchInDetails = Array.isArray(r.details) && r.details.some(d => String(d.parcaKodu || '').toLowerCase().includes(searchVal));
+            return kod.includes(searchVal) || ad.includes(searchVal) || matchInDetails;
         });
     }
 
@@ -3956,6 +3957,9 @@ function renderRawMaterialsTable() {
     if (!tbody) return;
     tbody.innerHTML = '';
 
+    const searchInput = document.getElementById('raw-search');
+    const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
     const pState = paginationState.raw;
     if (pState.total === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="color:var(--text-dim); padding:20px;">Hammadde kaydı bulunamadı.</td></tr>';
@@ -3968,6 +3972,10 @@ function renderRawMaterialsTable() {
         const isPartial = row.uretilenDusulen > 0 && row.kalanSiparis > 0;
         const hasDetails = row.details && row.details.length > 0;
 
+        // Eğer aramada alt parça kodu eşleştiyse detay paneli otomatik açık gelsin
+        const matchInDetails = searchVal && hasDetails && row.details.some(d => String(d.parcaKodu || '').toLowerCase().includes(searchVal));
+        const autoOpen = !!matchInDetails;
+
         let badgeHtml = '<span class="badge badge-danger">Sipariş Edilecek</span>';
         if (isDone) {
             badgeHtml = '<span class="badge badge-success"><i class="fa-solid fa-check" style="font-size:10px;"></i> Tamamlandı</span>';
@@ -3977,7 +3985,7 @@ function renderRawMaterialsTable() {
         }
 
         const detailBtnHtml = hasDetails
-            ? `<button class="raw-detail-btn" title="Parça detaylarını göster" onclick="toggleRawDetail(this, ${idx})" style="background:none;border:1px solid var(--border);border-radius:4px;padding:2px 7px;cursor:pointer;color:var(--text-muted);font-size:11px;margin-left:6px;">▼</button>`
+            ? `<button class="raw-detail-btn" title="Parça detaylarını göster" onclick="toggleRawDetail(this, ${idx})" style="background:${autoOpen ? 'rgba(99,102,241,0.2)' : 'none'};border:1px solid ${autoOpen ? '#6366f1' : 'var(--border)'};border-radius:4px;padding:2px 7px;cursor:pointer;color:${autoOpen ? '#a78bfa' : 'var(--text-muted)'};font-size:11px;margin-left:6px;">${autoOpen ? '▲' : '▼'}</button>`
             : '';
 
         tr.innerHTML = `
@@ -3992,19 +4000,24 @@ function renderRawMaterialsTable() {
         tr.dataset.detailIdx = idx;
         tbody.appendChild(tr);
 
-        // Detay satırı (gizli, tıklanınca açılır)
+        // Detay satırı
         if (hasDetails) {
             const detailTr = document.createElement('tr');
             detailTr.className = 'raw-detail-row';
-            detailTr.style.display = 'none';
+            detailTr.style.display = autoOpen ? 'table-row' : 'none';
             detailTr.dataset.parentIdx = idx;
 
             const detailRows = row.details.map(d => {
                 const birimStr = d.birimMiktar !== 1 ? ` × ${d.birimMiktar} birim/adet` : '';
                 const kalanColor = d.kalanMiktar > 0 ? 'var(--warning)' : 'var(--success)';
+                const isMatchedPart = searchVal && String(d.parcaKodu || '').toLowerCase().includes(searchVal);
+                const partBg = isMatchedPart ? 'rgba(99,102,241,0.18)' : 'rgba(255,255,255,0.03)';
+                const partBorder = isMatchedPart ? 'border-left: 3px solid #6366f1;' : '';
                 return `
-                    <tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid var(--border);">
-                        <td style="padding:5px 12px; font-weight:700; color:#a78bfa; white-space:nowrap;">${d.parcaKodu}</td>
+                    <tr style="background:${partBg}; border-bottom:1px solid var(--border); ${partBorder}">
+                        <td style="padding:5px 12px; font-weight:700; color:${isMatchedPart ? '#38bdf8' : '#a78bfa'}; white-space:nowrap;">
+                            ${d.parcaKodu}${isMatchedPart ? ' <span style="font-size:10px; background:#6366f1; color:white; padding:1px 5px; border-radius:3px; margin-left:4px;">Eşleşti</span>' : ''}
+                        </td>
                         <td style="padding:5px 12px; color:var(--text-muted);">Adet: <b style="color:white;">${d.uretilecek}</b>${birimStr}</td>
                         <td style="padding:5px 12px; text-align:right;">Toplam: <b style="color:white;">${d.toplamMiktar % 1 === 0 ? d.toplamMiktar : d.toplamMiktar.toFixed(2)}</b></td>
                         <td style="padding:5px 12px; text-align:right;">Kullanılan: <b style="color:var(--success);">${d.uretilenMiktar % 1 === 0 ? d.uretilenMiktar : d.uretilenMiktar.toFixed(2)}</b></td>
