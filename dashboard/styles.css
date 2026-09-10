@@ -1423,49 +1423,67 @@ tr.station-row-overproduced td:nth-child(2) { /* Kod */
 }
 
 /* --- PARÇA GÖRSELİ MODAL & BUTON STILLERI --- */
-.part-img-btn {
-    display: inline-flex;
+.code-cell-wrapper {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    margin-left: 6px;
-    background: rgba(99, 102, 241, 0.12);
-    border: 1px solid rgba(99, 102, 241, 0.35);
-    border-radius: 5px;
-    color: #a78bfa;
-    font-size: 11px;
-    cursor: pointer;
-    vertical-align: middle;
-    transition: all 0.2s ease;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+}
+.code-cell-text {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.part-img-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    height: 24px !important;
+    background: rgba(99, 102, 241, 0.15) !important;
+    border: 1px solid rgba(99, 102, 241, 0.4) !important;
+    border-radius: 6px !important;
+    color: #a78bfa !important;
+    font-size: 11.5px !important;
+    cursor: pointer !important;
+    vertical-align: middle !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    flex-shrink: 0 !important;
+}
+.part-img-btn * {
+    pointer-events: none !important;
 }
 .part-img-btn:hover {
-    background: rgba(99, 102, 241, 0.35);
-    border-color: #818cf8;
-    color: #ffffff;
-    transform: scale(1.1);
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    background: #6366f1 !important;
+    border-color: #a5b4fc !important;
+    color: #ffffff !important;
+    transform: scale(1.18) !important;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.7) !important;
+    cursor: pointer !important;
 }
 
 .part-image-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(4, 7, 18, 0.85);
-    backdrop-filter: blur(8px);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(4, 7, 18, 0.88) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    z-index: 999999 !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.25s ease;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 .part-image-modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 .part-image-modal-content {
     background: #111827;

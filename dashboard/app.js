@@ -1954,9 +1954,14 @@ function renderTakipTable() {
         
         tr.innerHTML = `
             <td style="font-size:12px; color:var(--text-muted);">${r.kaynak}</td>
-            <td style="font-weight:700; color:white; white-space:nowrap;">
-                ${r.kod}
-                <button class="part-img-btn" onclick="event.stopPropagation(); openPartImageModal('${r.kod}', '')" title="Görseli Görüntüle"><i class="fa-solid fa-image"></i></button>
+            <td>${r.oncelik}</td>
+            <td style="white-space:nowrap;">
+                <div class="code-cell-wrapper">
+                    <span class="code-cell-text" style="color:white;">${r.kod}</span>
+                    <button type="button" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${r.kod}')" title="Görseli Görüntüle">
+                        <i class="fa-solid fa-image"></i>
+                    </button>
+                </div>
             </td>
             <td class="text-right" style="font-weight:600;">${r.uretilecek}</td>
             <td class="text-right" style="color:${r.uretilen > 0 ? 'var(--success)' : 'var(--text-dim)'};">${r.uretilen}</td>
@@ -2668,17 +2673,19 @@ function renderStationTable(headers) {
                 
                 // Styling specific columns
                 if (h === 'Kod') {
-                    td.style.fontWeight = '700';
                     td.style.whiteSpace = 'nowrap';
-                    const matName = row['Malzeme Adı'] || '';
-                    const imgBtn = `<button class="part-img-btn" onclick="event.stopPropagation(); openPartImageModal('${code}', '${encodeURIComponent(matName)}')" title="Görseli Görüntüle"><i class="fa-solid fa-image"></i></button>`;
-                    if (excludedHariciKodlar.has(code)) {
-                        td.style.color = '#fda4af';
-                        td.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>${code}${imgBtn}`;
-                    } else {
-                        td.style.color = 'white';
-                        td.innerHTML = `${code}${imgBtn}`;
-                    }
+                    const isHarici = excludedHariciKodlar.has(code);
+                    const hariciIcon = isHarici ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; color:#fda4af;" title="Harici İşlem / Harici Kod"></i>' : '';
+                    const textColor = isHarici ? '#fda4af' : 'white';
+                    
+                    td.innerHTML = `
+                        <div class="code-cell-wrapper">
+                            <span class="code-cell-text" style="color:${textColor};">${hariciIcon}${code}</span>
+                            <button type="button" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${code}')" title="Görseli Görüntüle">
+                                <i class="fa-solid fa-image"></i>
+                            </button>
+                        </div>
+                    `;
                 } else if (h === 'Malzeme Adı') {
                     td.style.color = 'var(--text-muted)';
                 } else if (h === 'Hammadde') {
@@ -3087,10 +3094,17 @@ function renderUlTable() {
 
         tr.innerHTML = `
             <td style="font-size:12px; color:var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.kaynak}">${row.kaynak}</td>
-            <td style="font-weight:700; white-space:nowrap; color:${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '#fda4af' : 'white'};">
-                ${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>' : ''}
-                ${row.kod}
-                <button class="part-img-btn" onclick="openPartImageModal('${row.kod}', '${encodeURIComponent(row.malzeme || '')}')" title="Görseli Görüntüle"><i class="fa-solid fa-image"></i></button>
+            <td>${row.oncelik}</td>
+            <td style="white-space:nowrap;">
+                <div class="code-cell-wrapper">
+                    <span class="code-cell-text" style="color:${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '#fda4af' : 'white'};">
+                        ${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>' : ''}
+                        ${row.kod}
+                    </span>
+                    <button type="button" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${row.kod}')" title="Görseli Görüntüle">
+                        <i class="fa-solid fa-image"></i>
+                    </button>
+                </div>
             </td>
             <td style="color:var(--text-dim);">${row.malzeme}</td>
             <td style="font-size:12px; color:var(--text-muted);">${row.hKod}</td>
@@ -4152,6 +4166,7 @@ function openPartImageModal(kod, matName) {
         </div>
     `;
 
+    modal.style.display = 'flex';
     modal.classList.add('active');
 
     // file:// protokolünde ?v= query param DOSYA YOLUNU BOZAR! Sadece http(s) iken eklenir.
@@ -4258,6 +4273,7 @@ function closePartImageModal() {
     const modal = document.getElementById('part-image-modal');
     if (modal) {
         modal.classList.remove('active');
+        modal.style.display = 'none';
     }
 }
 
