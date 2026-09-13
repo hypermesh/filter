@@ -3689,118 +3689,131 @@ function renderWorkloadTab() {
 
     if (kpiContainer) {
         kpiContainer.innerHTML = `
-            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
-                <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
-                    <span>Aktif İstasyonlar</span>
-                    <span style="background: rgba(59,130,246,0.15); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-industry text-blue" style="font-size: 13px;"></i></span>
-                </div>
-                <div style="margin: 10px 0 4px 0;">
-                    <span style="font-size: 26px; font-weight: 800; color: var(--text-main);">${data.length}</span>
-                    <span style="font-size: 13px; font-weight: 500; color: var(--text-dim); margin-left: 4px;">İstasyon</span>
-                </div>
-                <div style="font-size: 12px; color: #38bdf8; display: flex; align-items: center; gap: 4px;">
-                    <i class="fa-solid fa-circle-check" style="font-size: 10px;"></i> Tüm hatlar takipte
-                </div>
-            </div>
-
-            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
-                <div style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
-                    <span>Toplam İş Yükü</span>
-                    <span style="background: rgba(245,158,11,0.15); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-clock text-yellow" style="font-size: 13px;"></i></span>
-                </div>
-                <div style="margin: 10px 0 4px 0;">
-                    <span style="font-size: 26px; font-weight: 800; color: var(--text-main);">${grandTotalHours.toFixed(1)}</span>
-                    <span style="font-size: 13px; font-weight: 500; color: var(--text-dim); margin-left: 4px;">Saat</span>
-                </div>
-                <div style="font-size: 12px; color: var(--text-dim);">Tüm parçaların toplamı</div>
-            </div>
-
-            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.04); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
-                <div style="font-size: 11px; color: #f87171; text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
-                    <span>🚨 En Yoğun (Darboğaz)</span>
-                    <span style="background: rgba(239,68,68,0.2); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 13px;"></i></span>
-                </div>
-                <div style="margin: 8px 0 4px 0;">
-                    <div style="font-size: 18px; font-weight: 700; color: #f87171; word-break: break-word; line-height: 1.25;" title="${maxItem ? maxItem.name : ''}">
-                        ${maxItem ? maxItem.name : '-'}
+            <div class="kpi-card glass" style="padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; min-width: 0; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                    <div style="background: rgba(59,130,246,0.15); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fa-solid fa-industry text-blue" style="font-size: 14px;"></i>
+                    </div>
+                    <div style="min-width: 0;">
+                        <div style="font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Aktif İstasyon</div>
+                        <div style="font-size: 17px; font-weight: 800; color: white; line-height: 1.2;">${data.length} <span style="font-size: 11.5px; font-weight: 500; color: var(--text-dim);">İstasyon</span></div>
                     </div>
                 </div>
-                <div style="font-size: 13px; color: #fca5a5; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                    ${maxItem ? `<span style="font-weight:700; font-size:14px;">${maxItem.tahminiGun.toFixed(1)} İş Günü</span> <span style="opacity:0.8; font-size:12px;">(${maxItem.totalHours.toFixed(1)} Saat)</span>` : '-'}
+                <div style="font-size: 11px; color: #38bdf8; white-space: nowrap; background: rgba(59,130,246,0.1); padding: 2px 7px; border-radius: 4px;">
+                    <i class="fa-solid fa-circle-check" style="font-size: 9px;"></i> Takipte
                 </div>
             </div>
 
-            <div class="kpi-card glass" style="padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.04); display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
-                <div style="font-size: 11px; color: #34d399; text-transform: uppercase; font-weight: 700; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px;">
-                    <span>🟢 En Müsait İstasyon</span>
-                    <span style="background: rgba(16,185,129,0.2); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-feather" style="color: #10b981; font-size: 13px;"></i></span>
-                </div>
-                <div style="margin: 8px 0 4px 0;">
-                    <div style="font-size: 18px; font-weight: 700; color: #34d399; word-break: break-word; line-height: 1.25;" title="${minItem ? minItem.name : ''}">
-                        ${minItem ? minItem.name : '-'}
+            <div class="kpi-card glass" style="padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; min-width: 0; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                    <div style="background: rgba(245,158,11,0.15); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fa-solid fa-clock text-yellow" style="font-size: 14px;"></i>
+                    </div>
+                    <div style="min-width: 0;">
+                        <div style="font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Toplam İş Yükü</div>
+                        <div style="font-size: 17px; font-weight: 800; color: white; line-height: 1.2;">${grandTotalHours.toFixed(1)} <span style="font-size: 11.5px; font-weight: 500; color: var(--text-dim);">Saat</span></div>
                     </div>
                 </div>
-                <div style="font-size: 13px; color: #6ee7b7; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                    ${minItem ? `<span style="font-weight:700; font-size:14px;">${minItem.tahminiGun.toFixed(1)} İş Günü</span> <span style="opacity:0.8; font-size:12px;">(${minItem.totalHours.toFixed(1)} Saat)</span>` : '-'}
+                <div style="font-size: 11px; color: #fbbf24; white-space: nowrap; background: rgba(245,158,11,0.1); padding: 2px 7px; border-radius: 4px;">
+                    Toplam Plan
+                </div>
+            </div>
+
+            <div class="kpi-card glass" style="padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); display: flex; align-items: center; justify-content: space-between; min-width: 0; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden;">
+                    <div style="background: rgba(239,68,68,0.2); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 14px;"></i>
+                    </div>
+                    <div style="min-width: 0; overflow: hidden;">
+                        <div style="font-size: 10.5px; color: #f87171; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">🚨 En Yoğun</div>
+                        <div style="font-size: 14px; font-weight: 800; color: #fca5a5; line-height: 1.2; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="${maxItem ? maxItem.name : ''}">
+                            ${maxItem ? maxItem.name : '-'}
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: right; white-space: nowrap; flex-shrink: 0;">
+                    <div style="font-size: 13.5px; font-weight: 800; color: #f87171;">${maxItem ? maxItem.tahminiGun.toFixed(1) + ' Gün' : '-'}</div>
+                    <div style="font-size: 10.5px; color: #fca5a5; opacity: 0.8;">${maxItem ? maxItem.totalHours.toFixed(1) + 's' : ''}</div>
+                </div>
+            </div>
+
+            <div class="kpi-card glass" style="padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); display: flex; align-items: center; justify-content: space-between; min-width: 0; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden;">
+                    <div style="background: rgba(16,185,129,0.2); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fa-solid fa-feather" style="color: #10b981; font-size: 14px;"></i>
+                    </div>
+                    <div style="min-width: 0; overflow: hidden;">
+                        <div style="font-size: 10.5px; color: #34d399; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">🟢 En Müsait</div>
+                        <div style="font-size: 14px; font-weight: 800; color: #6ee7b7; line-height: 1.2; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="${minItem ? minItem.name : ''}">
+                            ${minItem ? minItem.name : '-'}
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: right; white-space: nowrap; flex-shrink: 0;">
+                    <div style="font-size: 13.5px; font-weight: 800; color: #34d399;">${minItem ? minItem.tahminiGun.toFixed(1) + ' Gün' : '-'}</div>
+                    <div style="font-size: 10.5px; color: #6ee7b7; opacity: 0.8;">${minItem ? minItem.totalHours.toFixed(1) + 's' : ''}</div>
                 </div>
             </div>
         `;
     }
 
-    // 4. Barları Çiz
+    // 4. Barları Çiz (Kompakt 2 Kolonlu Kart Düzeni)
     const maxDays = Math.max(...data.map(d => d.tahminiGun), 1);
     let html = '';
 
     data.forEach(d => {
-        const barPct = Math.min(100, Math.max(5, (d.tahminiGun / maxDays) * 100));
+        const barPct = Math.min(100, Math.max(4, (d.tahminiGun / maxDays) * 100));
 
         let colorGradient = 'linear-gradient(90deg, #10b981, #059669)';
-        let badgeHtml = '<span class="badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); font-size:11px; padding:3px 8px;"><i class="fa-solid fa-feather"></i> Müsait (&lt;2 Gün)</span>';
+        let badgeHtml = '<span class="badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); font-size:10.5px; padding:2px 7px;"><i class="fa-solid fa-feather"></i> Müsait</span>';
         let dayColor = '#34d399';
 
         if (d.tahminiGun >= 10) {
             colorGradient = 'linear-gradient(90deg, #ef4444, #b91c1c)';
-            badgeHtml = '<span class="badge" style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); font-size:11px; padding:3px 8px; animation: pulseExcelBtn 2s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> Kritik Darboğaz (&gt;10 Gün)</span>';
+            badgeHtml = '<span class="badge" style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); font-size:10.5px; padding:2px 7px; animation: pulseExcelBtn 2s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> Kritik</span>';
             dayColor = '#f87171';
         } else if (d.tahminiGun >= 5) {
             colorGradient = 'linear-gradient(90deg, #f59e0b, #d97706)';
-            badgeHtml = '<span class="badge" style="background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); font-size:11px; padding:3px 8px;"><i class="fa-solid fa-fire"></i> Yüksek Yük (5-10 Gün)</span>';
+            badgeHtml = '<span class="badge" style="background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); font-size:10.5px; padding:2px 7px;"><i class="fa-solid fa-fire"></i> Yüksek Yük</span>';
             dayColor = '#fbbf24';
         } else if (d.tahminiGun >= 2) {
             colorGradient = 'linear-gradient(90deg, #3b82f6, #1d4ed8)';
-            badgeHtml = '<span class="badge" style="background:rgba(59,130,246,0.18); color:#60a5fa; border:1px solid rgba(59,130,246,0.35); font-size:11px; padding:3px 8px;"><i class="fa-solid fa-check"></i> Dengeli (2-5 Gün)</span>';
+            badgeHtml = '<span class="badge" style="background:rgba(59,130,246,0.18); color:#60a5fa; border:1px solid rgba(59,130,246,0.35); font-size:10.5px; padding:2px 7px;"><i class="fa-solid fa-check"></i> Dengeli</span>';
             dayColor = '#60a5fa';
         }
 
         html += `
-            <div class="workload-item" onclick="selectStationAndGo('${d.name}')" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(59,130,246,0.4)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.06)';">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-industry text-blue" style="font-size:13px;"></i> ${d.name}
+            <div class="workload-item" onclick="selectStationAndGo('${d.name}')" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 11px 14px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(59,130,246,0.4)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.06)';">
+                <!-- Üst Satır: İstasyon adı, parça, gün ve süre -->
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden;">
+                        <span style="font-size: 14px; font-weight: 700; color: white; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                            <i class="fa-solid fa-industry text-blue" style="font-size: 12px;"></i> ${d.name}
                         </span>
-                        <span style="font-size: 12px; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">
+                        <span style="font-size: 11px; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 1px 6px; border-radius: 4px; white-space: nowrap;">
                             ${d.partsCount} Parça
                         </span>
-                        <span style="font-size: 12px; color: var(--text-dim);">
-                            ⚙️ ${d.makineSayisi} Makine • ⏱️ ${d.gunlukSaat} Saat/Gün
-                        </span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
                         ${badgeHtml}
-                        <span style="font-size: 13px; color: var(--text-dim);">
-                            <strong style="color:var(--text-main); font-size:15px;">${d.totalHours.toFixed(1)}</strong> Saat
+                        <span style="font-size: 14px; font-weight: 800; color: ${dayColor};">
+                            ${d.tahminiGun.toFixed(1)} Gün
                         </span>
-                        <span style="font-size: 16px; font-weight: 700; color: ${dayColor}; min-width: 90px; text-align: right;">
-                            ${d.tahminiGun.toFixed(1)} İş Günü
+                        <span style="font-size: 11.5px; color: var(--text-dim);">
+                            (${d.totalHours.toFixed(1)}s)
                         </span>
-                        <i class="fa-solid fa-chevron-right" style="font-size: 11px; color: var(--text-dim);"></i>
+                        <i class="fa-solid fa-chevron-right" style="font-size: 10px; color: var(--text-dim);"></i>
                     </div>
                 </div>
                 
-                <!-- Progress Bar -->
-                <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden; position: relative;">
-                    <div style="width: ${barPct}%; height: 100%; background: ${colorGradient}; border-radius: 6px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                <!-- Alt Satır: Kompakt İlerleme Çubuğu ve Makine Detayı -->
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; position: relative;">
+                        <div style="width: ${barPct}%; height: 100%; background: ${colorGradient}; border-radius: 3px; transition: width 0.5s ease;"></div>
+                    </div>
+                    <span style="font-size: 10.5px; color: var(--text-dim); white-space: nowrap; flex-shrink: 0;">
+                        ⚙️ ${d.makineSayisi} Mak • ⏱️ ${d.gunlukSaat}s/g
+                    </span>
                 </div>
             </div>
         `;
