@@ -148,11 +148,26 @@
                     </div>
 
                     <div class="section-card glass mt-4">
-                        <div class="card-header">
-                            <h2><i class="fa-solid fa-file-zipper text-blue"></i> Kaynak Dosya Durumları</h2>
-                            <div class="search-bar">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                                <input type="text" id="dashboard-search" placeholder="Kaynak dosya ara..." oninput="renderDashboard()">
+                        <div class="card-header" style="flex-wrap: wrap; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <h2 style="margin: 0;"><i class="fa-solid fa-file-zipper text-blue"></i> Kaynak Dosya Durumları</h2>
+                                <span id="source-file-filter-status-badge" style="display:none; font-size: 12px; background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid #6366f1; padding: 3px 10px; border-radius: 20px; font-weight: 500; align-items: center; gap: 6px;">
+                                    <i class="fa-solid fa-filter"></i> <span id="source-file-filter-count">0</span> Dosya Filtreli
+                                </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <div style="display: flex; gap: 6px;">
+                                    <button type="button" class="btn btn-sm" onclick="selectAllSourceFiles(true)" style="font-size: 12px; padding: 5px 10px; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); color: #c7d2fe; cursor: pointer; border-radius: 6px;" title="Tüm kaynak dosyaları seç (filtreyi sıfırla)">
+                                        <i class="fa-solid fa-check-double"></i> Tümünü Seç
+                                    </button>
+                                    <button type="button" class="btn btn-sm" onclick="selectAllSourceFiles(false)" style="font-size: 12px; padding: 5px 10px; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; cursor: pointer; border-radius: 6px;" title="Seçimi temizle">
+                                        <i class="fa-solid fa-xmark"></i> Temizle
+                                    </button>
+                                </div>
+                                <div class="search-bar">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="dashboard-search" placeholder="Kaynak dosya ara..." oninput="renderDashboard()">
+                                </div>
                             </div>
                         </div>
                         <div class="dashboard-files-container" id="dashboard-files-list">
@@ -441,17 +456,34 @@
                                     </button>
                                 </div>
                                 <div class="header-filters" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                    <div class="search-bar" style="min-width: 220px;">
+                                    <div class="search-bar" style="min-width: 200px;">
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                         <input type="text" id="station-search" placeholder="Kod veya malzeme ara..." oninput="renderStationsTab()">
                                     </div>
-                                    <select id="station-filter-status" class="select-input" style="width: auto;">
+                                    <!-- Kaynak Dosya Çoklu Seçim Filtresi -->
+                                    <div style="position: relative; display: inline-block;">
+                                        <button id="station-source-filter-btn" type="button" onclick="toggleStationSourcePicker()" class="btn" title="Kaynak Dosyaya Göre Filtrele" style="padding: 6px 12px; font-size: 13px; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.35); color: #c7d2fe; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                                            <i class="fa-solid fa-file-zipper text-blue"></i> <span id="station-source-filter-label">Kaynak: Tümü</span> <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left: 2px;"></i>
+                                        </button>
+                                        <div id="station-source-filter-dropdown" style="display:none; position:absolute; right:0; top:calc(100% + 6px); background: #1e2535; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 14px; min-width: 230px; max-height: 280px; overflow-y: auto; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:6px;">
+                                                <span style="font-size:11px; color:var(--text-dim); text-transform:uppercase; font-weight:600; letter-spacing:0.5px;">Kaynak Dosyalar</span>
+                                                <div style="display:flex; gap:6px;">
+                                                    <button type="button" onclick="selectAllSourceFiles(true)" style="background:transparent; border:none; color:#818cf8; font-size:11px; cursor:pointer; text-decoration:underline;">Tümü</button>
+                                                    <span style="color:rgba(255,255,255,0.2);">|</span>
+                                                    <button type="button" onclick="selectAllSourceFiles(false)" style="background:transparent; border:none; color:#fda4af; font-size:11px; cursor:pointer; text-decoration:underline;">Temizle</button>
+                                                </div>
+                                            </div>
+                                            <div id="station-source-filter-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                                        </div>
+                                    </div>
+                                    <select id="station-filter-status" class="select-input" style="width: auto;" onchange="renderStationsTab()">
                                         <option value="all">Tüm Durumlar</option>
                                         <option value="missing">Eksik Olanlar</option>
                                         <option value="production">Üretimde Olanlar</option>
                                         <option value="ready">Hazır (Eksiksiz) Olanlar</option>
                                     </select>
-                                    <select id="station-sort" class="select-input" style="width: auto;">
+                                    <select id="station-sort" class="select-input" style="width: auto;" onchange="renderStationsTab()">
                                         <option value="priority-asc">Öncelik (Artan)</option>
                                         <option value="priority-desc">Öncelik (Azalan)</option>
                                         <option value="code-asc">Kod (A-Z)</option>
@@ -665,6 +697,6 @@
     <!-- Notification system -->
     <div id="toast" class="toast"></div>
 
-    <script src="app.js?v=1.1.19"></script>
+    <script src="app.js?v=1.1.20"></script>
 </body>
 </html>

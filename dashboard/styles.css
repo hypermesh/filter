@@ -542,11 +542,43 @@ body {
     gap: 12px;
     transition: var(--transition);
     cursor: pointer;
+    position: relative;
+    user-select: none;
 }
 
 .file-progress-card:hover {
     border-color: var(--border-hover);
-    transform: scale(1.01);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.file-progress-card.selected {
+    border-color: #818cf8 !important;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(129, 140, 248, 0.12)) !important;
+    box-shadow: 0 0 18px rgba(99, 102, 241, 0.35), inset 0 0 0 1px rgba(129, 140, 248, 0.4) !important;
+}
+
+.file-progress-card-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: transparent;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(0, 0, 0, 0.4);
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.file-progress-card.selected .file-progress-card-check {
+    background: #6366f1;
+    border-color: #a5b4fc;
+    color: #ffffff;
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
 }
 
 .card-title-row {

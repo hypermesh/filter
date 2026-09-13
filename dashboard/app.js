@@ -10,6 +10,7 @@ let dosyaTakipRows = [];   // Üretim Takip summary (Col M-Q)
 let downtimeMap = {};      // İstasyon duruş saatleri { "ISTASYON_ADI": saat }
 let hiddenStationCols = new Set(); // Kullanıcının gizlediği sütun başlıkları
 let productionHistory = []; // Genel Üretim Geçmişi (veritabanlari/uretim_gecmisi.json karşılığı)
+let selectedSourceFiles = new Set(); // Seçili Kaynak Dosyalar Filtresi (Boş ise hepsi)
 
 // --- LocalStorage Yardımcı Fonksiyonlar ---
 function getStorageKey() {
@@ -366,6 +367,7 @@ function parseWorkbook() {
     uretimListesiMap = {};
     uretimListesiRows = [];
     unitTimeMap = {}; // { 'KOD': { 'ISTASYON_ADI': süre_dk } }
+    selectedSourceFiles.clear();
 
     // First scan other sheets to extract part code names and populate maps
     for (const sName of workbook.SheetNames) {
@@ -1304,14 +1306,27 @@ function renderDashboard() {
     document.getElementById('kpi-missing-parts').textContent = missingParts.toLocaleString();
     document.getElementById('kpi-total-files').textContent = totalFiles.toLocaleString();
 
+    // Update Filter Status Badge in Genel Durum
+    const filterBadge = document.getElementById('source-file-filter-status-badge');
+    const filterCount = document.getElementById('source-file-filter-count');
+    if (filterBadge && filterCount) {
+        if (selectedSourceFiles.size > 0 && selectedSourceFiles.size < dosyaTakipRows.length) {
+            filterBadge.style.display = 'inline-flex';
+            filterCount.textContent = selectedSourceFiles.size;
+        } else {
+            filterBadge.style.display = 'none';
+        }
+    }
+
     // 2. Filter and Render files
-    const searchVal = document.getElementById('dashboard-search').value.toLowerCase().trim();
+    const searchVal = document.getElementById('dashboard-search') ? document.getElementById('dashboard-search').value.toLowerCase().trim() : '';
     let filteredFiles = dosyaTakipRows;
     if (searchVal) {
         filteredFiles = dosyaTakipRows.filter(f => f.kaynak.toLowerCase().includes(searchVal));
     }
 
     const container = document.getElementById('dashboard-files-list');
+    if (!container) return;
     container.innerHTML = '';
 
     if (filteredFiles.length === 0) {
@@ -1331,12 +1346,24 @@ function renderDashboard() {
             glowClass = 'var(--warning-glow)';
         }
 
+        const isSelected = selectedSourceFiles.has(f.kaynak);
         const card = document.createElement('div');
-        card.className = 'file-progress-card';
+        card.className = `file-progress-card ${isSelected ? 'selected' : ''}`;
+        card.setAttribute('data-kaynak', f.kaynak);
+        card.title = isSelected ? 'Filtreden çıkarmak için tıklayın' : 'İstasyon ve üretim listelerinde filtrelemek için tıklayın';
+
         card.innerHTML = `
             <div class="card-title-row">
-                <span class="file-name-label" title="${f.kaynak}">${f.kaynak}</span>
-                <span class="file-pct" style="color: ${colorClass};">${pct}%</span>
+                <div style="display: flex; align-items: center; overflow: hidden; gap: 4px;">
+                    <span class="file-progress-card-check"><i class="fa-solid fa-check"></i></span>
+                    <span class="file-name-label" title="${f.kaynak}">${f.kaynak}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="file-pct" style="color: ${colorClass};">${pct}%</span>
+                    <button type="button" class="btn btn-sm modal-open-btn" onclick="event.stopPropagation(); window.openDetailsModal('${f.kaynak}')" title="Dosya Eksik Detaylarını Aç" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #c7d2fe; padding: 2px 7px; font-size: 11px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-expand"></i> İncele
+                    </button>
+                </div>
             </div>
             <div class="progress-container">
                 <div class="progress-fill" style="width: ${pct}%; background-color: ${colorClass}; box-shadow: 0 0 8px ${glowClass};"></div>
@@ -1346,22 +1373,162 @@ function renderDashboard() {
                 <div class="stat-item"><i class="fa-solid fa-hourglass-half text-orange"></i> <span>${f.eksik} eksik</span></div>
             </div>
         `;
-        
-        card.style.cursor = 'pointer';
+
+        // Click to toggle filter selection
         card.addEventListener('click', () => {
-            openDetailsModal(f.kaynak);
+            if (selectedSourceFiles.has(f.kaynak)) {
+                selectedSourceFiles.delete(f.kaynak);
+            } else {
+                selectedSourceFiles.add(f.kaynak);
+            }
+            updateSourceFileFilterUI();
         });
 
-        // Add double click listener to filter production log by this source file
+        // Double click to filter production log by this source file
         card.addEventListener('dblclick', (e) => {
-            e.stopPropagation(); // prevent modal opening again
-            document.getElementById('takip-search').value = f.kaynak;
+            e.stopPropagation();
+            const takipSearch = document.getElementById('takip-search');
+            if (takipSearch) takipSearch.value = f.kaynak;
             switchTab('production');
         });
 
         container.appendChild(card);
     });
 }
+
+// --- KAYNAK DOSYA ÇOKLU SEÇİM VE FİLTRE YÖNETİMİ ---
+function selectAllSourceFiles(isAll) {
+    if (isAll) {
+        dosyaTakipRows.forEach(f => selectedSourceFiles.add(f.kaynak));
+    } else {
+        selectedSourceFiles.clear();
+    }
+    updateSourceFileFilterUI();
+}
+
+function updateSourceFileFilterUI() {
+    const allSources = dosyaTakipRows.map(f => f.kaynak);
+    
+    // Genel Durum rozetini güncelle
+    const badge = document.getElementById('source-file-filter-status-badge');
+    const countEl = document.getElementById('source-file-filter-count');
+    if (badge && countEl) {
+        if (selectedSourceFiles.size > 0 && selectedSourceFiles.size < allSources.length) {
+            badge.style.display = 'inline-flex';
+            countEl.textContent = selectedSourceFiles.size;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    // İstasyon sayfasındaki buton etiketini güncelle
+    const labelEl = document.getElementById('station-source-filter-label');
+    if (labelEl) {
+        if (selectedSourceFiles.size === 0 || selectedSourceFiles.size === allSources.length) {
+            labelEl.textContent = 'Kaynak: Tümü';
+        } else {
+            labelEl.textContent = `Kaynak: ${selectedSourceFiles.size} Seçili`;
+        }
+    }
+
+    // Genel Durum kartlarını güncelle
+    renderDashboard();
+
+    // Eğer İstasyon sekmesindeysek tabloyu ve sidebarı güncelle
+    if (currentTab === 'stations') {
+        paginationState.station.page = 1;
+        renderStationsTab();
+    } else if (currentTab === 'uretim-listesi') {
+        paginationState.ul.page = 1;
+        filterAndPaginateUlTable();
+    }
+
+    // Eğer dropdown açıksa checkboxları güncelle
+    const dd = document.getElementById('station-source-filter-dropdown');
+    if (dd && dd.style.display === 'block') {
+        renderStationSourceFilterOptions();
+    }
+}
+
+function toggleStationSourcePicker() {
+    const dd = document.getElementById('station-source-filter-dropdown');
+    if (!dd) return;
+    if (dd.style.display === 'none' || !dd.style.display) {
+        renderStationSourceFilterOptions();
+        dd.style.display = 'block';
+    } else {
+        dd.style.display = 'none';
+    }
+}
+
+function renderStationSourceFilterOptions() {
+    const listEl = document.getElementById('station-source-filter-list');
+    const labelEl = document.getElementById('station-source-filter-label');
+    if (!listEl) return;
+
+    listEl.innerHTML = '';
+    const allSources = dosyaTakipRows.map(f => f.kaynak);
+
+    if (labelEl) {
+        if (selectedSourceFiles.size === 0 || selectedSourceFiles.size === allSources.length) {
+            labelEl.textContent = 'Kaynak: Tümü';
+        } else {
+            labelEl.textContent = `Kaynak: ${selectedSourceFiles.size} Seçili`;
+        }
+    }
+
+    if (allSources.length === 0) {
+        listEl.innerHTML = '<div style="color:var(--text-dim); font-size:12px; padding:6px;">Kaynak dosya bulunamadı.</div>';
+        return;
+    }
+
+    allSources.forEach(src => {
+        const isChecked = selectedSourceFiles.has(src);
+        const rowDiv = document.createElement('label');
+        rowDiv.style.display = 'flex';
+        rowDiv.style.alignItems = 'center';
+        rowDiv.style.gap = '8px';
+        rowDiv.style.fontSize = '12px';
+        rowDiv.style.color = isChecked ? '#a5b4fc' : '#e2e8f0';
+        rowDiv.style.fontWeight = isChecked ? '600' : 'normal';
+        rowDiv.style.cursor = 'pointer';
+        rowDiv.style.padding = '4px 6px';
+        rowDiv.style.borderRadius = '4px';
+        rowDiv.style.transition = 'background 0.15s';
+        rowDiv.onmouseover = () => { rowDiv.style.background = 'rgba(255,255,255,0.06)'; };
+        rowDiv.onmouseout = () => { rowDiv.style.background = 'transparent'; };
+
+        rowDiv.innerHTML = `
+            <input type="checkbox" value="${src}" ${isChecked ? 'checked' : ''} style="accent-color: #6366f1; cursor: pointer; width: 14px; height: 14px;">
+            <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${src}">${src}</span>
+        `;
+
+        const chk = rowDiv.querySelector('input');
+        chk.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                selectedSourceFiles.add(src);
+            } else {
+                selectedSourceFiles.delete(src);
+            }
+            updateSourceFileFilterUI();
+        });
+
+        listEl.appendChild(rowDiv);
+    });
+}
+
+// Dropdown dışına tıklandığında kapatma
+document.addEventListener('click', function(e) {
+    const btn = document.getElementById('station-source-filter-btn');
+    const dd = document.getElementById('station-source-filter-dropdown');
+    if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) {
+        dd.style.display = 'none';
+    }
+});
+
+window.selectAllSourceFiles = selectAllSourceFiles;
+window.toggleStationSourcePicker = toggleStationSourcePicker;
+window.updateSourceFileFilterUI = updateSourceFileFilterUI;
 
 // Details Modal State & Logic
 let currentModalKaynak = null;
@@ -2322,8 +2489,16 @@ function renderStationsTab() {
     stationList.forEach(st => {
         const btn = document.createElement('button');
         
-        // Count how many parts in this station are fully complete
-        const rows = stationSheetsMap[st] || [];
+        // Count how many parts in this station are fully complete (filtered by source file if active)
+        const allStationRows = stationSheetsMap[st] || [];
+        const rows = selectedSourceFiles.size > 0 
+            ? allStationRows.filter(r => {
+                const code = String(r['Kod'] || '').trim().toUpperCase();
+                const reqs = uretimTakipRows.filter(u => u.kod === code);
+                return reqs.some(u => selectedSourceFiles.has(u.kaynak));
+              })
+            : allStationRows;
+
         let completedCount = 0;
         rows.forEach(r => {
             const code = String(r['Kod'] || '').trim().toUpperCase();
@@ -2349,8 +2524,14 @@ function renderStationsTab() {
             });
         }
 
+        const isDimmed = selectedSourceFiles.size > 0 && rows.length === 0;
         btn.className = `station-item-btn ${st === activeStation ? 'active' : ''} ${isSearchMatch ? 'search-match-pulse' : ''}`;
         btn.setAttribute('draggable', true);
+        if (isDimmed) {
+            btn.style.opacity = '0.45';
+        } else {
+            btn.style.opacity = '1';
+        }
         
         btn.innerHTML = `
             <span class="station-name" title="${st}">${st}</span>
@@ -2413,16 +2594,26 @@ function renderStationsTab() {
 }
 
 function filterAndPaginateStationData() {
-    const searchVal = document.getElementById('station-search').value.toLowerCase().trim();
+    const searchVal = document.getElementById('station-search') ? document.getElementById('station-search').value.toLowerCase().trim() : '';
     const statusFilter = document.getElementById('station-filter-status') ? document.getElementById('station-filter-status').value : 'all';
     const sortVal = document.getElementById('station-sort') ? document.getElementById('station-sort').value : 'priority-asc';
     
-    const rows = stationSheetsMap[activeStation] || [];
+    const allStationRows = stationSheetsMap[activeStation] || [];
     const headers = stationHeadersMap[activeStation] || [];
 
-    document.getElementById('current-station-title').innerHTML = `<i class="fa-solid fa-industry text-green"></i> ${activeStation} İstasyon İş Listesi`;
+    // Apply Source File Filter if active
+    const rows = selectedSourceFiles.size > 0
+        ? allStationRows.filter(r => {
+            const code = String(r['Kod'] || '').trim().toUpperCase();
+            const reqs = uretimTakipRows.filter(u => u.kod === code);
+            return reqs.some(u => selectedSourceFiles.has(u.kaynak));
+          })
+        : allStationRows;
 
-    // İstasyon Kapasite Rozetini Güncelle
+    const sourceCountText = selectedSourceFiles.size > 0 ? ` <span style="font-size:12px; color:#818cf8; font-weight:normal; margin-left:6px;">(${selectedSourceFiles.size} Kaynak Dosya Filtreli)</span>` : '';
+    document.getElementById('current-station-title').innerHTML = `<i class="fa-solid fa-industry text-green"></i> ${activeStation} İstasyon İş Listesi${sourceCountText}`;
+
+    // İstasyon Kapasite Rozetini Güncelle (Filtrelenmiş kaynak dosya satırlarına göre)
     const capBadge = document.getElementById('station-capacity-badge');
     if (capBadge) {
         if (!activeStation || rows.length === 0) {
@@ -2990,6 +3181,15 @@ function filterAndPaginateUlTable() {
     const sortVal = document.getElementById('ul-sort').value;
 
     let filtered = uretimListesiRows;
+    
+    // 0. Source File Filter
+    if (selectedSourceFiles.size > 0) {
+        filtered = filtered.filter(r => {
+            const code = String(r.kod || '').trim().toUpperCase();
+            const reqs = uretimTakipRows.filter(u => u.kod === code);
+            return reqs.some(u => selectedSourceFiles.has(u.kaynak)) || (r.kaynak && selectedSourceFiles.has(r.kaynak));
+        });
+    }
     
     // 1. Advanced Include/Exclude Search Filter (Google-style)
     if (searchVal) {
