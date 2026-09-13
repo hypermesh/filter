@@ -278,7 +278,8 @@ body {
     justify-content: space-between;
     padding: 20px 15px;
     flex-shrink: 0;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-x: hidden;
 }
 
 .app-sidebar.collapsed {
@@ -289,6 +290,7 @@ body {
 .app-sidebar.collapsed .nav-item {
     justify-content: center;
     padding: 12px 0;
+    gap: 0;
 }
 
 .app-sidebar.collapsed .nav-item span {
@@ -303,6 +305,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    overflow-x: hidden;
 }
 
 .nav-item {
@@ -317,9 +320,19 @@ body {
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    transition: all 0.2s;
+    transition: background 0.2s, color 0.2s, border 0.2s;
     text-align: left;
     width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.nav-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
 }
 
 .nav-item:hover {
@@ -338,6 +351,7 @@ body {
     width: 20px;
     font-size: 16px;
     text-align: center;
+    flex-shrink: 0;
 }
 
 .sidebar-footer {
@@ -346,6 +360,8 @@ body {
     text-align: center;
     padding-top: 10px;
     border-top: 1px solid var(--border-color);
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 /* Main Panel */
@@ -529,7 +545,8 @@ body {
     gap: 18px;
     overflow-y: auto;
     max-height: 520px;
-    padding-right: 5px;
+    padding: 8px 8px 12px 8px;
+    margin: -8px -8px 0 -8px;
 }
 
 .file-progress-card {
@@ -540,16 +557,16 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    transition: var(--transition);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s, background 0.2s;
     cursor: pointer;
     position: relative;
     user-select: none;
 }
 
 .file-progress-card:hover {
-    border-color: var(--border-hover);
+    border-color: #818cf8;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 .file-progress-card.selected {
