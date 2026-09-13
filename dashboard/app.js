@@ -11,6 +11,7 @@ let downtimeMap = {};      // İstasyon duruş saatleri { "ISTASYON_ADI": saat }
 let hiddenStationCols = new Set(); // Kullanıcının gizlediği sütun başlıkları
 let productionHistory = []; // Genel Üretim Geçmişi (veritabanlari/uretim_gecmisi.json karşılığı)
 let selectedSourceFiles = new Set(); // Seçili Kaynak Dosyalar Filtresi (Boş ise hepsi)
+let rawExcelArrayBuffer = null; // Orijinal Excel dosyasının ham ArrayBuffer verisi (ExcelJS ile stilleri korumak için)
 
 // --- LocalStorage Yardımcı Fonksiyonlar ---
 function getStorageKey() {
@@ -293,6 +294,7 @@ function handleFile(file) {
     
     reader.onload = function(e) {
         try {
+            rawExcelArrayBuffer = e.target.result; // Orijinal buffer'ı ExcelJS için sakla
             const data = new Uint8Array(e.target.result);
             workbook = XLSX.read(data, {
                 type: 'array',
@@ -2932,38 +2934,206 @@ document.getElementById('station-next-btn')?.addEventListener('click', () => {
 });
 
 // -------------------------------------------------------------
-// 6. EXPORT BACK TO EXCEL WORKBOOK
+// 6. EXPORT BACK TO EXCEL WORKBOOK (STİLLER VE FORMÜLLER KORUNARAK)
 // -------------------------------------------------------------
-exportBtn.addEventListener('click', () => {
+exportBtn.addEventListener('click', async () => {
     if (!workbook) return;
     
-    showToast("Güncel veriler Excel dosyasına yazılıyor...", "info");
+    showToast("Güncel veriler hazırlanıyor (Orijinal kenarlıklar, renkler ve formüller korunuyor)...", "info");
     
     try {
-        // 1. Write the new production log entries to columns I and J in "Üretim Takip" sheet
-        const utSheet = workbook.Sheets["Üretim Takip"];
-        
-        // Find existing range
-        const utRange = XLSX.utils.decode_range(utSheet['!ref']);
-        
-        // Clear all log columns from row 2 onwards to rewrite completely
-        for (let r = 1; r <= utRange.e.r; r++) {
-            delete utSheet[XLSX.utils.encode_cell({ r: r, c: 8 })]; // Col I
-            delete utSheet[XLSX.utils.encode_cell({ r: r, c: 9 })]; // Col J
-            delete utSheet[XLSX.utils.encode_cell({ r: r, c: 10 })]; // Col K
-            delete utSheet[XLSX.utils.encode_cell({ r: r, c: 11 })]; // Col L
+        const origFileName = loadedFileName.textContent.replace("Yüklenen Dosya: ", "").replace(".xlsx", "");
+        const exportName = `${origFileName}_Guncel.xlsx`;
+
+        // 1. ÖNCELİKLİ YÖNTEM: ExcelJS ile orijinal şablonun tüm stillerini, renklerini ve formüllerini koruyarak güncelle
+        if (rawExcelArrayBuffer && typeof ExcelJS !== 'undefined') {
+            const excelJsWorkbook = new ExcelJS.Workbook();
+            await excelJsWorkbook.xlsx.load(rawExcelArrayBuffer.slice(0));
+
+            // A. "Üretim Takip" Sayfası Güncellemesi
+            const utSheet = excelJsWorkbook.getWorksheet("Üretim Takip");
+            if (utSheet) {
+                // Sütun L başlığı
+                const headerRow = utSheet.getRow(1);
+                headerRow.getCell(12).value = 'İSTASYON';
+
+                // Eski üretim loglarını temizle (Sütun I=9, J=10, K=11, L=12)
+                const maxRow = Math.max(utSheet.rowCount, uretimTakipRows.length + 50, productionLog.length + 50);
+                for (let r = 2; r <= maxRow; r++) {
+                    const row = utSheet.getRow(r);
+                    if (row.getCell(9).value !== null && row.getCell(9).value !== undefined) {
+                        row.getCell(9).value = null;
+                        row.getCell(10).value = null;
+                        row.getCell(11).value = null;
+                        row.getCell(12).value = null;
+                    }
+                }
+
+                // Yeni üretim kayıtlarını yaz
+                productionLog.forEach((log, idx) => {
+                    const r = idx + 2; // Satır 2'den itibaren
+                    const row = utSheet.getRow(r);
+                    row.getCell(9).value = log.kod;
+                    row.getCell(10).value = parseFloat(log.adet) || 0;
+                    row.getCell(11).value = {
+                        formula: `IF(I${r}<>"",MAX(0,SUMIF($I$2:$I$6377,I${r},$J$2:$J$6377)-SUMIF($C$2:$C$6377,I${r},$D$2:$D$6377)),"")`,
+                        result: parseFloat(log.fazla) || 0
+                    };
+                    row.getCell(12).value = log.station || 'Tüm İstasyonlar';
+                });
+
+                // Üretim Takip satırlarının değerlerini ve formül sonuçlarını senkronize et
+                uretimTakipRows.forEach(row => {
+                    const r = row.rowIndex; // 1-tabanlı Excel satırı
+                    const exRow = utSheet.getRow(r);
+                    
+                    const cellE = exRow.getCell(5); // Üretilen Miktar
+                    if (cellE.formula) cellE.result = row.uretilen;
+                    else cellE.value = row.uretilen;
+
+                    const cellF = exRow.getCell(6); // Kalan Miktar
+                    if (cellF.formula) cellF.result = row.kalan;
+                    else cellF.value = row.kalan;
+
+                    const cellG = exRow.getCell(7); // Tamamlanma (%)
+                    if (cellG.formula) cellG.result = row.tamamlanma;
+                    else cellG.value = row.tamamlanma;
+                });
+
+                // Dosya Takip (Kaynak Dosya Özeti) sütunları (O=15, P=16, Q=17)
+                dosyaTakipRows.forEach(row => {
+                    const r = row.rowIndex;
+                    const exRow = utSheet.getRow(r);
+                    
+                    const cellO = exRow.getCell(15);
+                    if (cellO.formula) cellO.result = row.hazir;
+                    else cellO.value = row.hazir;
+
+                    const cellP = exRow.getCell(16);
+                    if (cellP.formula) cellP.result = row.eksik;
+                    else cellP.value = row.eksik;
+
+                    const cellQ = exRow.getCell(17);
+                    if (cellQ.formula) cellQ.result = row.tamamlanma;
+                    else cellQ.value = row.tamamlanma;
+                });
+            }
+
+            // B. "MONTAJ OTOMASYON İZLEME" Sayfası
+            const moSheet = excelJsWorkbook.getWorksheet("MONTAJ OTOMASYON İZLEME");
+            if (moSheet) {
+                montajOtomasyonLeft.forEach(row => {
+                    const exRow = moSheet.getRow(row.rowIndex);
+                    const cG = exRow.getCell(7); if (cG.formula) cG.result = row.uretilen; else cG.value = row.uretilen;
+                    const cH = exRow.getCell(8); if (cH.formula) cH.result = row.tamamlanma; else cH.value = row.tamamlanma;
+                    const cI = exRow.getCell(9); if (cI.formula) cI.result = row.limit; else cI.value = row.limit;
+                });
+                montajOtomasyonRight.forEach(row => {
+                    const exRow = moSheet.getRow(row.rowIndex);
+                    const cO = exRow.getCell(15); if (cO.formula) cO.result = row.tamamlananCesit; else cO.value = row.tamamlananCesit;
+                    const cP = exRow.getCell(16); if (cP.formula) cP.result = row.tamamlanma; else cP.value = row.tamamlanma;
+                    const cR = exRow.getCell(18); if (cR.formula) cR.result = row.limit; else cR.value = row.limit;
+                });
+            }
+
+            // C. "FINAL MONTAJ İZLEME" Sayfası
+            const fmSheet = excelJsWorkbook.getWorksheet("FINAL MONTAJ İZLEME");
+            if (fmSheet) {
+                finalMontajLeft.forEach(row => {
+                    const exRow = fmSheet.getRow(row.rowIndex);
+                    const cG = exRow.getCell(7); if (cG.formula) cG.result = row.uretilen; else cG.value = row.uretilen;
+                    const cH = exRow.getCell(8); if (cH.formula) cH.result = row.tamamlanma; else cH.value = row.tamamlanma;
+                    const cI = exRow.getCell(9); if (cI.formula) cI.result = row.limit; else cI.value = row.limit;
+                });
+                finalMontajRight.forEach(row => {
+                    const exRow = fmSheet.getRow(row.rowIndex);
+                    const cO = exRow.getCell(15); if (cO.formula) cO.result = row.tamamlananCesit; else cO.value = row.tamamlananCesit;
+                    const cP = exRow.getCell(16); if (cP.formula) cP.result = row.tamamlanma; else cP.value = row.tamamlanma;
+                    const cR = exRow.getCell(18); if (cR.formula) cR.result = row.limit; else cR.value = row.limit;
+                });
+            }
+
+            // D. İstasyon Sayfaları (Kullanıcı miktar değiştirdiyse)
+            for (const [stName, rows] of Object.entries(stationSheetsMap)) {
+                const wsSt = excelJsWorkbook.getWorksheet(stName);
+                if (!wsSt) continue;
+
+                const headerRow = wsSt.getRow(1);
+                let uMiktarCol = -1;
+                let tHammaddeCol = -1;
+                headerRow.eachCell((cell, colNumber) => {
+                    const val = String(cell.value || '').trim().toLowerCase();
+                    if (val === 'üretilecek miktar') uMiktarCol = colNumber;
+                    if (val === 'toplam hammadde miktarı') tHammaddeCol = colNumber;
+                });
+
+                rows.forEach(row => {
+                    const exRow = wsSt.getRow(row.rowIndex);
+                    if (uMiktarCol !== -1) {
+                        const cell = exRow.getCell(uMiktarCol);
+                        if (cell.formula) cell.result = row['Üretilecek Miktar'] || 0;
+                        else cell.value = row['Üretilecek Miktar'] || 0;
+                    }
+                    if (tHammaddeCol !== -1) {
+                        const cell = exRow.getCell(tHammaddeCol);
+                        if (cell.formula) cell.result = row['Toplam Hammadde Miktarı'] || 0;
+                        else cell.value = row['Toplam Hammadde Miktarı'] || 0;
+                    }
+                });
+            }
+
+            // E. "ÜRETİM LİSTESİ" Sayfası
+            const wsUl = excelJsWorkbook.worksheets.find(ws => 
+                ws.name.toUpperCase().replace(/I/g, 'İ').includes('ÜRETİM LİSTESİ') || 
+                ws.name.toUpperCase().includes('URETIM LISTESI')
+            );
+            if (wsUl) {
+                const headerRow = wsUl.getRow(1);
+                let uMiktarCol = -1;
+                headerRow.eachCell((cell, colNumber) => {
+                    const val = String(cell.value || '').trim().toLowerCase();
+                    if (val === 'üretilecek miktar') uMiktarCol = colNumber;
+                });
+                if (uMiktarCol !== -1) {
+                    uretimListesiRows.forEach(row => {
+                        const exRow = wsUl.getRow(row.rowIndex);
+                        const cell = exRow.getCell(uMiktarCol);
+                        if (cell.formula) cell.result = row.uretilecek;
+                        else cell.value = row.uretilecek;
+                    });
+                }
+            }
+
+            // ExcelJS dosyayı yazıp indir
+            const buffer = await excelJsWorkbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            if (typeof saveAs !== 'undefined') {
+                saveAs(blob, exportName);
+            } else {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = exportName;
+                link.click();
+            }
+            showToast(`Orijinal tasarım ve tüm kenarlıklar korunarak indirildi: "${exportName}"`, "success");
+            return;
         }
 
-        // Set Col L header
+        // 2. YEDEK YÖNTEM (SheetJS Fallback)
+        const utSheet = workbook.Sheets["Üretim Takip"];
+        const utRange = XLSX.utils.decode_range(utSheet['!ref']);
+        for (let r = 1; r <= utRange.e.r; r++) {
+            delete utSheet[XLSX.utils.encode_cell({ r: r, c: 8 })];
+            delete utSheet[XLSX.utils.encode_cell({ r: r, c: 9 })];
+            delete utSheet[XLSX.utils.encode_cell({ r: r, c: 10 })];
+            delete utSheet[XLSX.utils.encode_cell({ r: r, c: 11 })];
+        }
         utSheet[XLSX.utils.encode_cell({ r: 0, c: 11 })] = { t: 's', v: 'İSTASYON' };
 
-        // Rewrite production log rows
         productionLog.forEach((log, idx) => {
-            const r = idx + 1; // row 2 onwards
+            const r = idx + 1;
             utSheet[XLSX.utils.encode_cell({ r: r, c: 8 })] = { t: 's', v: log.kod };
             utSheet[XLSX.utils.encode_cell({ r: r, c: 9 })] = { t: 'n', v: log.adet };
-            
-            // Formula for Col K: =IF(I<>, MAX(0, SUMIF($I$2:$I$6377, I, $J$2:$J$6377) - SUMIF($C$2:$C$6377, I, $D$2:$D$6377)), "")
             utSheet[XLSX.utils.encode_cell({ r: r, c: 10 })] = { 
                 t: 'n', 
                 v: log.fazla,
@@ -2972,199 +3142,11 @@ exportBtn.addEventListener('click', () => {
             utSheet[XLSX.utils.encode_cell({ r: r, c: 11 })] = { t: 's', v: log.station || 'Tüm İstasyonlar' };
         });
 
-        // Ensure SheetJS knows the new range of "Üretim Takip"
-        const maxLogLength = Math.max(uretimTakipRows.length, productionLog.length) + 10;
-        if (maxLogLength - 1 > utRange.e.r) {
-            utRange.e.r = maxLogLength - 1;
-            utSheet['!ref'] = XLSX.utils.encode_range(utRange);
-        }
-
-        // 2. Update all cell values in Üretim Takip formula columns (Col E, F, G, O, P, Q)
-        uretimTakipRows.forEach(row => {
-            const r = row.rowIndex - 1; // 0-based
-            // Col E: Üretilen Miktar
-            const cellE = utSheet[XLSX.utils.encode_cell({ r: r, c: 4 })] || { t: 'n' };
-            cellE.v = row.uretilen;
-            utSheet[XLSX.utils.encode_cell({ r: r, c: 4 })] = cellE;
-
-            // Col F: Kalan Miktar
-            const cellF = utSheet[XLSX.utils.encode_cell({ r: r, c: 5 })] || { t: 'n' };
-            cellF.v = row.kalan;
-            utSheet[XLSX.utils.encode_cell({ r: r, c: 5 })] = cellF;
-
-            // Col G: Tamamlanma (%)
-            const cellG = utSheet[XLSX.utils.encode_cell({ r: r, c: 6 })] || { t: 'n' };
-            cellG.v = row.tamamlanma;
-            utSheet[XLSX.utils.encode_cell({ r: r, c: 6 })] = cellG;
-        });
-
-        dosyaTakipRows.forEach(row => {
-            const r = row.rowIndex - 1; // 0-based
-            // Col O: HAZIR (Kalem)
-            const cellO = utSheet[XLSX.utils.encode_cell({ r: r, c: 14 })] || { t: 'n' };
-            cellO.v = row.hazir;
-            utSheet[XLSX.utils.encode_cell({ r: r, c: 14 })] = cellO;
-
-            // Col P: EKSİK (Kalem)
-            const cellP = utSheet[XLSX.utils.encode_cell({ r: r, c: 15 })] || { t: 'n' };
-            cellP.v = row.eksik;
-            utSheet[XLSX.utils.encode_cell({ r: r, c: 15 })] = cellP;
-
-            // Col Q: GENEL TAMAMLANMA (%)
-            const cellQ = utSheet[XLSX.utils.encode_cell({ r: r, c: 16 })] || { t: 'n' };
-            cellQ.v = row.tamamlanma;
-            utSheet[XLSX.utils.encode_cell({ r: r, c: 16 })] = cellQ;
-        });
-
-        // 3. Update MONTAJ OTOMASYON İZLEME cell values
-        const moSheet = workbook.Sheets["MONTAJ OTOMASYON İZLEME"];
-        if (moSheet) {
-            montajOtomasyonLeft.forEach(row => {
-                const r = row.rowIndex - 1;
-                // Col G: Üretilen Miktar
-                const cellG = moSheet[XLSX.utils.encode_cell({ r: r, c: 6 })] || { t: 'n' };
-                cellG.v = row.uretilen;
-                moSheet[XLSX.utils.encode_cell({ r: r, c: 6 })] = cellG;
-
-                // Col H: Tamamlanma Oranı (%)
-                const cellH = moSheet[XLSX.utils.encode_cell({ r: r, c: 7 })] || { t: 'n' };
-                cellH.v = row.tamamlanma;
-                moSheet[XLSX.utils.encode_cell({ r: r, c: 7 })] = cellH;
-
-                // Col I: Alt Parça Limit
-                const cellI = moSheet[XLSX.utils.encode_cell({ r: r, c: 8 })] || { t: 'n' };
-                cellI.v = row.limit;
-                moSheet[XLSX.utils.encode_cell({ r: r, c: 8 })] = cellI;
-            });
-
-            montajOtomasyonRight.forEach(row => {
-                const r = row.rowIndex - 1;
-                // Col O: Tamamlanan Çeşit
-                const cellO = moSheet[XLSX.utils.encode_cell({ r: r, c: 14 })] || { t: 'n' };
-                cellO.v = row.tamamlananCesit;
-                moSheet[XLSX.utils.encode_cell({ r: r, c: 14 })] = cellO;
-
-                // Col P: Tamamlanma Oranı (%)
-                const cellP = moSheet[XLSX.utils.encode_cell({ r: r, c: 15 })] || { t: 'n' };
-                cellP.v = row.tamamlanma;
-                moSheet[XLSX.utils.encode_cell({ r: r, c: 15 })] = cellP;
-
-                // Col R: Ek Toplanabilir (Set)
-                const cellR = moSheet[XLSX.utils.encode_cell({ r: r, c: 17 })] || { t: 'n' };
-                cellR.v = row.limit;
-                moSheet[XLSX.utils.encode_cell({ r: r, c: 17 })] = cellR;
-            });
-        }
-
-        // 4. Update FINAL MONTAJ İZLEME cell values
-        const fmSheet = workbook.Sheets["FINAL MONTAJ İZLEME"];
-        if (fmSheet) {
-            finalMontajLeft.forEach(row => {
-                const r = row.rowIndex - 1;
-                // Col G: Üretilen Miktar
-                const cellG = fmSheet[XLSX.utils.encode_cell({ r: r, c: 6 })] || { t: 'n' };
-                cellG.v = row.uretilen;
-                fmSheet[XLSX.utils.encode_cell({ r: r, c: 6 })] = cellG;
-
-                // Col H: Tamamlanma Oranı (%)
-                const cellH = fmSheet[XLSX.utils.encode_cell({ r: r, c: 7 })] || { t: 'n' };
-                cellH.v = row.tamamlanma;
-                fmSheet[XLSX.utils.encode_cell({ r: r, c: 7 })] = cellH;
-
-                // Col I: Alt Parça Limit
-                const cellI = fmSheet[XLSX.utils.encode_cell({ r: r, c: 8 })] || { t: 'n' };
-                cellI.v = row.limit;
-                fmSheet[XLSX.utils.encode_cell({ r: r, c: 8 })] = cellI;
-            });
-
-            finalMontajRight.forEach(row => {
-                const r = row.rowIndex - 1;
-                // Col O: Tamamlanan Çeşit
-                const cellO = fmSheet[XLSX.utils.encode_cell({ r: r, c: 14 })] || { t: 'n' };
-                cellO.v = row.tamamlananCesit;
-                fmSheet[XLSX.utils.encode_cell({ r: r, c: 14 })] = cellO;
-
-                // Col P: Tamamlanma Oranı (%)
-                const cellP = fmSheet[XLSX.utils.encode_cell({ r: r, c: 15 })] || { t: 'n' };
-                cellP.v = row.tamamlanma;
-                fmSheet[XLSX.utils.encode_cell({ r: r, c: 15 })] = cellP;
-
-                // Col R: Ek Toplanabilir (Set)
-                const cellR = fmSheet[XLSX.utils.encode_cell({ r: r, c: 17 })] || { t: 'n' };
-                cellR.v = row.limit;
-                fmSheet[XLSX.utils.encode_cell({ r: r, c: 17 })] = cellR;
-            });
-        }
-
-        // 5. Update Station Sheets cell values in the workbook
-        for (const [stName, rows] of Object.entries(stationSheetsMap)) {
-            const sheet = workbook.Sheets[stName];
-            if (!sheet) continue;
-            
-            // Read headers of this sheet to find column indexes of Üretilecek Miktar and Toplam Hammadde Miktarı
-            let headers = [];
-            const ref = sheet['!ref'];
-            if (!ref) continue;
-            const range = XLSX.utils.decode_range(ref);
-            for (let c = range.s.c; c <= range.e.c; c++) {
-                const cell = sheet[XLSX.utils.encode_cell({ r: range.s.r, c: c })];
-                headers.push(cell ? String(cell.v).trim().toLowerCase() : `sütun ${c+1}`);
-            }
-            const uMiktarColIdx = headers.indexOf('üretilecek miktar');
-            const tHammaddeColIdx = headers.indexOf('toplam hammadde miktarı');
-            
-            rows.forEach(row => {
-                const r = row.rowIndex - 1; // 0-based index for SheetJS
-                
-                if (uMiktarColIdx !== -1) {
-                    const cellG = sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + uMiktarColIdx })] || { t: 'n' };
-                    cellG.v = row['Üretilecek Miktar'] || 0;
-                    sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + uMiktarColIdx })] = cellG;
-                }
-                
-                if (tHammaddeColIdx !== -1) {
-                    const cellI = sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + tHammaddeColIdx })] || { t: 'n' };
-                    cellI.v = row['Toplam Hammadde Miktarı'] || 0;
-                    sheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + tHammaddeColIdx })] = cellI;
-                }
-            });
-        }
-
-        // 6. Update ÜRETİM LİSTESİ sheet cell values in the workbook
-        const ulSheetName = workbook.SheetNames.find(n => 
-            n.toUpperCase().replace(/I/g, 'İ').includes('ÜRETİM LİSTESİ') || 
-            n.toUpperCase().includes('URETIM LISTESI')
-        );
-        if (ulSheetName) {
-            const ulSheet = workbook.Sheets[ulSheetName];
-            if (ulSheet && ulSheet['!ref']) {
-                let headers = [];
-                const range = XLSX.utils.decode_range(ulSheet['!ref']);
-                for (let c = range.s.c; c <= range.e.c; c++) {
-                    const cell = ulSheet[XLSX.utils.encode_cell({ r: range.s.r, c: c })];
-                    headers.push(cell ? String(cell.v).trim().toLowerCase() : `sütun ${c+1}`);
-                }
-                const miktarColIdx = headers.indexOf('üretilecek miktar');
-                if (miktarColIdx !== -1) {
-                    uretimListesiRows.forEach(row => {
-                        const r = row.rowIndex - 1; // 0-based index
-                        const cellG = ulSheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + miktarColIdx })] || { t: 'n' };
-                        cellG.v = row.uretilecek;
-                        ulSheet[XLSX.utils.encode_cell({ r: r, c: range.s.c + miktarColIdx })] = cellG;
-                    });
-                }
-            }
-        }
-
-        // Export workbook to download file
-        const origFileName = loadedFileName.textContent.replace("Yüklenen Dosya: ", "").replace(".xlsx", "");
-        const exportName = `${origFileName}_Guncel.xlsx`;
-        
         XLSX.writeFile(workbook, exportName);
         showToast(`Güncel Excel dosyası indirildi: "${exportName}"`, "success");
         
     } catch (err) {
-        console.error(err);
+        console.error("Excel indirme hatası:", err);
         showToast("Excel dosyasına yazılırken hata oluştu!", "error");
     }
 });
