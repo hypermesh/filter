@@ -2674,15 +2674,18 @@ function renderStationTable(headers) {
                 // Styling specific columns
                 if (h === 'Kod') {
                     td.style.whiteSpace = 'nowrap';
+                    td.style.width = '140px';
+                    td.style.minWidth = '140px';
+                    td.style.padding = '6px 12px';
                     const isHarici = excludedHariciKodlar.has(code);
                     const hariciIcon = isHarici ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; color:#fda4af;" title="Harici İşlem / Harici Kod"></i>' : '';
                     const textColor = isHarici ? '#fda4af' : 'white';
                     
                     td.innerHTML = `
-                        <div class="code-cell-wrapper">
-                            <span class="code-cell-text" style="color:${textColor};">${hariciIcon}${code}</span>
-                            <button type="button" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${code}')" title="Görseli Görüntüle">
-                                <i class="fa-solid fa-image"></i>
+                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                            <span style="font-weight: 700; color:${textColor};">${hariciIcon}${code}</span>
+                            <button type="button" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${code}')" style="cursor: pointer !important; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; background: rgba(99,102,241,0.2) !important; border: 1px solid #6366f1 !important; border-radius: 6px; color: #a78bfa; font-size: 12px; flex-shrink: 0;" title="Görseli Görüntüle">
+                                <i class="fa-solid fa-image" style="pointer-events: none;"></i>
                             </button>
                         </div>
                     `;
