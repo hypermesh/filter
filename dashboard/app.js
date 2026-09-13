@@ -1940,6 +1940,18 @@ function deleteLogEntry(index) {
     showQuickPartInfo(deletedCode);
 }
 
+function clearAllProductionLogs() {
+    if (!productionLog || productionLog.length === 0) return;
+    if (confirm("Tüm üretim giriş günlüğü kayıtlarını silmek istediğinize emin misiniz?")) {
+        productionLog = [];
+        saveProductionLogToStorage();
+        showToast("Tüm üretim günlüğü temizlendi.", "info");
+        recalculateAll();
+        renderProductionTab();
+    }
+}
+window.clearAllProductionLogs = clearAllProductionLogs;
+
 function renderProductionLog() {
     const tbody = document.getElementById('production-log-body');
     tbody.innerHTML = '';
