@@ -27,9 +27,9 @@ function saveProductionLogToStorage() {
 function loadProductionLogFromStorage() {
     try {
         const raw = localStorage.getItem(getStorageKey());
-        if (raw) {
+        if (raw !== null) {
             const saved = JSON.parse(raw);
-            if (Array.isArray(saved) && saved.length > 0) {
+            if (Array.isArray(saved)) {
                 productionLog = saved;
                 console.log(`[Storage] ${saved.length} üretim kaydı geri yüklendi (${loadedExcelFileName})`);
             }
@@ -2136,10 +2136,13 @@ function renderTakipTable() {
         tr.innerHTML = `
             <td style="font-size:12px; color:var(--text-muted);">${r.kaynak}</td>
             <td>${r.oncelik}</td>
-            <td style="white-space:nowrap;">
+            <td style="white-space:nowrap; width:140px; min-width:140px; padding:6px 12px;">
                 <div class="code-cell-wrapper">
-                    <span class="code-cell-text" style="color:white;">${r.kod}</span>
-                    <button type="button" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${r.kod}')" title="Görseli Görüntüle">
+                    <span class="code-cell-text" style="color:${excludedHariciKodlar.has(r.kod.trim().toUpperCase()) ? '#fda4af' : 'white'};">
+                        ${excludedHariciKodlar.has(r.kod.trim().toUpperCase()) ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>' : ''}
+                        ${r.kod}
+                    </span>
+                    <button type="button" draggable="false" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${r.kod}')" title="Görseli Görüntüle">
                         <i class="fa-solid fa-image"></i>
                     </button>
                 </div>
@@ -2887,10 +2890,10 @@ function renderStationTable(headers) {
                     const textColor = isHarici ? '#fda4af' : 'white';
                     
                     td.innerHTML = `
-                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                            <span style="font-weight: 700; color:${textColor};">${hariciIcon}${code}</span>
-                            <button type="button" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${code}')" style="cursor: pointer !important; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; background: rgba(99,102,241,0.2) !important; border: 1px solid #6366f1 !important; border-radius: 6px; color: #a78bfa; font-size: 12px; flex-shrink: 0;" title="Görseli Görüntüle">
-                                <i class="fa-solid fa-image" style="pointer-events: none;"></i>
+                        <div class="code-cell-wrapper">
+                            <span class="code-cell-text" style="color:${textColor};">${hariciIcon}${code}</span>
+                            <button type="button" draggable="false" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${code}')" title="Görseli Görüntüle">
+                                <i class="fa-solid fa-image"></i>
                             </button>
                         </div>
                     `;
@@ -3292,13 +3295,13 @@ function renderUlTable() {
         tr.innerHTML = `
             <td style="font-size:12px; color:var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.kaynak}">${row.kaynak}</td>
             <td>${row.oncelik}</td>
-            <td style="white-space:nowrap;">
+            <td style="white-space:nowrap; width:140px; min-width:140px; padding:6px 12px;">
                 <div class="code-cell-wrapper">
                     <span class="code-cell-text" style="color:${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '#fda4af' : 'white'};">
                         ${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>' : ''}
                         ${row.kod}
                     </span>
-                    <button type="button" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${row.kod}')" title="Görseli Görüntüle">
+                    <button type="button" draggable="false" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${row.kod}')" title="Görseli Görüntüle">
                         <i class="fa-solid fa-image"></i>
                     </button>
                 </div>
@@ -4006,10 +4009,15 @@ document.addEventListener('DOMContentLoaded', () => {
 let draggedStationRow = null;
 
 window.handleStationRowDragStart = function(e) {
+    // If the drag originated from a button, input, or interactive element, cancel drag!
+    if (e.target.closest && e.target.closest('button, input, select, a, .part-img-btn')) {
+        e.preventDefault();
+        return;
+    }
     draggedStationRow = this;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', this.dataset.index);
-    this.style.opacity = '0.4';
+    this.classList.add('dragging');
 };
 
 window.handleStationRowDragOver = function(e) {
@@ -4017,21 +4025,31 @@ window.handleStationRowDragOver = function(e) {
     e.dataTransfer.dropEffect = 'move';
     const rect = this.getBoundingClientRect();
     const offset = e.clientY - rect.top;
-    this.classList.remove('drag-over-top', 'drag-over-bottom');
+    
+    // Clear indicator on other rows
+    document.querySelectorAll('#station-tbody tr').forEach(tr => {
+        if (tr !== this) {
+            tr.classList.remove('drag-over-top', 'drag-over-bottom');
+        }
+    });
+
     if (offset > rect.height / 2) {
+        this.classList.remove('drag-over-top');
         this.classList.add('drag-over-bottom');
     } else {
+        this.classList.remove('drag-over-bottom');
         this.classList.add('drag-over-top');
     }
 };
 
 window.handleStationRowDragLeave = function(e) {
+    if (e.relatedTarget && this.contains(e.relatedTarget)) return;
     this.classList.remove('drag-over-top', 'drag-over-bottom');
 };
 
 window.handleStationRowDragEnd = function(e) {
-    this.style.opacity = '1';
-    document.querySelectorAll('#station-tbody tr').forEach(tr => tr.classList.remove('drag-over-top', 'drag-over-bottom'));
+    this.classList.remove('dragging');
+    document.querySelectorAll('#station-tbody tr').forEach(tr => tr.classList.remove('drag-over-top', 'drag-over-bottom', 'dragging'));
 };
 
 window.handleStationRowDrop = function(e) {
