@@ -3363,98 +3363,103 @@ function filterAndPaginateUlTable() {
 
 // --- DİNAMİK HAMMADDE / PARÇA BİRİM STANDARTLARI & FORMÜL İSTİSNA MOTORU ---
 function determinePartClassification(row) {
-    const cleanCode = String(row.kod || "").trim().toUpperCase();
-    const hKod = String(row.hKod || "").trim().toUpperCase();
-    const hammadde = String(row.hammadde || "").trim().toUpperCase();
-    const malzeme = String(row.malzeme || "").trim().toUpperCase();
+    const cleanCode = String(row.kod || '').trim().toUpperCase();
+    const rawInfo = parcaBirimHammaddeMap[cleanCode] || null;
+    const hKod = String(row.hKod || (rawInfo ? rawInfo.hKod : '') || '').trim().toUpperCase();
+    const hammadde = String(row.hammadde || (rawInfo ? rawInfo.hAd : '') || '').trim().toUpperCase();
+    const unitDimRaw = rawInfo ? parseFloat(rawInfo.birimMiktar) || 0 : 0;
 
     const rules = partiFormuluHaricKurallar || {};
     
-    // 1. Kaynaklı / Alt Montaj Parçaları (Noktasız standart dışı hammadde kodları)
-    const isDotted = hKod.includes(".") || hKod.startsWith("150") || hKod.startsWith("152");
-    if (!isDotted && rules.sadece_noktali_hammadde_gecerli !== false) {
+    // 1. Kaynaklı / Alt Montaj Parçaları:
+    // Hammadde kodu DOLU olmalı, noktasız düz parça kodu içermeli (örn: 3704, 5403, 10068)
+    if (hKod.length > 0 && !hKod.includes('.') && !hKod.startsWith('150') && !hKod.startsWith('152') && !hKod.startsWith('153') && !hKod.startsWith('154') && rules.sadece_noktali_hammadde_gecerli !== false) {
         return {
-            category: "kaynakli",
-            unitType: "adet",
-            unitLabel: "1 Adet",
-            badgeStyle: "background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:700; font-size:11px;",
+            category: 'kaynakli',
+            unitType: 'adet',
+            unitDim: 1.0,
+            unitLabel: '1 Adet',
+            badgeStyle: 'background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:700; font-size:11px;',
             isExcluded: true,
-            exclusionReason: "Kaynaklı / Alt Montaj",
-            exclusionTag: "Kaynaklı"
+            exclusionReason: 'Kaynaklı / Alt Montaj',
+            exclusionTag: 'Kaynaklı'
         };
     }
 
-    // 2. Lazer Kesim Sac Parçaları (150.01.01, 150.01 veya SAC / PLAKA / LEVHA içerenler)
-    const isLaserSheet = hKod.startsWith("150.01.01") || hKod.startsWith("150.01") || 
+    // 2. Lazer Kesim Sac Parçaları:
+    // Hammadde kodu 150.01.01... veya hammadde adı Çelik Sac / DKP Sac / Plaka olanlar
+    const isLaserSheet = hKod.startsWith('150.01.01') || hKod.startsWith('150.01') || 
                          (Array.isArray(rules.haric_hammadde_onekleri) && rules.haric_hammadde_onekleri.some(p => p && hKod.startsWith(p))) ||
-                         ["SAC", "PLAKA", "LEVHA", "LAZER SAC"].some(w => hammadde.includes(w) || malzeme.includes(w));
+                         ['ÇELİK SAC', 'DKP SAC', 'PASLANMAZ SAC', 'SAC |', 'PLAKA', 'LEVHA'].some(w => hammadde.includes(w));
     if (isLaserSheet) {
         return {
-            category: "lazer_sac",
-            unitType: "adet",
-            unitLabel: "1 Adet",
-            badgeStyle: "background:rgba(234,179,8,0.15); color:#fde047; border:1px solid rgba(234,179,8,0.3); font-weight:700; font-size:11px;",
+            category: 'lazer_sac',
+            unitType: 'adet',
+            unitDim: 1.0,
+            unitLabel: '1 Adet',
+            badgeStyle: 'background:rgba(234,179,8,0.15); color:#fde047; border:1px solid rgba(234,179,8,0.3); font-weight:700; font-size:11px;',
             isExcluded: true,
-            exclusionReason: "Lazer Kesim Sac (150.01.01)",
-            exclusionTag: "Lazer Sac"
+            exclusionReason: 'Lazer Kesim Sac (150.01.01)',
+            exclusionTag: 'Lazer Sac'
         };
     }
 
-    // 3. Standart Satınalma / Montaj Elemanları (Civata, Somun, Rulman, Keçe vb.)
-    const isStandardPurchase = ["153.", "154.", "155.", "156."].some(p => hKod.startsWith(p)) ||
-                              ["CIVATA", "SOMUN", "RULMAN", "KECE", "PIM", "SEGMAN", "O-RING", "ORING", "YAY", "PUL"].some(w => hammadde.includes(w) || malzeme.includes(w));
+    // 3. Standart Satınalma ve Bağlantı Elemanları (Civata, Somun, Rulman, Keçe vb.)
+    const isStandardPurchase = ['153.', '154.', '155.', '156.'].some(p => hKod.startsWith(p)) ||
+                              ['SOMUN |', 'CİVATA |', 'CIVATA |', 'RULMAN |', 'KEÇE |', 'KECE |', 'PİM |', 'PIM |', 'SEGMAN |', 'O-RING'].some(w => hammadde.includes(w));
     if (isStandardPurchase) {
         return {
-            category: "standart_satinalma",
-            unitType: "adet",
-            unitLabel: "1 Adet",
-            badgeStyle: "background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:700; font-size:11px;",
+            category: 'standart_satinalma',
+            unitType: 'adet',
+            unitDim: 1.0,
+            unitLabel: '1 Adet',
+            badgeStyle: 'background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:700; font-size:11px;',
             isExcluded: true,
-            exclusionReason: "Standart Satınalma",
-            exclusionTag: "Satınalma"
+            exclusionReason: 'Standart Satınalma',
+            exclusionTag: 'Satınalma'
         };
     }
 
-    // 4. Doğrudan Hariç Tutulan Hammadde veya Parça Kodları
+    // 4. Doğrudan Hariç Tutulan Hammadde veya Parça Kodları (JSON kural listesi)
     if (Array.isArray(rules.haric_hammadde_kodlari) && rules.haric_hammadde_kodlari.includes(hKod)) {
         return {
-            category: "ozel_haric",
-            unitType: "adet",
-            unitLabel: "1 Adet",
-            badgeStyle: "background:rgba(148,163,184,0.15); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); font-weight:700; font-size:11px;",
+            category: 'ozel_haric',
+            unitType: 'adet',
+            unitDim: 1.0,
+            unitLabel: '1 Adet',
+            badgeStyle: 'background:rgba(148,163,184,0.15); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); font-weight:700; font-size:11px;',
             isExcluded: true,
-            exclusionReason: "Hariç Tutulan Hammadde",
-            exclusionTag: "Hariç"
+            exclusionReason: 'Hariç Tutulan Hammadde',
+            exclusionTag: 'Hariç'
         };
     }
     if (Array.isArray(rules.haric_parca_kodlari) && rules.haric_parca_kodlari.includes(cleanCode)) {
         return {
-            category: "ozel_haric",
-            unitType: "adet",
-            unitLabel: "1 Adet",
-            badgeStyle: "background:rgba(148,163,184,0.15); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); font-weight:700; font-size:11px;",
+            category: 'ozel_haric',
+            unitType: 'adet',
+            unitDim: 1.0,
+            unitLabel: '1 Adet',
+            badgeStyle: 'background:rgba(148,163,184,0.15); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); font-weight:700; font-size:11px;',
             isExcluded: true,
-            exclusionReason: "Hariç Tutulan Parça",
-            exclusionTag: "Hariç"
+            exclusionReason: 'Hariç Tutulan Parça',
+            exclusionTag: 'Hariç'
         };
     }
 
     // 5. Doğrusal / Kesimli Hammaddeler (Profil, Boru, Lama, Mil vb.)
-    const rawInfo = parcaBirimHammaddeMap[cleanCode];
-    let unitDim = rawInfo ? parseFloat(rawInfo.birimMiktar) || 0 : 0;
-    if (unitDim <= 0) unitDim = 0.20; // Varsayılan 200 mm kesim boyu
-
-    const unitFormatted = unitDim < 1 ? (Math.round(unitDim * 1000) + " mm") : (unitDim.toFixed(2) + " m");
+    // Reçetedeki gerçek kesim boyu (m / mm), eğer boy yoksa varsayılan 200 mm
+    let unitDim = unitDimRaw > 0 ? unitDimRaw : 0.20;
+    const unitFormatted = unitDim < 1 ? `${Math.round(unitDim * 1000)} mm` : `${unitDim.toFixed(2)} m`;
 
     return {
-        category: "profil_boru_lama",
-        unitType: "uzunluk",
+        category: 'profil_boru_lama',
+        unitType: 'uzunluk',
         unitDim: unitDim,
         unitLabel: unitFormatted,
-        badgeStyle: "background:rgba(56,189,248,0.12); color:#38bdf8; border:1px solid rgba(56,189,248,0.25); font-weight:700; font-size:11px;",
+        badgeStyle: 'background:rgba(56,189,248,0.12); color:#38bdf8; border:1px solid rgba(56,189,248,0.25); font-weight:700; font-size:11px;',
         isExcluded: false,
-        exclusionReason: "",
-        exclusionTag: ""
+        exclusionReason: '',
+        exclusionTag: ''
     };
 }
 
@@ -3469,12 +3474,12 @@ function isPartExcludedFromBatchFormula(row) {
 
 // --- AKILLI EMPİRİK PARTİ BOYUTLANDIRMA MOTORU (YILLIK PROJEKSİYON & İSTİSNA DESTEKLİ) ---
 function calculateEmpiricalBatchQty(row, options) {
-    const cleanCode = String(row.kod || "").trim().toUpperCase();
+    const cleanCode = String(row.kod || '').trim().toUpperCase();
     const origQty = parseFloat(row.orijinalUretilecek) || 1;
     
     // 0. Dinamik Sınıflandırma ve İstisna Kontrolü
     const classification = determinePartClassification(row);
-    const unitDim = classification.unitType === "adet" ? 1.0 : (classification.unitDim || 0.20);
+    const unitDim = classification.unitDim;
     
     // 2. Makine Reçete Ortaklığı & Yıllık Projeksiyon Analizi
     const machineRecInfo = parcaMakineReceteleriMap[cleanCode];
@@ -3497,7 +3502,7 @@ function calculateEmpiricalBatchQty(row, options) {
     else if (recipeUsage >= 2) kRecipe = 1.2;
 
     // 4. Kaynak Dosya / Makine Frekansı Çarpanı
-    const sourceCount = Math.max((row.kaynak || "").split(",").length, machineCount);
+    const sourceCount = Math.max((row.kaynak || '').split(',').length, machineCount);
     let kFreq = 1.0;
     if (sourceCount >= 4) kFreq = 1.6;
     else if (sourceCount >= 2) kFreq = 1.3;
@@ -3532,7 +3537,7 @@ function calculateEmpiricalBatchQty(row, options) {
             unitType: classification.unitType,
             unitLabel: classification.unitLabel,
             badgeStyle: classification.badgeStyle,
-            isWelded: classification.category === "kaynakli",
+            isWelded: classification.category === 'kaynakli',
             recipeUsage: recipeUsage,
             sourceCount: sourceCount,
             machineCount: machineCount,
@@ -3569,8 +3574,8 @@ function calculateEmpiricalBatchQty(row, options) {
         kFreq: kFreq,
         kAnnual: kAnnual,
         isExcluded: false,
-        exclusionReason: "",
-        exclusionTag: "",
+        exclusionReason: '',
+        exclusionTag: '',
         finalQty: finalBatchQty,
         extraQty: Math.max(0, finalBatchQty - origQty),
         extraRaw: Math.round((Math.max(0, finalBatchQty - origQty) * unitDim) * 100) / 100
