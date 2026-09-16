@@ -4023,10 +4023,47 @@ function renderWorkloadTab() {
         data.sort((a, b) => a.name.localeCompare(b.name, 'tr', { sensitivity: 'base' }));
     }
 
-    // 3. KPI Değerleri
+    // 3. KPI Değerleri (5 İş Günü = 1 Haftalık %100 Kapasite Normuna Göre)
     const maxItem = [...data].sort((a, b) => b.tahminiGun - a.tahminiGun)[0];
     const minItem = [...data].sort((a, b) => a.tahminiGun - b.tahminiGun)[0];
-    const grandTotalDays = (grandTotalHours / (9 * 1)).toFixed(1); // referans 9h tek istasyon eşdeğeri
+    
+    // En yoğun istasyonun haftalık doluluk oranı ve durum kartı rengi
+    const maxDaysVal = maxItem ? maxItem.tahminiGun : 0;
+    const maxWeeklyPct = Math.round((maxDaysVal / 5.0) * 100);
+    
+    let maxKpiBg = 'rgba(16,185,129,0.06)';
+    let maxKpiBorder = 'rgba(16,185,129,0.25)';
+    let maxKpiIconBg = 'rgba(16,185,129,0.2)';
+    let maxKpiIcon = 'fa-solid fa-circle-check text-green';
+    let maxKpiTitle = '🟢 En Yüksek Yük (Rutin / Müsait)';
+    let maxKpiTitleColor = '#34d399';
+    let maxKpiValColor = '#6ee7b7';
+    
+    if (maxDaysVal >= 10) {
+        maxKpiBg = 'rgba(239,68,68,0.1)';
+        maxKpiBorder = 'rgba(239,68,68,0.4)';
+        maxKpiIconBg = 'rgba(239,68,68,0.25)';
+        maxKpiIcon = 'fa-solid fa-triangle-exclamation';
+        maxKpiTitle = '🚨 Kritik Darboğaz (>10 Gün)';
+        maxKpiTitleColor = '#f87171';
+        maxKpiValColor = '#f87171';
+    } else if (maxDaysVal >= 5) {
+        maxKpiBg = 'rgba(245,158,11,0.08)';
+        maxKpiBorder = 'rgba(245,158,11,0.35)';
+        maxKpiIconBg = 'rgba(245,158,11,0.2)';
+        maxKpiIcon = 'fa-solid fa-fire text-yellow';
+        maxKpiTitle = '🟠 Yüksek Yük (Haftayı Aşıyor)';
+        maxKpiTitleColor = '#fbbf24';
+        maxKpiValColor = '#fbbf24';
+    } else if (maxDaysVal >= 2) {
+        maxKpiBg = 'rgba(59,130,246,0.06)';
+        maxKpiBorder = 'rgba(59,130,246,0.25)';
+        maxKpiIconBg = 'rgba(59,130,246,0.2)';
+        maxKpiIcon = 'fa-solid fa-gauge text-blue';
+        maxKpiTitle = '🔵 En Yüksek Yük (Dengeli)';
+        maxKpiTitleColor = '#60a5fa';
+        maxKpiValColor = '#93c5fd';
+    }
 
     if (kpiContainer) {
         kpiContainer.innerHTML = `
@@ -4060,21 +4097,21 @@ function renderWorkloadTab() {
                 </div>
             </div>
 
-            <div class="kpi-card glass" style="padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); display: flex; align-items: center; justify-content: space-between; min-width: 0; gap: 10px;">
+            <div class="kpi-card glass" style="padding: 10px 14px; border-radius: 10px; border: 1px solid ${maxKpiBorder}; background: ${maxKpiBg}; display: flex; align-items: center; justify-content: space-between; min-width: 0; gap: 10px;">
                 <div style="display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden;">
-                    <div style="background: rgba(239,68,68,0.2); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 14px;"></i>
+                    <div style="background: ${maxKpiIconBg}; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="${maxKpiIcon}" style="font-size: 14px;"></i>
                     </div>
                     <div style="min-width: 0; overflow: hidden;">
-                        <div style="font-size: 10.5px; color: #f87171; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">🚨 En Yoğun</div>
-                        <div style="font-size: 14px; font-weight: 800; color: #fca5a5; line-height: 1.2; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="${maxItem ? maxItem.name : ''}">
+                        <div style="font-size: 10.5px; color: ${maxKpiTitleColor}; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">${maxKpiTitle}</div>
+                        <div style="font-size: 14px; font-weight: 800; color: white; line-height: 1.2; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="${maxItem ? maxItem.name : ''}">
                             ${maxItem ? maxItem.name : '-'}
                         </div>
                     </div>
                 </div>
                 <div style="text-align: right; white-space: nowrap; flex-shrink: 0;">
-                    <div style="font-size: 13.5px; font-weight: 800; color: #f87171;">${maxItem ? maxItem.tahminiGun.toFixed(1) + ' Gün' : '-'}</div>
-                    <div style="font-size: 10.5px; color: #fca5a5; opacity: 0.8;">${maxItem ? maxItem.totalHours.toFixed(1) + 's' : ''}</div>
+                    <div style="font-size: 13.5px; font-weight: 800; color: ${maxKpiValColor};">${maxItem ? maxItem.tahminiGun.toFixed(1) + ' Gün' : '-'}</div>
+                    <div style="font-size: 10px; color: var(--text-dim);">Haftalık: <b style="color:${maxKpiTitleColor};">%${maxWeeklyPct}</b> (${maxItem ? maxItem.totalHours.toFixed(1) + 's' : ''})</div>
                 </div>
             </div>
 
@@ -4092,18 +4129,20 @@ function renderWorkloadTab() {
                 </div>
                 <div style="text-align: right; white-space: nowrap; flex-shrink: 0;">
                     <div style="font-size: 13.5px; font-weight: 800; color: #34d399;">${minItem ? minItem.tahminiGun.toFixed(1) + ' Gün' : '-'}</div>
-                    <div style="font-size: 10.5px; color: #6ee7b7; opacity: 0.8;">${minItem ? minItem.totalHours.toFixed(1) + 's' : ''}</div>
+                    <div style="font-size: 10px; color: var(--text-dim);">Haftalık: <b style="color:#34d399;">%${Math.round(((minItem ? minItem.tahminiGun : 0) / 5.0) * 100)}</b> (${minItem ? minItem.totalHours.toFixed(1) + 's' : ''})</div>
                 </div>
             </div>
         `;
     }
 
-    // 4. Barları Çiz (Kompakt 2 Kolonlu Kart Düzeni)
-    const maxDays = Math.max(...data.map(d => d.tahminiGun), 1);
+    // 4. Barları Çiz (5 İş Günü = %100 Haftalık Kapasite Ölçeğine Göre)
+    const BASE_WEEK_DAYS = 5.0; // 5 iş günü (540 dk/gün = 45 saat/makine)
     let html = '';
 
     data.forEach(d => {
-        const barPct = Math.min(100, Math.max(4, (d.tahminiGun / maxDays) * 100));
+        // İlerleme çubuğu 5 iş gününe göre orantılanır (%100 = 5 gün)
+        const weeklyPct = Math.round((d.tahminiGun / BASE_WEEK_DAYS) * 100);
+        const barPct = Math.min(100, Math.max(3, weeklyPct));
 
         let colorGradient = 'linear-gradient(90deg, #10b981, #059669)';
         let badgeHtml = '<span class="badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); font-size:10.5px; padding:2px 7px;"><i class="fa-solid fa-feather"></i> Müsait</span>';
@@ -4134,6 +4173,9 @@ function renderWorkloadTab() {
                         <span style="font-size: 11px; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 1px 6px; border-radius: 4px; white-space: nowrap;">
                             ${d.partsCount} Parça
                         </span>
+                        <span style="font-size: 10.5px; color: ${dayColor}; background: rgba(255,255,255,0.03); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.06); font-weight: 700; white-space: nowrap;">
+                            %${weeklyPct} Haftalık
+                        </span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
                         ${badgeHtml}
@@ -4147,13 +4189,13 @@ function renderWorkloadTab() {
                     </div>
                 </div>
                 
-                <!-- Alt Satır: Kompakt İlerleme Çubuğu ve Makine Detayı -->
+                <!-- Alt Satır: 5 İş Gününe Orantılı İlerleme Çubuğu ve Makine Detayı -->
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; position: relative;">
+                    <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; position: relative;" title="5 İş Günü (Haftalık %100 Kapasite): %${weeklyPct}">
                         <div style="width: ${barPct}%; height: 100%; background: ${colorGradient}; border-radius: 3px; transition: width 0.5s ease;"></div>
                     </div>
                     <span style="font-size: 10.5px; color: var(--text-dim); white-space: nowrap; flex-shrink: 0;">
-                        ⚙️ ${d.makineSayisi} Mak • ⏱️ ${d.gunlukSaat}s/g
+                        ⚙️ ${d.makineSayisi} Mak • ⏱️ ${d.gunlukSaat}s/g (540 dk)
                     </span>
                 </div>
             </div>
