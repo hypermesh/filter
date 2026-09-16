@@ -3446,7 +3446,10 @@ function calculateEmpiricalBatchQty(row, options) {
     else if (totalAnnualDemand >= 40) kAnnual = 1.15;
 
     // 6. Boy Kuralı Tabanı (B)
-    const lengthThreshold = options ? parseFloat(options.lengthThreshold) || 0.50 : 0.50;
+    let rawThresh = options ? parseFloat(options.lengthThreshold) : 0.50;
+    if (isNaN(rawThresh) || rawThresh <= 0) rawThresh = 0.50;
+    // Eğer 5'ten büyükse (örneğin 500 mm girildiyse) metreye çevir (0.50 m)
+    const lengthThreshold = rawThresh > 5 ? (rawThresh / 1000.0) : rawThresh;
     const shortMin = options ? parseFloat(options.shortMin) || 20 : 20;
     const longMultiplier = options ? parseFloat(options.longMultiplier) || 1.30 : 1.30;
 
@@ -3501,7 +3504,7 @@ function calculateEmpiricalBatchQty(row, options) {
 }
 
 function applySmartBatchRules() {
-    const lengthThreshold = parseFloat(document.getElementById('batch-length-threshold').value) || 0.50;
+    const lengthThreshold = parseFloat(document.getElementById('batch-length-threshold').value) || 500;
     const shortMin = parseFloat(document.getElementById('batch-short-min').value) || 20;
     const longMultiplier = parseFloat(document.getElementById('batch-long-multiplier').value) || 1.30;
 
