@@ -3308,6 +3308,11 @@ function filterAndPaginateUlTable() {
 function calculateEmpiricalBatchQty(row, options) {
     const cleanCode = String(row.kod || '').trim().toUpperCase();
     const origQty = parseFloat(row.orijinalUretilecek) || 1;
+    const hKod = String(row.hKod || '').trim();
+    
+    // 0. Noktalı Standart Hammadde Kontrolü (150.xx, 152.xx vb.)
+    // Eğer hammadde kodu nokta içermiyorsa (Örn: 3157, 3478), bu parça kaynaklı parçadır; formüle dahil edilmez, net ihtiyaç kalır.
+    const isStandardRawMaterial = hKod.includes('.') || hKod.startsWith('150') || hKod.startsWith('152');
     
     // 1. Birim Hammadde Ölçüsü (metre / kg)
     const rawInfo = parcaBirimHammaddeMap[cleanCode];
@@ -3359,6 +3364,24 @@ function calculateEmpiricalBatchQty(row, options) {
         baseQty = Math.ceil(origQty * longMultiplier);
     }
 
+    // 0.1 Kaynaklı Parça / Alt Montaj ise net ihtiyaç kalır (Formüle girmez)
+    if (!isStandardRawMaterial) {
+        return {
+            unitDim: unitDim,
+            recipeUsage: recipeUsage,
+            sourceCount: sourceCount,
+            machineCount: machineCount,
+            totalAnnualDemand: totalAnnualDemand,
+            kRecipe: 1.0,
+            kFreq: 1.0,
+            kAnnual: 1.0,
+            isWeldedPart: true,
+            finalQty: origQty,
+            extraQty: 0,
+            extraRaw: 0
+        };
+    }
+
     // 7. Empirik Toplam Parti Adedi
     const dynamicMultiplier = Math.max(kRecipe * kFreq, kAnnual * (machineCount > 1 ? 1.25 : 1.0));
     const empiricalQty = Math.ceil(origQty * dynamicMultiplier);
@@ -3373,6 +3396,7 @@ function calculateEmpiricalBatchQty(row, options) {
         kRecipe: kRecipe,
         kFreq: kFreq,
         kAnnual: kAnnual,
+        isWeldedPart: false,
         finalQty: finalBatchQty,
         extraQty: Math.max(0, finalBatchQty - origQty),
         extraRaw: Math.round((Math.max(0, finalBatchQty - origQty) * unitDim) * 100) / 100
@@ -3475,21 +3499,32 @@ function renderUlTable() {
         }
 
         // Tüketim, Makine Ortaklığı & Yıllık Projeksiyon Rozeti
-        const isCommon = calc.machineCount >= 2;
-        const isHighDemand = calc.totalAnnualDemand >= 200 || calc.recipeUsage >= 8;
-        const commonBadgeClass = calc.machineCount >= 4 ? 'background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);' : (isCommon ? 'background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3);' : 'background:rgba(255,255,255,0.05); color:var(--text-muted); border:1px solid rgba(255,255,255,0.08);');
-        
-        const usageBadge = `
-            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px;">
-                <span class="badge" style="${commonBadgeClass} padding: 2px 7px; font-weight: 700; font-size: 10.5px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; width: fit-content;">
-                    <i class="fa-solid ${calc.machineCount >= 4 ? 'fa-fire text-orange' : (isCommon ? 'fa-diagram-project' : 'fa-cube')}"></i> ${calc.machineCount >= 2 ? calc.machineCount + ' Makinede Ortak' : 'Özel Parça (Tek Makine)'}
-                </span>
-                <div style="display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-dim);">
-                    <span><i class="fa-solid fa-wrench" style="opacity:0.6;"></i> Reçete: <b>${calc.recipeUsage} ad</b></span>
-                    ${calc.totalAnnualDemand > 0 ? `<span style="color:#38bdf8;"><i class="fa-solid fa-chart-line"></i> Yıllık: <b>~${Math.round(calc.totalAnnualDemand)} ad</b></span>` : ''}
+        let usageBadge = '';
+        if (calc.isWeldedPart) {
+            usageBadge = `
+                <div style="display: flex; flex-direction: column; gap: 3px; font-size: 11px;">
+                    <span class="badge" style="background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.25); padding: 2px 7px; font-weight: 700; font-size: 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; width: fit-content;">
+                        <i class="fa-solid fa-layer-group"></i> Kaynaklı / Alt Montaj (Net İhtiyaç)
+                    </span>
+                    <span style="font-size:10px; color:var(--text-dim);">Formül dışı (Tam Reçete)</span>
                 </div>
-            </div>
-        `;
+            `;
+        } else {
+            const isCommon = calc.machineCount >= 2;
+            const commonBadgeClass = calc.machineCount >= 4 ? 'background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);' : (isCommon ? 'background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3);' : 'background:rgba(255,255,255,0.05); color:var(--text-muted); border:1px solid rgba(255,255,255,0.08);');
+            
+            usageBadge = `
+                <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px;">
+                    <span class="badge" style="${commonBadgeClass} padding: 2px 7px; font-weight: 700; font-size: 10.5px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; width: fit-content;">
+                        <i class="fa-solid ${calc.machineCount >= 4 ? 'fa-fire text-orange' : (isCommon ? 'fa-diagram-project' : 'fa-cube')}"></i> ${calc.machineCount >= 2 ? calc.machineCount + ' Makinede Ortak' : 'Özel Parça (Tek Makine)'}
+                    </span>
+                    <div style="display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-dim);">
+                        <span><i class="fa-solid fa-wrench" style="opacity:0.6;"></i> Reçete: <b>${calc.recipeUsage} ad</b></span>
+                        ${calc.totalAnnualDemand > 0 ? `<span style="color:#38bdf8;"><i class="fa-solid fa-chart-line"></i> Yıllık: <b>~${Math.round(calc.totalAnnualDemand)} ad</b></span>` : ''}
+                    </div>
+                </div>
+            `;
+        }
 
         tr.innerHTML = `
             <td style="font-size:12px; color:var(--text-muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.kaynak}">${row.kaynak}</td>
