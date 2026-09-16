@@ -3708,12 +3708,12 @@ function renderUlTable() {
             `;
         } else {
             const isCommon = calc.machineCount >= 2;
-            const commonBadgeClass = calc.machineCount >= 4 ? "background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);" : (isCommon ? "background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3);" : "background:rgba(255,255,255,0.05); color:var(--text-muted); border:1px solid rgba(255,255,255,0.08);");
+            const commonBadgeClass = calc.machineCount >= 4 ? "background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);" : (isCommon ? "background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3);" : "background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);");
             
             usageBadge = `
                 <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px;">
                     <span class="badge" style="${commonBadgeClass} padding: 2px 7px; font-weight: 700; font-size: 10.5px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; width: fit-content;">
-                        <i class="fa-solid ${calc.machineCount >= 4 ? "fa-fire text-orange" : (isCommon ? "fa-diagram-project" : "fa-cube")}"></i> ${calc.machineCount >= 2 ? calc.machineCount + " Makinede Ortak" : "Özel Parça (Tek Makine)"}
+                        <i class="fa-solid ${calc.machineCount >= 4 ? "fa-fire" : (isCommon ? "fa-diagram-project" : "fa-star")}"></i> ${calc.machineCount >= 2 ? calc.machineCount + " Makinede Ortak" : "Özel Parça (Tek Makine)"}
                     </span>
                     <div style="display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-dim);">
                         <span><i class="fa-solid fa-wrench" style="opacity:0.6;"></i> Reçete: <b>${calc.recipeUsage} ad</b></span>
