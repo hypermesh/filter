@@ -13,6 +13,7 @@ let partiFormuluHaricKurallar = {
     haric_malzeme_kelimeleri: [],
     sadece_noktali_hammadde_gecerli: true
 };
+let hammaddeBirimKurallari = null;
 
 // Parsed Data Structures
 let uretimTakipRows = []; // Üretim Takip requirements (Col A-G)
@@ -89,6 +90,17 @@ function loadParcaReceteTuketimDatabase() {
             if (data && typeof data === 'object') {
                 partiFormuluHaricKurallar = data;
                 console.log(`[DB] Empirik parti formülü hariç tutma kuralları yüklendi.`);
+            }
+        })
+        .catch(() => {});
+
+    // 5. Hammadde ve Parça Birim Standartları Kuralları
+    fetch('../veritabanlari/hammadde_birim_kurallari.json')
+        .then(res => res.json())
+        .then(data => {
+            if (data && typeof data === 'object') {
+                hammaddeBirimKurallari = data;
+                console.log(`[DB] Hammadde birim standartları kuralları yüklendi.`);
             }
         })
         .catch(() => {});
@@ -3349,73 +3361,120 @@ function filterAndPaginateUlTable() {
     renderUlTable();
 }
 
-// --- DİNAMİK FORMÜL HARİÇ TUTMA KONTROLÜ ---
-function isPartExcludedFromBatchFormula(row) {
-    const cleanCode = String(row.kod || '').trim().toUpperCase();
-    const hKod = String(row.hKod || '').trim().toUpperCase();
-    const hammadde = String(row.hammadde || '').trim().toUpperCase();
-    const malzeme = String(row.malzeme || '').trim().toUpperCase();
+// --- DİNAMİK HAMMADDE / PARÇA BİRİM STANDARTLARI & FORMÜL İSTİSNA MOTORU ---
+function determinePartClassification(row) {
+    const cleanCode = String(row.kod || "").trim().toUpperCase();
+    const hKod = String(row.hKod || "").trim().toUpperCase();
+    const hammadde = String(row.hammadde || "").trim().toUpperCase();
+    const malzeme = String(row.malzeme || "").trim().toUpperCase();
 
     const rules = partiFormuluHaricKurallar || {};
     
-    // 1. Noktalı Standart Kodlama Kontrolü (Nokta içermeyenler -> Kaynaklı / Alt Montaj)
-    if (rules.sadece_noktali_hammadde_gecerli !== false) {
-        const isDotted = hKod.includes('.') || hKod.startsWith('150') || hKod.startsWith('152');
-        if (!isDotted) {
-            return { excluded: true, reason: 'Kaynaklı / Alt Montaj', shortTag: 'Kaynaklı' };
-        }
+    // 1. Kaynaklı / Alt Montaj Parçaları (Noktasız standart dışı hammadde kodları)
+    const isDotted = hKod.includes(".") || hKod.startsWith("150") || hKod.startsWith("152");
+    if (!isDotted && rules.sadece_noktali_hammadde_gecerli !== false) {
+        return {
+            category: "kaynakli",
+            unitType: "adet",
+            unitLabel: "1 Adet",
+            badgeStyle: "background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:700; font-size:11px;",
+            isExcluded: true,
+            exclusionReason: "Kaynaklı / Alt Montaj",
+            exclusionTag: "Kaynaklı"
+        };
     }
 
-    // 2. Hariç Tutulacak Hammadde Önekleri (Örn: 150.01.01 Lazer Sac)
-    if (Array.isArray(rules.haric_hammadde_onekleri)) {
-        for (const prefix of rules.haric_hammadde_onekleri) {
-            const cleanPrefix = String(prefix || '').trim().toUpperCase();
-            if (cleanPrefix && hKod.startsWith(cleanPrefix)) {
-                return { excluded: true, reason: `Lazer Kesim Sac (${cleanPrefix})`, shortTag: 'Lazer Sac' };
-            }
-        }
+    // 2. Lazer Kesim Sac Parçaları (150.01.01, 150.01 veya SAC / PLAKA / LEVHA içerenler)
+    const isLaserSheet = hKod.startsWith("150.01.01") || hKod.startsWith("150.01") || 
+                         (Array.isArray(rules.haric_hammadde_onekleri) && rules.haric_hammadde_onekleri.some(p => p && hKod.startsWith(p))) ||
+                         ["SAC", "PLAKA", "LEVHA", "LAZER SAC"].some(w => hammadde.includes(w) || malzeme.includes(w));
+    if (isLaserSheet) {
+        return {
+            category: "lazer_sac",
+            unitType: "adet",
+            unitLabel: "1 Adet",
+            badgeStyle: "background:rgba(234,179,8,0.15); color:#fde047; border:1px solid rgba(234,179,8,0.3); font-weight:700; font-size:11px;",
+            isExcluded: true,
+            exclusionReason: "Lazer Kesim Sac (150.01.01)",
+            exclusionTag: "Lazer Sac"
+        };
     }
 
-    // 3. Doğrudan Hariç Tutulacak Hammadde Kodları
+    // 3. Standart Satınalma / Montaj Elemanları (Civata, Somun, Rulman, Keçe vb.)
+    const isStandardPurchase = ["153.", "154.", "155.", "156."].some(p => hKod.startsWith(p)) ||
+                              ["CIVATA", "SOMUN", "RULMAN", "KECE", "PIM", "SEGMAN", "O-RING", "ORING", "YAY", "PUL"].some(w => hammadde.includes(w) || malzeme.includes(w));
+    if (isStandardPurchase) {
+        return {
+            category: "standart_satinalma",
+            unitType: "adet",
+            unitLabel: "1 Adet",
+            badgeStyle: "background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:700; font-size:11px;",
+            isExcluded: true,
+            exclusionReason: "Standart Satınalma",
+            exclusionTag: "Satınalma"
+        };
+    }
+
+    // 4. Doğrudan Hariç Tutulan Hammadde veya Parça Kodları
     if (Array.isArray(rules.haric_hammadde_kodlari) && rules.haric_hammadde_kodlari.includes(hKod)) {
-        return { excluded: true, reason: 'Hariç Tutulan Hammadde', shortTag: 'Hariç' };
+        return {
+            category: "ozel_haric",
+            unitType: "adet",
+            unitLabel: "1 Adet",
+            badgeStyle: "background:rgba(148,163,184,0.15); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); font-weight:700; font-size:11px;",
+            isExcluded: true,
+            exclusionReason: "Hariç Tutulan Hammadde",
+            exclusionTag: "Hariç"
+        };
     }
-
-    // 4. Doğrudan Hariç Tutulacak Parça Kodları
     if (Array.isArray(rules.haric_parca_kodlari) && rules.haric_parca_kodlari.includes(cleanCode)) {
-        return { excluded: true, reason: 'Hariç Tutulan Parça', shortTag: 'Hariç' };
+        return {
+            category: "ozel_haric",
+            unitType: "adet",
+            unitLabel: "1 Adet",
+            badgeStyle: "background:rgba(148,163,184,0.15); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); font-weight:700; font-size:11px;",
+            isExcluded: true,
+            exclusionReason: "Hariç Tutulan Parça",
+            exclusionTag: "Hariç"
+        };
     }
 
-    // 5. Malzeme Adında Geçen Anahtar Kelimeler (Örn: SAC, LAZER vb.)
-    if (Array.isArray(rules.haric_malzeme_kelimeleri) && rules.haric_malzeme_kelimeleri.length > 0) {
-        for (const kw of rules.haric_malzeme_kelimeleri) {
-            const cleanKw = String(kw || '').trim().toUpperCase();
-            if (cleanKw && (hammadde.includes(cleanKw) || malzeme.includes(cleanKw))) {
-                return { excluded: true, reason: `Malzeme İstisnası (${cleanKw})`, shortTag: cleanKw };
-            }
-        }
-    }
+    // 5. Doğrusal / Kesimli Hammaddeler (Profil, Boru, Lama, Mil vb.)
+    const rawInfo = parcaBirimHammaddeMap[cleanCode];
+    let unitDim = rawInfo ? parseFloat(rawInfo.birimMiktar) || 0 : 0;
+    if (unitDim <= 0) unitDim = 0.20; // Varsayılan 200 mm kesim boyu
 
-    return { excluded: false, reason: '', shortTag: '' };
+    const unitFormatted = unitDim < 1 ? (Math.round(unitDim * 1000) + " mm") : (unitDim.toFixed(2) + " m");
+
+    return {
+        category: "profil_boru_lama",
+        unitType: "uzunluk",
+        unitDim: unitDim,
+        unitLabel: unitFormatted,
+        badgeStyle: "background:rgba(56,189,248,0.12); color:#38bdf8; border:1px solid rgba(56,189,248,0.25); font-weight:700; font-size:11px;",
+        isExcluded: false,
+        exclusionReason: "",
+        exclusionTag: ""
+    };
+}
+
+function isPartExcludedFromBatchFormula(row) {
+    const classification = determinePartClassification(row);
+    return {
+        excluded: classification.isExcluded,
+        reason: classification.exclusionReason,
+        shortTag: classification.exclusionTag
+    };
 }
 
 // --- AKILLI EMPİRİK PARTİ BOYUTLANDIRMA MOTORU (YILLIK PROJEKSİYON & İSTİSNA DESTEKLİ) ---
 function calculateEmpiricalBatchQty(row, options) {
-    const cleanCode = String(row.kod || '').trim().toUpperCase();
+    const cleanCode = String(row.kod || "").trim().toUpperCase();
     const origQty = parseFloat(row.orijinalUretilecek) || 1;
     
-    // 0. İstisna Kontrolü (Kaynaklı parçalar, 150.01.01 lazer sac vb.)
-    const exclusion = isPartExcludedFromBatchFormula(row);
-    const isWelded = exclusion.shortTag === 'Kaynaklı' || (!String(row.hKod || '').includes('.') && !String(row.hKod || '').startsWith('150') && !String(row.hKod || '').startsWith('152'));
-    
-    // 1. Birim Hammadde Ölçüsü (metre / kg / adet)
-    const rawInfo = parcaBirimHammaddeMap[cleanCode];
-    let unitDim = rawInfo ? parseFloat(rawInfo.birimMiktar) || 0 : 0;
-    if (isWelded) {
-        unitDim = 1.0; // Kaynaklı / montaj parçaları için 1 adet
-    } else if (unitDim <= 0) {
-        unitDim = 0.20; // Profil/boru varsayılan 200 mm
-    }
+    // 0. Dinamik Sınıflandırma ve İstisna Kontrolü
+    const classification = determinePartClassification(row);
+    const unitDim = classification.unitType === "adet" ? 1.0 : (classification.unitDim || 0.20);
     
     // 2. Makine Reçete Ortaklığı & Yıllık Projeksiyon Analizi
     const machineRecInfo = parcaMakineReceteleriMap[cleanCode];
@@ -3438,7 +3497,7 @@ function calculateEmpiricalBatchQty(row, options) {
     else if (recipeUsage >= 2) kRecipe = 1.2;
 
     // 4. Kaynak Dosya / Makine Frekansı Çarpanı
-    const sourceCount = Math.max((row.kaynak || '').split(',').length, machineCount);
+    const sourceCount = Math.max((row.kaynak || "").split(",").length, machineCount);
     let kFreq = 1.0;
     if (sourceCount >= 4) kFreq = 1.6;
     else if (sourceCount >= 2) kFreq = 1.3;
@@ -3451,8 +3510,8 @@ function calculateEmpiricalBatchQty(row, options) {
     else if (totalAnnualDemand >= 40) kAnnual = 1.15;
 
     // 6. Boy Kuralı Tabanı (B)
-    let rawThresh = options ? parseFloat(options.lengthThreshold) : 0.50;
-    if (isNaN(rawThresh) || rawThresh <= 0) rawThresh = 0.50;
+    let rawThresh = options ? parseFloat(options.lengthThreshold) : 500;
+    if (isNaN(rawThresh) || rawThresh <= 0) rawThresh = 500;
     // Eğer 5'ten büyükse (örneğin 500 mm girildiyse) metreye çevir (0.50 m)
     const lengthThreshold = rawThresh > 5 ? (rawThresh / 1000.0) : rawThresh;
     const shortMin = options ? parseFloat(options.shortMin) || 20 : 20;
@@ -3465,11 +3524,15 @@ function calculateEmpiricalBatchQty(row, options) {
         baseQty = Math.ceil(origQty * longMultiplier);
     }
 
-    // 0.1 Eğer istisna kapsamındaysa (Lazer sac, Kaynaklı parça vb.) formül uygulanmaz, net ihtiyaç kalır!
-    if (exclusion.excluded) {
+    // İstisna kapsamındaysa (Lazer sac, Kaynaklı parça vb.) formül uygulanmaz, net ihtiyaç kalır!
+    if (classification.isExcluded) {
         return {
             unitDim: unitDim,
-            isWelded: isWelded,
+            classification: classification,
+            unitType: classification.unitType,
+            unitLabel: classification.unitLabel,
+            badgeStyle: classification.badgeStyle,
+            isWelded: classification.category === "kaynakli",
             recipeUsage: recipeUsage,
             sourceCount: sourceCount,
             machineCount: machineCount,
@@ -3478,8 +3541,8 @@ function calculateEmpiricalBatchQty(row, options) {
             kFreq: 1.0,
             kAnnual: 1.0,
             isExcluded: true,
-            exclusionReason: exclusion.reason,
-            exclusionTag: exclusion.shortTag,
+            exclusionReason: classification.exclusionReason,
+            exclusionTag: classification.exclusionTag,
             finalQty: origQty,
             extraQty: 0,
             extraRaw: 0
@@ -3493,7 +3556,11 @@ function calculateEmpiricalBatchQty(row, options) {
 
     return {
         unitDim: unitDim,
-        isWelded: isWelded,
+        classification: classification,
+        unitType: classification.unitType,
+        unitLabel: classification.unitLabel,
+        badgeStyle: classification.badgeStyle,
+        isWelded: false,
         recipeUsage: recipeUsage,
         sourceCount: sourceCount,
         machineCount: machineCount,
@@ -3502,8 +3569,8 @@ function calculateEmpiricalBatchQty(row, options) {
         kFreq: kFreq,
         kAnnual: kAnnual,
         isExcluded: false,
-        exclusionReason: '',
-        exclusionTag: '',
+        exclusionReason: "",
+        exclusionTag: "",
         finalQty: finalBatchQty,
         extraQty: Math.max(0, finalBatchQty - origQty),
         extraRaw: Math.round((Math.max(0, finalBatchQty - origQty) * unitDim) * 100) / 100
@@ -3511,9 +3578,9 @@ function calculateEmpiricalBatchQty(row, options) {
 }
 
 function applySmartBatchRules() {
-    const lengthThreshold = parseFloat(document.getElementById('batch-length-threshold').value) || 500;
-    const shortMin = parseFloat(document.getElementById('batch-short-min').value) || 20;
-    const longMultiplier = parseFloat(document.getElementById('batch-long-multiplier').value) || 1.30;
+    const lengthThreshold = parseFloat(document.getElementById("batch-length-threshold").value) || 500;
+    const shortMin = parseFloat(document.getElementById("batch-short-min").value) || 20;
+    const longMultiplier = parseFloat(document.getElementById("batch-long-multiplier").value) || 1.30;
 
     const options = { lengthThreshold, shortMin, longMultiplier };
     let changedCount = 0;
@@ -3532,7 +3599,7 @@ function applySmartBatchRules() {
     recalculateAll();
     filterAndPaginateUlTable();
 
-    showToast(`⚡ Akıllı parti kuralları ${changedCount} parçaya uygulandı! (+${Math.round(totalExtraRaw)} m/kg hammadde)`, "success");
+    showToast(`⚡ Akıllı parti kuralları ${changedCount} parçaya uygulandı! (+${Math.round(totalExtraRaw)} m/kg/ad hammadde)`, "success");
 }
 window.applySmartBatchRules = applySmartBatchRules;
 
@@ -3551,49 +3618,43 @@ function resetUlToOriginal() {
 window.resetUlToOriginal = resetUlToOriginal;
 
 function renderUlTable() {
-    const tbody = document.getElementById('ul-table-body');
-    tbody.innerHTML = '';
-    
-    const countBadge = document.getElementById('ul-total-count');
+    const tbody = document.getElementById("ul-table-body");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    const countBadge = document.getElementById("ul-total-count");
     if (countBadge) countBadge.textContent = `${uretimListesiRows.length} Kalem`;
 
     const pState = paginationState.ul;
 
     if (pState.total === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color:var(--text-dim); padding:20px;">Eşleşen parça bulunamadı.</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="color:var(--text-dim); padding:20px;">Eşleşen parça bulunamadı.</td></tr>`;
         return;
     }
 
     const pageRows = pState.filtered;
 
     pageRows.forEach(row => {
-        const tr = document.createElement('tr');
+        const tr = document.createElement("tr");
         
         // Empirik parti ve hammadde analizini hesapla
         const calc = calculateEmpiricalBatchQty(row);
-        let unitDimFormatted = `${Math.round(calc.unitDim * 1000)} mm`;
-        let unitBadgeStyle = 'background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); font-weight: 700; font-size: 11px;';
-        
-        if (calc.isWelded) {
-            unitDimFormatted = '1 Adet';
-            unitBadgeStyle = 'background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); font-weight: 700; font-size: 11px;';
-        } else if (calc.unitDim >= 1) {
-            unitDimFormatted = `${calc.unitDim.toFixed(2)} m`;
-        }
+        const unitDimFormatted = calc.unitLabel;
+        const unitBadgeStyle = calc.badgeStyle;
 
         // Check if quantity has been modified
         const isModified = row.uretilecek !== row.orijinalUretilecek;
-        let changeBadgeHtml = '';
-        let inputStyle = 'width: 86px; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); color: white; border-radius: 6px; padding: 5px 8px; font-weight: 700; font-size: 13px; outline: none; transition: var(--transition);';
+        let changeBadgeHtml = "";
+        let inputStyle = "width: 86px; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); color: white; border-radius: 6px; padding: 5px 8px; font-weight: 700; font-size: 13px; outline: none; transition: var(--transition);";
         
         const currentDiff = row.uretilecek - row.orijinalUretilecek;
         const currentExtraRaw = Math.round((currentDiff * calc.unitDim) * 100) / 100;
 
         if (isModified) {
             const diffText = currentDiff > 0 ? `+${currentDiff} Adet` : `${currentDiff} Adet`;
-            const badgeColor = currentDiff > 0 ? '#34d399' : '#f87171';
-            const badgeBg = currentDiff > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
-            const borderGlow = currentDiff > 0 ? 'rgba(52, 211, 153, 0.3)' : 'rgba(239, 68, 68, 0.3)';
+            const badgeColor = currentDiff > 0 ? "#34d399" : "#f87171";
+            const badgeBg = currentDiff > 0 ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)";
+            const borderGlow = currentDiff > 0 ? "rgba(52, 211, 153, 0.3)" : "rgba(239, 68, 68, 0.3)";
             
             inputStyle = `width: 86px; background: rgba(16, 22, 40, 0.95); border: 1.5px solid ${badgeColor}; color: ${badgeColor}; box-shadow: 0 0 10px ${borderGlow}; border-radius: 6px; padding: 5px 8px; font-weight: 800; font-size: 13px; outline: none; transition: var(--transition);`;
             
@@ -3607,17 +3668,17 @@ function renderUlTable() {
                     </div>
                     ${currentExtraRaw > 0 ? `
                     <div style="font-size: 10px; color: #38bdf8; display: flex; align-items: center; gap: 4px; background: rgba(56, 189, 248, 0.12); padding: 1px 6px; border-radius: 3px; border: 1px solid rgba(56, 189, 248, 0.25);">
-                        <i class="fa-solid fa-cube" style="font-size: 9px;"></i> ${calc.isWelded ? `Ekstra: +${currentDiff} Adet` : `Ekstra: +${currentExtraRaw} m`}
-                    </div>` : ''}
+                        <i class="fa-solid fa-cube" style="font-size: 9px;"></i> ${calc.unitType === "adet" ? `Ekstra: +${currentDiff} Adet` : `Ekstra: +${currentExtraRaw} m`}
+                    </div>` : ""}
                 </div>
             `;
         }
 
         // Tüketim, Makine Ortaklığı & Yıllık Projeksiyon Rozeti
-        let usageBadge = '';
+        let usageBadge = "";
         if (calc.isExcluded) {
-            const badgeIcon = calc.exclusionTag === 'Lazer Sac' ? 'fa-bolt text-yellow' : 'fa-layer-group';
-            const badgeColor = calc.exclusionTag === 'Lazer Sac' ? 'background:rgba(234,179,8,0.12); color:#fde047; border:1px solid rgba(234,179,8,0.3);' : 'background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.25);';
+            const badgeIcon = calc.exclusionTag === "Lazer Sac" ? "fa-bolt text-yellow" : (calc.exclusionTag === "Kaynaklı" ? "fa-layer-group" : "fa-shield");
+            const badgeColor = calc.exclusionTag === "Lazer Sac" ? "background:rgba(234,179,8,0.12); color:#fde047; border:1px solid rgba(234,179,8,0.3);" : "background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.25);";
             usageBadge = `
                 <div style="display: flex; flex-direction: column; gap: 3px; font-size: 11px;">
                     <span class="badge" style="${badgeColor} padding: 2px 7px; font-weight: 700; font-size: 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; width: fit-content;">
@@ -3628,22 +3689,22 @@ function renderUlTable() {
             `;
         } else {
             const isCommon = calc.machineCount >= 2;
-            const commonBadgeClass = calc.machineCount >= 4 ? 'background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);' : (isCommon ? 'background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3);' : 'background:rgba(255,255,255,0.05); color:var(--text-muted); border:1px solid rgba(255,255,255,0.08);');
+            const commonBadgeClass = calc.machineCount >= 4 ? "background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);" : (isCommon ? "background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3);" : "background:rgba(255,255,255,0.05); color:var(--text-muted); border:1px solid rgba(255,255,255,0.08);");
             
             usageBadge = `
                 <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px;">
                     <span class="badge" style="${commonBadgeClass} padding: 2px 7px; font-weight: 700; font-size: 10.5px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; width: fit-content;">
-                        <i class="fa-solid ${calc.machineCount >= 4 ? 'fa-fire text-orange' : (isCommon ? 'fa-diagram-project' : 'fa-cube')}"></i> ${calc.machineCount >= 2 ? calc.machineCount + ' Makinede Ortak' : 'Özel Parça (Tek Makine)'}
+                        <i class="fa-solid ${calc.machineCount >= 4 ? "fa-fire text-orange" : (isCommon ? "fa-diagram-project" : "fa-cube")}"></i> ${calc.machineCount >= 2 ? calc.machineCount + " Makinede Ortak" : "Özel Parça (Tek Makine)"}
                     </span>
                     <div style="display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-dim);">
                         <span><i class="fa-solid fa-wrench" style="opacity:0.6;"></i> Reçete: <b>${calc.recipeUsage} ad</b></span>
-                        ${calc.totalAnnualDemand > 0 ? `<span style="color:#38bdf8;"><i class="fa-solid fa-chart-line"></i> Yıllık: <b>~${Math.round(calc.totalAnnualDemand)} ad</b></span>` : ''}
+                        ${calc.totalAnnualDemand > 0 ? `<span style="color:#38bdf8;"><i class="fa-solid fa-chart-line"></i> Yıllık: <b>~${Math.round(calc.totalAnnualDemand)} ad</b></span>` : ""}
                     </div>
                 </div>
             `;
         }
-
-        tr.innerHTML = `
+        
+tr.innerHTML = `
             <td style="font-size:12px; color:var(--text-muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.kaynak}">${row.kaynak}</td>
             <td>${row.oncelik}</td>
             <td style="white-space:nowrap; width:140px; min-width:140px; padding:6px 12px;">

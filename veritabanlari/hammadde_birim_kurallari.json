@@ -1,0 +1,84 @@
+{
+    "aciklama": "Hammadde kod yapisi ve malzeme adina gore parca birimini (Adet, mm/m) ve formul istisnasini belirleyen standart kural tablosudur.",
+    "adet_bazli_kategoriler": {
+        "kaynakli_montaj": {
+            "tanim": "Noktasiz Duz Parca Kodlu Hammaddeler (Kaynakli / Alt Montaj)",
+            "noktasiz_kod_kurali": true,
+            "birim": "Adet",
+            "varsayilan_miktar": 1,
+            "badge_renk": "purple"
+        },
+        "lazer_sac": {
+            "tanim": "Lazer Kesim Sac Parcalari",
+            "hammadde_onekleri": [
+                "150.01.01",
+                "150.01"
+            ],
+            "kelimeler": [
+                "SAC",
+                "PLAKA",
+                "LEVHA",
+                "LAZER SAC",
+                "DKP SAC",
+                "CR SAC",
+                "HR SAC",
+                "PASLANMAZ SAC"
+            ],
+            "birim": "Adet",
+            "varsayilan_miktar": 1,
+            "badge_renk": "amber"
+        },
+        "standart_satinalma": {
+            "tanim": "Standart Satinalma ve Baglanti Elemanlari",
+            "hammadde_onekleri": [
+                "153.",
+                "154.",
+                "155.",
+                "156."
+            ],
+            "kelimeler": [
+                "CIVATA",
+                "SOMUN",
+                "RULMAN",
+                "KECE",
+                "PIM",
+                "SEGMAN",
+                "O-RING",
+                "ORING",
+                "YAY",
+                "PUL"
+            ],
+            "birim": "Adet",
+            "varsayilan_miktar": 1,
+            "badge_renk": "purple"
+        }
+    },
+    "boy_bazli_kategoriler": {
+        "profil_boru_lama": {
+            "tanim": "Profil, Boru, Dolu Mil, Lama, Cubuk vb. Kesimli Dogrusal Hammaddeler",
+            "hammadde_onekleri": [
+                "150.02",
+                "150.03",
+                "150.04",
+                "150.05",
+                "150.06",
+                "152"
+            ],
+            "kelimeler": [
+                "PROFIL",
+                "BORU",
+                "MIL",
+                "LAMA",
+                "KUTU PROFIL",
+                "DOLU MIL",
+                "KOSEBENT",
+                "NPU",
+                "NPI",
+                "TRANSMISYON"
+            ],
+            "birim": "mm/m",
+            "varsayilan_boy_m": 0.2,
+            "badge_renk": "blue"
+        }
+    }
+}
