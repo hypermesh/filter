@@ -4770,3 +4770,82 @@ window.showPartHoverPreview = showPartHoverPreview;
 window.movePartHoverPreview = movePartHoverPreview;
 window.hidePartHoverPreview = hidePartHoverPreview;
 window.handleDirectImagePreview = handleDirectImagePreview;
+
+// --- REÇETE / REVİZYON EXCEL YÜKLEME VE VERİTABANI GÜNCELLEME ---
+function handleRecipeDbFileUpload(input) {
+    if (!input.files || input.files.length === 0) return;
+    
+    const files = Array.from(input.files);
+    let processedCount = 0;
+    let totalUpdatedParts = 0;
+    
+    files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const wb = XLSX.read(data, { type: 'array' });
+                const firstSheetName = wb.SheetNames[0];
+                const sheet = wb.Sheets[firstSheetName];
+                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                
+                if (!rows || rows.length <= 1) return;
+                
+                const defaultMachine = file.name.replace(/\.[^/.]+$/, "");
+                const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
+                
+                const is3Col = headers.length >= 3 && (headers[0].includes('kaynak') || headers[0].includes('reçete') || headers[0].includes('recete'));
+                
+                for (let r = 1; r < rows.length; r++) {
+                    const row = rows[r];
+                    if (!row || row.length === 0) continue;
+                    
+                    let src = defaultMachine;
+                    let code = '';
+                    let qty = 1.0;
+                    
+                    if (is3Col) {
+                        src = String(row[0] || defaultMachine).trim();
+                        code = String(row[1] || '').trim().toUpperCase();
+                        qty = parseFloat(row[2]) || 0;
+                    } else {
+                        code = String(row[0] || '').trim().toUpperCase();
+                        qty = parseFloat(row[1]) || 1.0;
+                    }
+                    
+                    if (!code || code === 'NAN' || code === '-') continue;
+                    
+                    if (!parcaMakineReceteleriMap[code]) {
+                        parcaMakineReceteleriMap[code] = {
+                            kod: code,
+                            makineler: {}
+                        };
+                    }
+                    
+                    parcaMakineReceteleriMap[code].makineler[src] = qty;
+                    totalUpdatedParts++;
+                }
+                
+                // İstatistikleri güncelle
+                Object.values(parcaMakineReceteleriMap).forEach(p => {
+                    p.makine_sayisi = Object.keys(p.makineler || {}).length;
+                    p.toplam_birim_adet = Object.values(p.makineler || {}).reduce((a, b) => a + b, 0);
+                });
+                
+                processedCount++;
+                if (processedCount === files.length) {
+                    recalculateAll();
+                    filterAndPaginateUlTable();
+                    showToast(`✅ ${files.length} reçete dosyası başarıyla işlendi! (${totalUpdatedParts} parça kaydı güncellendi)`, "success");
+                }
+            } catch (err) {
+                console.error('Reçete yükleme hatası:', err);
+                showToast(`"${file.name}" dosyası işlenirken hata oluştu!`, "error");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+    
+    input.value = ''; // Reset input
+}
+window.handleRecipeDbFileUpload = handleRecipeDbFileUpload;

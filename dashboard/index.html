@@ -47,6 +47,10 @@
             </div>
             <div class="header-actions">
                 <input type="file" id="import-history-input" accept=".json" style="display: none;" onchange="if(this.files.length>0) importProductionHistoryJSON(this.files[0])">
+                <input type="file" id="import-recipe-db-input" accept=".xlsx,.xls" multiple style="display: none;" onchange="handleRecipeDbFileUpload(this)">
+                <button class="btn btn-secondary" id="import-recipe-db-btn" onclick="document.getElementById('import-recipe-db-input').click()" title="Yeni veya revize reçete Excel dosyalarını yükleyerek veritabanını güncelle">
+                    <i class="fa-solid fa-file-circle-plus text-blue"></i> Reçete/Revizyon Yükle
+                </button>
                 <button class="btn btn-secondary" id="import-history-btn" onclick="document.getElementById('import-history-input').click()" title="Üretim geçmişi (uretim_gecmisi.json) yükle">
                     <i class="fa-solid fa-file-import"></i> Geçmiş Yükle
                 </button>
