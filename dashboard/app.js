@@ -3406,11 +3406,16 @@ function calculateEmpiricalBatchQty(row, options) {
     
     // 0. İstisna Kontrolü (Kaynaklı parçalar, 150.01.01 lazer sac vb.)
     const exclusion = isPartExcludedFromBatchFormula(row);
+    const isWelded = exclusion.shortTag === 'Kaynaklı' || (!String(row.hKod || '').includes('.') && !String(row.hKod || '').startsWith('150') && !String(row.hKod || '').startsWith('152'));
     
-    // 1. Birim Hammadde Ölçüsü (metre / kg)
+    // 1. Birim Hammadde Ölçüsü (metre / kg / adet)
     const rawInfo = parcaBirimHammaddeMap[cleanCode];
     let unitDim = rawInfo ? parseFloat(rawInfo.birimMiktar) || 0 : 0;
-    if (unitDim <= 0) unitDim = 0.20; // Varsayılan 200 mm
+    if (isWelded) {
+        unitDim = 1.0; // Kaynaklı / montaj parçaları için 1 adet
+    } else if (unitDim <= 0) {
+        unitDim = 0.20; // Profil/boru varsayılan 200 mm
+    }
     
     // 2. Makine Reçete Ortaklığı & Yıllık Projeksiyon Analizi
     const machineRecInfo = parcaMakineReceteleriMap[cleanCode];
@@ -3464,6 +3469,7 @@ function calculateEmpiricalBatchQty(row, options) {
     if (exclusion.excluded) {
         return {
             unitDim: unitDim,
+            isWelded: isWelded,
             recipeUsage: recipeUsage,
             sourceCount: sourceCount,
             machineCount: machineCount,
@@ -3487,6 +3493,7 @@ function calculateEmpiricalBatchQty(row, options) {
 
     return {
         unitDim: unitDim,
+        isWelded: isWelded,
         recipeUsage: recipeUsage,
         sourceCount: sourceCount,
         machineCount: machineCount,
@@ -3564,7 +3571,15 @@ function renderUlTable() {
         
         // Empirik parti ve hammadde analizini hesapla
         const calc = calculateEmpiricalBatchQty(row);
-        const unitDimFormatted = calc.unitDim < 1 ? `${Math.round(calc.unitDim * 1000)} mm` : `${calc.unitDim.toFixed(2)} m`;
+        let unitDimFormatted = `${Math.round(calc.unitDim * 1000)} mm`;
+        let unitBadgeStyle = 'background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); font-weight: 700; font-size: 11px;';
+        
+        if (calc.isWelded) {
+            unitDimFormatted = '1 Adet';
+            unitBadgeStyle = 'background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); font-weight: 700; font-size: 11px;';
+        } else if (calc.unitDim >= 1) {
+            unitDimFormatted = `${calc.unitDim.toFixed(2)} m`;
+        }
 
         // Check if quantity has been modified
         const isModified = row.uretilecek !== row.orijinalUretilecek;
@@ -3592,7 +3607,7 @@ function renderUlTable() {
                     </div>
                     ${currentExtraRaw > 0 ? `
                     <div style="font-size: 10px; color: #38bdf8; display: flex; align-items: center; gap: 4px; background: rgba(56, 189, 248, 0.12); padding: 1px 6px; border-radius: 3px; border: 1px solid rgba(56, 189, 248, 0.25);">
-                        <i class="fa-solid fa-cube" style="font-size: 9px;"></i> Ekstra: +${currentExtraRaw} m
+                        <i class="fa-solid fa-cube" style="font-size: 9px;"></i> ${calc.isWelded ? `Ekstra: +${currentDiff} Adet` : `Ekstra: +${currentExtraRaw} m`}
                     </div>` : ''}
                 </div>
             `;
@@ -3644,7 +3659,7 @@ function renderUlTable() {
             </td>
             <td style="color:var(--text-dim); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.malzeme}">${row.malzeme}</td>
             <td style="white-space:nowrap;">
-                <span class="badge" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); font-weight: 700; font-size: 11px;">
+                <span class="badge" style="${unitBadgeStyle}">
                     ${unitDimFormatted}
                 </span>
             </td>
