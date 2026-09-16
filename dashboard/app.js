@@ -6,6 +6,13 @@ let parcaReceteTuketimMap = {}; // veritabanlari/parca_recete_tuketim.json veris
 let parcaBirimHammaddeMap = {}; // parça bazlı birim hammadde boyu/ölçüsü
 let parcaMakineReceteleriMap = {}; // veritabanlari/parca_makine_receteleri.json verisi
 let makineYillikTahminlerMap = {}; // veritabanlari/makine_yillik_tahminler.json verisi
+let partiFormuluHaricKurallar = {
+    haric_hammadde_onekleri: ["150.01.01"],
+    haric_hammadde_kodlari: [],
+    haric_parca_kodlari: [],
+    haric_malzeme_kelimeleri: [],
+    sadece_noktali_hammadde_gecerli: true
+};
 
 // Parsed Data Structures
 let uretimTakipRows = []; // Üretim Takip requirements (Col A-G)
@@ -71,6 +78,17 @@ function loadParcaReceteTuketimDatabase() {
             if (data && typeof data === 'object') {
                 makineYillikTahminlerMap = data;
                 console.log(`[DB] ${Object.keys(data).length} makine için yıllık tahmin verisi yüklendi.`);
+            }
+        })
+        .catch(() => {});
+
+    // 4. Empirik Formül Hariç Tutma Kuralları
+    fetch('../veritabanlari/parti_formulu_haric_kurallar.json')
+        .then(res => res.json())
+        .then(data => {
+            if (data && typeof data === 'object') {
+                partiFormuluHaricKurallar = data;
+                console.log(`[DB] Empirik parti formülü hariç tutma kuralları yüklendi.`);
             }
         })
         .catch(() => {});
@@ -3304,15 +3322,63 @@ function filterAndPaginateUlTable() {
     renderUlTable();
 }
 
-// --- AKILLI EMPİRİK PARTİ BOYUTLANDIRMA MOTORU (YILLIK PROJEKSİYON DESTEKLİ) ---
+// --- DİNAMİK FORMÜL HARİÇ TUTMA KONTROLÜ ---
+function isPartExcludedFromBatchFormula(row) {
+    const cleanCode = String(row.kod || '').trim().toUpperCase();
+    const hKod = String(row.hKod || '').trim().toUpperCase();
+    const hammadde = String(row.hammadde || '').trim().toUpperCase();
+    const malzeme = String(row.malzeme || '').trim().toUpperCase();
+
+    const rules = partiFormuluHaricKurallar || {};
+    
+    // 1. Noktalı Standart Kodlama Kontrolü (Nokta içermeyenler -> Kaynaklı / Alt Montaj)
+    if (rules.sadece_noktali_hammadde_gecerli !== false) {
+        const isDotted = hKod.includes('.') || hKod.startsWith('150') || hKod.startsWith('152');
+        if (!isDotted) {
+            return { excluded: true, reason: 'Kaynaklı / Alt Montaj', shortTag: 'Kaynaklı' };
+        }
+    }
+
+    // 2. Hariç Tutulacak Hammadde Önekleri (Örn: 150.01.01 Lazer Sac)
+    if (Array.isArray(rules.haric_hammadde_onekleri)) {
+        for (const prefix of rules.haric_hammadde_onekleri) {
+            const cleanPrefix = String(prefix || '').trim().toUpperCase();
+            if (cleanPrefix && hKod.startsWith(cleanPrefix)) {
+                return { excluded: true, reason: `Lazer Kesim Sac (${cleanPrefix})`, shortTag: 'Lazer Sac' };
+            }
+        }
+    }
+
+    // 3. Doğrudan Hariç Tutulacak Hammadde Kodları
+    if (Array.isArray(rules.haric_hammadde_kodlari) && rules.haric_hammadde_kodlari.includes(hKod)) {
+        return { excluded: true, reason: 'Hariç Tutulan Hammadde', shortTag: 'Hariç' };
+    }
+
+    // 4. Doğrudan Hariç Tutulacak Parça Kodları
+    if (Array.isArray(rules.haric_parca_kodlari) && rules.haric_parca_kodlari.includes(cleanCode)) {
+        return { excluded: true, reason: 'Hariç Tutulan Parça', shortTag: 'Hariç' };
+    }
+
+    // 5. Malzeme Adında Geçen Anahtar Kelimeler (Örn: SAC, LAZER vb.)
+    if (Array.isArray(rules.haric_malzeme_kelimeleri) && rules.haric_malzeme_kelimeleri.length > 0) {
+        for (const kw of rules.haric_malzeme_kelimeleri) {
+            const cleanKw = String(kw || '').trim().toUpperCase();
+            if (cleanKw && (hammadde.includes(cleanKw) || malzeme.includes(cleanKw))) {
+                return { excluded: true, reason: `Malzeme İstisnası (${cleanKw})`, shortTag: cleanKw };
+            }
+        }
+    }
+
+    return { excluded: false, reason: '', shortTag: '' };
+}
+
+// --- AKILLI EMPİRİK PARTİ BOYUTLANDIRMA MOTORU (YILLIK PROJEKSİYON & İSTİSNA DESTEKLİ) ---
 function calculateEmpiricalBatchQty(row, options) {
     const cleanCode = String(row.kod || '').trim().toUpperCase();
     const origQty = parseFloat(row.orijinalUretilecek) || 1;
-    const hKod = String(row.hKod || '').trim();
     
-    // 0. Noktalı Standart Hammadde Kontrolü (150.xx, 152.xx vb.)
-    // Eğer hammadde kodu nokta içermiyorsa (Örn: 3157, 3478), bu parça kaynaklı parçadır; formüle dahil edilmez, net ihtiyaç kalır.
-    const isStandardRawMaterial = hKod.includes('.') || hKod.startsWith('150') || hKod.startsWith('152');
+    // 0. İstisna Kontrolü (Kaynaklı parçalar, 150.01.01 lazer sac vb.)
+    const exclusion = isPartExcludedFromBatchFormula(row);
     
     // 1. Birim Hammadde Ölçüsü (metre / kg)
     const rawInfo = parcaBirimHammaddeMap[cleanCode];
@@ -3364,8 +3430,8 @@ function calculateEmpiricalBatchQty(row, options) {
         baseQty = Math.ceil(origQty * longMultiplier);
     }
 
-    // 0.1 Kaynaklı Parça / Alt Montaj ise net ihtiyaç kalır (Formüle girmez)
-    if (!isStandardRawMaterial) {
+    // 0.1 Eğer istisna kapsamındaysa (Lazer sac, Kaynaklı parça vb.) formül uygulanmaz, net ihtiyaç kalır!
+    if (exclusion.excluded) {
         return {
             unitDim: unitDim,
             recipeUsage: recipeUsage,
@@ -3375,7 +3441,9 @@ function calculateEmpiricalBatchQty(row, options) {
             kRecipe: 1.0,
             kFreq: 1.0,
             kAnnual: 1.0,
-            isWeldedPart: true,
+            isExcluded: true,
+            exclusionReason: exclusion.reason,
+            exclusionTag: exclusion.shortTag,
             finalQty: origQty,
             extraQty: 0,
             extraRaw: 0
@@ -3396,7 +3464,9 @@ function calculateEmpiricalBatchQty(row, options) {
         kRecipe: kRecipe,
         kFreq: kFreq,
         kAnnual: kAnnual,
-        isWeldedPart: false,
+        isExcluded: false,
+        exclusionReason: '',
+        exclusionTag: '',
         finalQty: finalBatchQty,
         extraQty: Math.max(0, finalBatchQty - origQty),
         extraRaw: Math.round((Math.max(0, finalBatchQty - origQty) * unitDim) * 100) / 100
@@ -3500,13 +3570,15 @@ function renderUlTable() {
 
         // Tüketim, Makine Ortaklığı & Yıllık Projeksiyon Rozeti
         let usageBadge = '';
-        if (calc.isWeldedPart) {
+        if (calc.isExcluded) {
+            const badgeIcon = calc.exclusionTag === 'Lazer Sac' ? 'fa-bolt text-yellow' : 'fa-layer-group';
+            const badgeColor = calc.exclusionTag === 'Lazer Sac' ? 'background:rgba(234,179,8,0.12); color:#fde047; border:1px solid rgba(234,179,8,0.3);' : 'background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.25);';
             usageBadge = `
                 <div style="display: flex; flex-direction: column; gap: 3px; font-size: 11px;">
-                    <span class="badge" style="background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.25); padding: 2px 7px; font-weight: 700; font-size: 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; width: fit-content;">
-                        <i class="fa-solid fa-layer-group"></i> Kaynaklı / Alt Montaj (Net İhtiyaç)
+                    <span class="badge" style="${badgeColor} padding: 2px 7px; font-weight: 700; font-size: 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; width: fit-content;">
+                        <i class="fa-solid ${badgeIcon}"></i> ${calc.exclusionReason}
                     </span>
-                    <span style="font-size:10px; color:var(--text-dim);">Formül dışı (Tam Reçete)</span>
+                    <span style="font-size:10px; color:var(--text-dim);"><i class="fa-solid fa-shield"></i> Net İhtiyaç (Formül Dışı)</span>
                 </div>
             `;
         } else {

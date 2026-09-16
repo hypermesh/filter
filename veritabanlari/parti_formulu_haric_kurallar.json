@@ -1,0 +1,10 @@
+{
+    "haric_hammadde_onekleri": [
+        "150.01.01"
+    ],
+    "haric_hammadde_kodlari": [],
+    "haric_parca_kodlari": [],
+    "haric_malzeme_kelimeleri": [],
+    "sadece_noktali_hammadde_gecerli": true,
+    "aciklama": "Noktasiz kodlar (kaynakli parcalar) ve 150.01.01 (lazer sac) empirik parti formulunden haric tutulur."
+}
