@@ -1509,114 +1509,138 @@ tr.station-row-overproduced td:nth-child(2) { /* Kod */
     cursor: pointer !important;
 }
 
-.part-image-modal-overlay {
+/* --- PARÇA GÖRSELİ LIGHTBOX (SADE & ÇERÇEVESİZ) --- */
+.part-lightbox-overlay {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    background: rgba(4, 7, 18, 0.88) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
+    background: rgba(4, 7, 18, 0.9) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
     z-index: 999999 !important;
     display: none;
     align-items: center !important;
     justify-content: center !important;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.25s ease, visibility 0.25s ease;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    cursor: zoom-out;
 }
-.part-image-modal-overlay.active {
+.part-lightbox-overlay.active {
     display: flex !important;
     opacity: 1 !important;
     visibility: visible !important;
 }
-.part-image-modal-content {
-    background: #111827;
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    border-radius: 14px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(99, 102, 241, 0.2);
-    width: 90%;
-    max-width: 680px;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    transform: scale(0.95);
-    transition: transform 0.25s ease;
-}
-.part-image-modal-overlay.active .part-image-modal-content {
-    transform: scale(1);
-}
-.part-image-modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 20px;
-    background: rgba(255, 255, 255, 0.03);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-.part-image-modal-header h3 {
-    margin: 0;
-    font-size: 16px;
+.part-lightbox-close {
+    position: absolute;
+    top: 24px;
+    right: 32px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: #ffffff;
+    font-size: 26px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: 8px;
-}
-.part-image-modal-close {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 22px;
+    justify-content: center;
     cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 1000000;
     line-height: 1;
-    padding: 4px 8px;
-    border-radius: 6px;
-    transition: all 0.2s;
 }
-.part-image-modal-close:hover {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
+.part-lightbox-close:hover {
+    background: #ef4444;
+    border-color: #f87171;
+    transform: scale(1.1) rotate(90deg);
 }
-.part-image-modal-body {
-    padding: 20px;
+.part-lightbox-content {
+    cursor: default;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow-y: auto;
-    min-height: 320px;
+    max-width: 90vw;
+    max-height: 90vh;
+    animation: lightboxZoom 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.part-image-preview-wrapper {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px dashed rgba(255, 255, 255, 0.1);
-    min-height: 280px;
-    overflow: hidden;
+@keyframes lightboxZoom {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
-.part-image-preview-wrapper img {
-    max-width: 100%;
-    max-height: 55vh;
+.part-lightbox-img {
+    max-width: 82vw;
+    max-height: 80vh;
     object-fit: contain;
-    border-radius: 8px;
-    transition: transform 0.2s ease;
+    border-radius: 12px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(99, 102, 241, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: #0f172a;
 }
-.part-image-preview-wrapper img:hover {
-    transform: scale(1.02);
+.part-lightbox-tag {
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 18px;
+    background: rgba(15, 23, 42, 0.88);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: 20px;
+    color: #e2e8f0;
+    font-size: 13px;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
 }
-.part-image-modal-footer {
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.02);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+/* --- PARÇA GÖRSELİ HOVER POPUP (KÜÇÜK ÖNİZLEME) --- */
+.part-hover-popup {
+    position: fixed;
+    z-index: 9999999;
+    pointer-events: none;
+    display: none;
+    opacity: 0;
+    transform: scale(0.92) translateY(4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.part-hover-popup.active {
+    display: block;
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+.part-hover-inner {
+    background: rgba(15, 23, 42, 0.96);
+    border: 1.5px solid rgba(99, 102, 241, 0.55);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 20px rgba(99, 102, 241, 0.3);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 140px;
+}
+.part-hover-img {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: #090d16;
+}
+.part-hover-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #c7d2fe;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--text-dim);
+    gap: 5px;
 }

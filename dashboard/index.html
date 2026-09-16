@@ -680,22 +680,18 @@
         </div>
     </div>
 
-    <!-- Parça Görseli Önizleme Modalı -->
-    <div id="part-image-modal" class="part-image-modal-overlay" onclick="handlePartModalOverlayClick(event)">
-        <div class="part-image-modal-content">
-            <div class="part-image-modal-header">
-                <h3><i class="fa-solid fa-image text-blue"></i> <span id="part-img-modal-title">Parça Görseli</span></h3>
-                <button class="part-image-modal-close" onclick="closePartImageModal()" title="Kapat">&times;</button>
-            </div>
-            <div class="part-image-modal-body">
-                <div class="part-image-preview-wrapper" id="part-img-preview-container">
-                    <!-- Görsel veya Bilgilendirme Kartı Buraya Yüklenecek -->
-                </div>
-            </div>
-            <div class="part-image-modal-footer">
-                <span id="part-img-modal-info"><i class="fa-solid fa-folder-open"></i> dashboard/images/parcalar/</span>
-                <button class="btn btn-secondary btn-sm" onclick="closePartImageModal()" style="padding: 4px 12px; font-size: 12px;">Kapat (ESC)</button>
-            </div>
+    <!-- Parça Görseli Önizleme Modalı (Sade Lightbox) -->
+    <div id="part-image-modal" class="part-lightbox-overlay" onclick="handlePartModalOverlayClick(event)">
+        <button class="part-lightbox-close" onclick="closePartImageModal()" title="Kapat (ESC)">&times;</button>
+        <div class="part-lightbox-content" id="part-img-preview-container">
+            <!-- Görsel doğrudan buraya yüklenecek -->
+        </div>
+    </div>
+
+    <!-- Parça Görseli Hover Önizleme Popup -->
+    <div id="part-hover-popup" class="part-hover-popup">
+        <div class="part-hover-inner" id="part-hover-inner">
+            <!-- Hover görseli buraya gelecek -->
         </div>
     </div>
 

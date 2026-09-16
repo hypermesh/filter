@@ -2142,7 +2142,7 @@ function renderTakipTable() {
                         ${excludedHariciKodlar.has(r.kod.trim().toUpperCase()) ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>' : ''}
                         ${r.kod}
                     </span>
-                    <button type="button" draggable="false" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${r.kod}')" title="Görseli Görüntüle">
+                    <button type="button" draggable="false" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${r.kod}')" onmouseenter="window.showPartHoverPreview(event, '${r.kod}')" onmousemove="window.movePartHoverPreview(event)" onmouseleave="window.hidePartHoverPreview()" title="Görseli Görüntüle">
                         <i class="fa-solid fa-image"></i>
                     </button>
                 </div>
@@ -2892,7 +2892,7 @@ function renderStationTable(headers) {
                     td.innerHTML = `
                         <div class="code-cell-wrapper">
                             <span class="code-cell-text" style="color:${textColor};">${hariciIcon}${code}</span>
-                            <button type="button" draggable="false" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${code}')" title="Görseli Görüntüle">
+                            <button type="button" draggable="false" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${code}')" onmouseenter="window.showPartHoverPreview(event, '${code}')" onmousemove="window.movePartHoverPreview(event)" onmouseleave="window.hidePartHoverPreview()" title="Görseli Görüntüle">
                                 <i class="fa-solid fa-image"></i>
                             </button>
                         </div>
@@ -3301,7 +3301,7 @@ function renderUlTable() {
                         ${excludedHariciKodlar.has(row.kod.trim().toUpperCase()) ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; opacity:0.9;" title="Harici İşlem / Harici Kod"></i>' : ''}
                         ${row.kod}
                     </span>
-                    <button type="button" draggable="false" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${row.kod}')" title="Görseli Görüntüle">
+                    <button type="button" draggable="false" class="part-img-btn" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); window.openPartImageModal('${row.kod}')" onmouseenter="window.showPartHoverPreview(event, '${row.kod}')" onmousemove="window.movePartHoverPreview(event)" onmouseleave="window.hidePartHoverPreview()" title="Görseli Görüntüle">
                         <i class="fa-solid fa-image"></i>
                     </button>
                 </div>
@@ -4368,111 +4368,154 @@ function exportRawMaterialsToExcel() {
 window.exportRawMaterialsToExcel = exportRawMaterialsToExcel;
 
 // -------------------------------------------------------------
-// 9. PARÇA GÖRSELİ MODALI (POP-UP)
+// 9. PARÇA GÖRSELİ MODALI & HOVER ÖNİZLEME (LIGHTBOX)
 // -------------------------------------------------------------
-function openPartImageModal(kod, matName) {
-    const modal = document.getElementById('part-image-modal');
-    const titleEl = document.getElementById('part-img-modal-title');
-    const container = document.getElementById('part-img-preview-container');
-    const infoEl = document.getElementById('part-img-modal-info');
-    if (!modal || !container) return;
+const partImageCache = new Map(); // kod -> { url, w, h } veya null
 
-    const decodedMatName = matName ? decodeURIComponent(matName) : '';
+function findPartImageUrl(kod, callback) {
     const cleanKod = String(kod || '').trim();
+    if (!cleanKod) { callback(null); return; }
+    if (partImageCache.has(cleanKod)) {
+        const cached = partImageCache.get(cleanKod);
+        if (cached) callback(cached.url, cached.w, cached.h);
+        else callback(null);
+        return;
+    }
     
-    if (titleEl) {
-        titleEl.textContent = `Parça Görseli: ${cleanKod}${decodedMatName ? ' - ' + decodedMatName : ''}`;
-    }
-    if (infoEl) {
-        infoEl.innerHTML = `<i class="fa-solid fa-folder-open"></i> dashboard/images/parcalar/${cleanKod}.jpg (veya .png)`;
-    }
-
-    container.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--text-muted); padding:30px;">
-            <i class="fa-solid fa-spinner fa-spin" style="font-size:32px; color:#818cf8;"></i>
-            <span style="font-size:13px;">Görsel aranıyor (${cleanKod})...</span>
-        </div>
-    `;
-
-    modal.style.display = 'flex';
-    modal.classList.add('active');
-
-    // file:// protokolünde ?v= query param DOSYA YOLUNU BOZAR! Sadece http(s) iken eklenir.
     const isHttp = window.location.protocol.startsWith('http');
     const queryParam = isHttp ? `?v=${Date.now()}` : '';
 
-    // Denenecek olası dosya adları ve uzantılar
     const kodVariants = [cleanKod];
-    // Baştaki sıfırları atılmış varyant (Örn: 05540 -> 5540)
     const strippedZero = cleanKod.replace(/^0+/, '');
-    if (strippedZero && strippedZero !== cleanKod) {
-        kodVariants.push(strippedZero);
-    }
-    // Tire veya alt çizgi temizliği
+    if (strippedZero && strippedZero !== cleanKod) kodVariants.push(strippedZero);
     const noSpecial = cleanKod.replace(/[\/\\]/g, '_');
-    if (noSpecial !== cleanKod) {
-        kodVariants.push(noSpecial);
-    }
+    if (noSpecial !== cleanKod) kodVariants.push(noSpecial);
 
-    const extensions = ['jpg', 'png', 'jpeg', 'webp', 'JPG', 'PNG'];
+    const extensions = ['jpg', 'png', 'jpeg', 'webp', 'JPG', 'PNG', 'JPEG', 'WEBP'];
     const searchQueue = [];
     kodVariants.forEach(k => {
         extensions.forEach(ext => {
-            searchQueue.push({ kod: k, ext: ext, path: `images/parcalar/${k}.${ext}${queryParam}` });
+            searchQueue.push(`images/parcalar/${k}.${ext}${queryParam}`);
         });
     });
 
-    let queueIndex = 0;
+    let queueIdx = 0;
+    function testNext() {
+        if (queueIdx >= searchQueue.length) {
+            partImageCache.set(cleanKod, null);
+            callback(null);
+            return;
+        }
+        const src = searchQueue[queueIdx++];
+        const testImg = new Image();
+        testImg.onload = function() {
+            partImageCache.set(cleanKod, { url: src, w: testImg.naturalWidth, h: testImg.naturalHeight });
+            callback(src, testImg.naturalWidth, testImg.naturalHeight);
+        };
+        testImg.onerror = function() {
+            testNext();
+        };
+        testImg.src = src;
+    }
+    testNext();
+}
 
-    function tryNext() {
-        if (queueIndex >= searchQueue.length) {
-            // Hiçbiri bulunamadı
+function showPartHoverPreview(e, kod) {
+    const popup = document.getElementById('part-hover-popup');
+    const inner = document.getElementById('part-hover-inner');
+    if (!popup || !inner) return;
+
+    findPartImageUrl(kod, (url) => {
+        if (!url) {
+            popup.classList.remove('active');
+            return;
+        }
+        inner.innerHTML = `
+            <img src="${url}" class="part-hover-img" alt="${kod}">
+            <div class="part-hover-label"><i class="fa-solid fa-cube text-blue"></i> ${kod}</div>
+        `;
+        popup.classList.add('active');
+        positionHoverPopup(e);
+    });
+}
+
+function positionHoverPopup(e) {
+    const popup = document.getElementById('part-hover-popup');
+    if (!popup || !popup.classList.contains('active')) return;
+    
+    const popupWidth = 165;
+    const popupHeight = 185;
+    let finalX = e.clientX + 16;
+    let finalY = e.clientY - 90;
+    
+    if (finalX + popupWidth > window.innerWidth) {
+        finalX = e.clientX - popupWidth - 16;
+    }
+    if (finalY + popupHeight > window.innerHeight) {
+        finalY = window.innerHeight - popupHeight - 12;
+    }
+    if (finalY < 12) finalY = 12;
+
+    popup.style.left = `${finalX}px`;
+    popup.style.top = `${finalY}px`;
+}
+
+function movePartHoverPreview(e) {
+    positionHoverPopup(e);
+}
+
+function hidePartHoverPreview() {
+    const popup = document.getElementById('part-hover-popup');
+    if (popup) popup.classList.remove('active');
+}
+
+function openPartImageModal(kod, matName) {
+    hidePartHoverPreview();
+    const modal = document.getElementById('part-image-modal');
+    const container = document.getElementById('part-img-preview-container');
+    if (!modal || !container) return;
+
+    const cleanKod = String(kod || '').trim();
+    const decodedMatName = matName ? decodeURIComponent(matName) : '';
+
+    container.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--text-muted); padding:40px;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:36px; color:#818cf8;"></i>
+            <span style="font-size:14px;">Görsel yükleniyor (${cleanKod})...</span>
+        </div>
+    `;
+
+    modal.classList.add('active');
+
+    findPartImageUrl(cleanKod, (url, w, h) => {
+        if (url) {
             container.innerHTML = `
-                <div style="text-align:center; padding:30px 20px; max-width:460px;">
-                    <div style="width:64px; height:64px; border-radius:50%; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.25); display:inline-flex; align-items:center; justify-content:center; margin-bottom:14px;">
-                        <i class="fa-regular fa-image" style="font-size:28px; color:#818cf8;"></i>
+                <img src="${url}" alt="${cleanKod}" class="part-lightbox-img">
+                <div class="part-lightbox-tag">
+                    <i class="fa-solid fa-cube" style="color:#818cf8;"></i>
+                    <span>Parça: <b style="color:white;">${cleanKod}</b>${decodedMatName ? ' - ' + decodedMatName : ''}</span>
+                    <span style="opacity:0.6; font-size:11px; margin-left:4px;">(${w} × ${h} px)</span>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div style="text-align:center; padding:32px 24px; max-width:440px; background:#111827; border:1px solid rgba(99,102,241,0.35); border-radius:14px; box-shadow:0 25px 60px rgba(0,0,0,0.85);" onclick="event.stopPropagation()">
+                    <div style="width:58px; height:58px; border-radius:50%; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.25); display:inline-flex; align-items:center; justify-content:center; margin-bottom:12px;">
+                        <i class="fa-regular fa-image" style="font-size:26px; color:#818cf8;"></i>
                     </div>
-                    <h4 style="margin:0 0 8px 0; color:white; font-size:16px;">Görsel Bulunamadı</h4>
-                    <p style="color:var(--text-muted); font-size:13px; line-height:1.5; margin:0 0 14px 0;">
+                    <h4 style="margin:0 0 6px 0; color:white; font-size:16px;">Görsel Bulunamadı</h4>
+                    <p style="color:var(--text-muted); font-size:13px; line-height:1.5; margin:0 0 12px 0;">
                         <b>${cleanKod}</b> kodlu parça için klasörde görsel dosyası tespit edilemedi.
                     </p>
-                    <div style="background:rgba(0,0,0,0.45); border:1px dashed rgba(99,102,241,0.3); border-radius:8px; padding:12px; font-size:12px; color:#c7d2fe; text-align:left; margin-bottom:14px;">
-                        <i class="fa-solid fa-circle-info" style="color:#818cf8; margin-right:4px;"></i> <b>Klasör Konumu:</b><br>
-                        Görselinizi aşağıdaki konuma bu adla yerleştirdiğinizde otomatik algılanır:<br>
-                        <code style="display:block; margin-top:6px; background:#1e1b4b; padding:6px 8px; border-radius:4px; color:#38bdf8; word-break:break-all;">dashboard/images/parcalar/${cleanKod}.jpg (veya .png)</code>
-                    </div>
+                    <code style="display:block; margin-bottom:14px; background:#1e1b4b; padding:6px 10px; border-radius:6px; color:#38bdf8; font-size:12px; word-break:break-all;">dashboard/images/parcalar/${cleanKod}.jpg</code>
                     <input type="file" id="part-file-browser" accept="image/*" style="display:none;" onchange="handleDirectImagePreview(this)">
                     <button class="btn btn-primary btn-sm" onclick="document.getElementById('part-file-browser').click()" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 14px;">
-                        <i class="fa-solid fa-upload"></i> Bilgisayardan Görsel Seçip Göster
+                        <i class="fa-solid fa-upload"></i> Bilgisayardan Görsel Seç
                     </button>
                 </div>
             `;
-            return;
         }
-
-        const item = searchQueue[queueIndex++];
-        const img = new Image();
-
-        img.onload = function() {
-            container.innerHTML = `
-                <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
-                    <img src="${item.path}" alt="${cleanKod}" style="max-width:100%; max-height:55vh; object-fit:contain; border-radius:8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                    <div style="margin-top:10px; font-size:11.5px; color:var(--text-dim); display:flex; gap:16px;">
-                        <span><i class="fa-solid fa-file-image"></i> ${item.kod}.${item.ext}</span>
-                        <span><i class="fa-solid fa-expand"></i> ${this.naturalWidth} x ${this.naturalHeight} px</span>
-                    </div>
-                </div>
-            `;
-        };
-
-        img.onerror = function() {
-            tryNext();
-        };
-
-        img.src = item.path;
-    }
-
-    tryNext();
+    });
 }
 
 function handleDirectImagePreview(input) {
@@ -4483,11 +4526,10 @@ function handleDirectImagePreview(input) {
         reader.onload = function(e) {
             if (container) {
                 container.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
-                        <img src="${e.target.result}" alt="Önizleme" style="max-width:100%; max-height:55vh; object-fit:contain; border-radius:8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                        <div style="margin-top:10px; font-size:11.5px; color:var(--success); display:flex; gap:8px;">
-                            <span><i class="fa-solid fa-check-circle"></i> Seçilen Görsel Yüklendi: ${file.name}</span>
-                        </div>
+                    <img src="${e.target.result}" alt="Önizleme" class="part-lightbox-img">
+                    <div class="part-lightbox-tag">
+                        <i class="fa-solid fa-check-circle" style="color:var(--success);"></i>
+                        <span>Seçilen Görsel: <b style="color:white;">${file.name}</b></span>
                     </div>
                 `;
             }
@@ -4495,18 +4537,16 @@ function handleDirectImagePreview(input) {
         reader.readAsDataURL(file);
     }
 }
-window.handleDirectImagePreview = handleDirectImagePreview;
 
 function closePartImageModal() {
     const modal = document.getElementById('part-image-modal');
     if (modal) {
         modal.classList.remove('active');
-        modal.style.display = 'none';
     }
 }
 
 function handlePartModalOverlayClick(event) {
-    if (event.target.id === 'part-image-modal') {
+    if (event.target.id === 'part-image-modal' || event.target.classList.contains('part-lightbox-overlay')) {
         closePartImageModal();
     }
 }
@@ -4515,11 +4555,14 @@ function handlePartModalOverlayClick(event) {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closePartImageModal();
+        hidePartHoverPreview();
     }
 });
 
 window.openPartImageModal = openPartImageModal;
 window.closePartImageModal = closePartImageModal;
 window.handlePartModalOverlayClick = handlePartModalOverlayClick;
-
-
+window.showPartHoverPreview = showPartHoverPreview;
+window.movePartHoverPreview = movePartHoverPreview;
+window.hidePartHoverPreview = hidePartHoverPreview;
+window.handleDirectImagePreview = handleDirectImagePreview;
