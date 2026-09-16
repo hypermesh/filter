@@ -2,8 +2,10 @@
 let workbook = null;
 let currentTab = 'dashboard';
 let loadedExcelFileName = ''; // Yüklü Excel dosya adı (localStorage anahtarı için)
-let parcaReceteTuketimMap = {}; // veritabanlari/parca_recete_tuketim.json verisi { "10005": 24, "1206": 2 }
-let parcaBirimHammaddeMap = {}; // parça bazlı birim hammadde boyu/ölçüsü { "5031": { birim: 0.12, birimStr: "0.12 m", hKod: "...", hAd: "..." } }
+let parcaReceteTuketimMap = {}; // veritabanlari/parca_recete_tuketim.json verisi
+let parcaBirimHammaddeMap = {}; // parça bazlı birim hammadde boyu/ölçüsü
+let parcaMakineReceteleriMap = {}; // veritabanlari/parca_makine_receteleri.json verisi
+let makineYillikTahminlerMap = {}; // veritabanlari/makine_yillik_tahminler.json verisi
 
 // Parsed Data Structures
 let uretimTakipRows = []; // Üretim Takip requirements (Col A-G)
@@ -41,29 +43,37 @@ function loadProductionLogFromStorage() {
     }
 }
 
-// Parça Reçete Başı Tüketim Veritabanını Yükle
+// Reçete & Yıllık Tahmin Veritabanlarını Yükle
 function loadParcaReceteTuketimDatabase() {
-    try {
-        fetch('../veritabanlari/parca_recete_tuketim.json')
-            .then(res => res.json())
-            .then(data => {
-                if (data && typeof data === 'object') {
-                    parcaReceteTuketimMap = data;
-                    console.log(`[DB] ${Object.keys(data).length} parça için reçete tüketim verisi yüklendi.`);
-                }
-            })
-            .catch(err => {
-                // Fallback: Doğrudan dahili varsayılan veritabanı
-                parcaReceteTuketimMap = {
-                    "1206": 2, "10005": 24, "5031": 1, "3534": 2, "3701": 2, "3704": 1,
-                    "5438": 4, "5489": 2, "5403": 6, "5429": 4, "6433": 1, "6810": 2,
-                    "7201": 8, "18705": 1, "18703": 1, "18708": 1, "7500": 4, "5516": 2,
-                    "17425": 5, "18862": 22, "5050": 5, "5100": 18, "5101": 18, "5105": 7, "5106": 9, "5107": 2
-                };
-            });
-    } catch (e) {
-        console.warn('Reçete tüketim veritabanı yüklenemedi:', e);
-    }
+    // 1. Reçete başı tüketim
+    fetch('../veritabanlari/parca_recete_tuketim.json')
+        .then(res => res.json())
+        .then(data => {
+            if (data && typeof data === 'object') parcaReceteTuketimMap = data;
+        })
+        .catch(() => {});
+
+    // 2. Parça - Makine Çoklu Reçete Veritabanı
+    fetch('../veritabanlari/parca_makine_receteleri.json')
+        .then(res => res.json())
+        .then(data => {
+            if (data && typeof data === 'object') {
+                parcaMakineReceteleriMap = data;
+                console.log(`[DB] ${Object.keys(data).length} parça için makine reçete verisi yüklendi.`);
+            }
+        })
+        .catch(() => {});
+
+    // 3. Makine Yıllık Üretim Tahminleri
+    fetch('../veritabanlari/makine_yillik_tahminler.json')
+        .then(res => res.json())
+        .then(data => {
+            if (data && typeof data === 'object') {
+                makineYillikTahminlerMap = data;
+                console.log(`[DB] ${Object.keys(data).length} makine için yıllık tahmin verisi yüklendi.`);
+            }
+        })
+        .catch(() => {});
 }
 loadParcaReceteTuketimDatabase();
 
@@ -3294,7 +3304,7 @@ function filterAndPaginateUlTable() {
     renderUlTable();
 }
 
-// --- AKILLI EMPİRİK PARTİ BOYUTLANDIRMA MOTORU ---
+// --- AKILLI EMPİRİK PARTİ BOYUTLANDIRMA MOTORU (YILLIK PROJEKSİYON DESTEKLİ) ---
 function calculateEmpiricalBatchQty(row, options) {
     const cleanCode = String(row.kod || '').trim().toUpperCase();
     const origQty = parseFloat(row.orijinalUretilecek) || 1;
@@ -3302,25 +3312,42 @@ function calculateEmpiricalBatchQty(row, options) {
     // 1. Birim Hammadde Ölçüsü (metre / kg)
     const rawInfo = parcaBirimHammaddeMap[cleanCode];
     let unitDim = rawInfo ? parseFloat(rawInfo.birimMiktar) || 0 : 0;
-    
-    // Eğer birim miktar yoksa malzeme adından veya hammadde adından sezgisel tahmin
     if (unitDim <= 0) unitDim = 0.20; // Varsayılan 200 mm
     
-    // 2. Reçete Başı Tüketim (R)
-    let recipeUsage = parcaReceteTuketimMap[cleanCode] || 1;
+    // 2. Makine Reçete Ortaklığı & Yıllık Projeksiyon Analizi
+    const machineRecInfo = parcaMakineReceteleriMap[cleanCode];
+    let machineCount = machineRecInfo ? machineRecInfo.makine_sayisi || 1 : 1;
+    let totalAnnualDemand = 0;
+    
+    if (machineRecInfo && machineRecInfo.makineler) {
+        Object.entries(machineRecInfo.makineler).forEach(([mName, mQty]) => {
+            const mAnnual = makineYillikTahminlerMap[mName] || 50;
+            totalAnnualDemand += (parseFloat(mQty) || 1) * mAnnual;
+        });
+    }
+
+    // 3. Reçete Başı Tüketim (R)
+    let recipeUsage = parcaReceteTuketimMap[cleanCode] || (machineRecInfo ? Math.round(machineRecInfo.toplam_birim_adet / Math.max(1, machineCount)) : 1);
     let kRecipe = 1.0;
     if (recipeUsage >= 15) kRecipe = 2.2;
     else if (recipeUsage >= 8) kRecipe = 1.8;
     else if (recipeUsage >= 4) kRecipe = 1.4;
     else if (recipeUsage >= 2) kRecipe = 1.2;
 
-    // 3. Kaynak Dosya Frekansı (F) - Kaç projede geçiyor
-    const sourceCount = (row.kaynak || '').split(',').length;
+    // 4. Kaynak Dosya / Makine Frekansı Çarpanı
+    const sourceCount = Math.max((row.kaynak || '').split(',').length, machineCount);
     let kFreq = 1.0;
-    if (sourceCount >= 3) kFreq = 1.5;
-    else if (sourceCount === 2) kFreq = 1.25;
+    if (sourceCount >= 4) kFreq = 1.6;
+    else if (sourceCount >= 2) kFreq = 1.3;
 
-    // 4. Boy Kuralı Tabanı (B)
+    // 5. Yıllık Talep Gücü Çarpanı (D)
+    let kAnnual = 1.0;
+    if (totalAnnualDemand >= 800) kAnnual = 2.2;
+    else if (totalAnnualDemand >= 300) kAnnual = 1.7;
+    else if (totalAnnualDemand >= 100) kAnnual = 1.35;
+    else if (totalAnnualDemand >= 40) kAnnual = 1.15;
+
+    // 6. Boy Kuralı Tabanı (B)
     const lengthThreshold = options ? parseFloat(options.lengthThreshold) || 0.50 : 0.50;
     const shortMin = options ? parseFloat(options.shortMin) || 20 : 20;
     const longMultiplier = options ? parseFloat(options.longMultiplier) || 1.30 : 1.30;
@@ -3332,16 +3359,20 @@ function calculateEmpiricalBatchQty(row, options) {
         baseQty = Math.ceil(origQty * longMultiplier);
     }
 
-    // 5. Empirik Toplam Parti Adedi
-    const empiricalQty = Math.ceil(origQty * kRecipe * kFreq);
+    // 7. Empirik Toplam Parti Adedi
+    const dynamicMultiplier = Math.max(kRecipe * kFreq, kAnnual * (machineCount > 1 ? 1.25 : 1.0));
+    const empiricalQty = Math.ceil(origQty * dynamicMultiplier);
     const finalBatchQty = Math.max(baseQty, empiricalQty);
 
     return {
         unitDim: unitDim,
         recipeUsage: recipeUsage,
         sourceCount: sourceCount,
+        machineCount: machineCount,
+        totalAnnualDemand: totalAnnualDemand,
         kRecipe: kRecipe,
         kFreq: kFreq,
+        kAnnual: kAnnual,
         finalQty: finalBatchQty,
         extraQty: Math.max(0, finalBatchQty - origQty),
         extraRaw: Math.round((Math.max(0, finalBatchQty - origQty) * unitDim) * 100) / 100
@@ -3443,17 +3474,20 @@ function renderUlTable() {
             `;
         }
 
-        // Tüketim & Frekans Rozeti
-        const isHighUsage = calc.recipeUsage >= 6;
-        const isMultiProject = calc.sourceCount >= 2;
+        // Tüketim, Makine Ortaklığı & Yıllık Projeksiyon Rozeti
+        const isCommon = calc.machineCount >= 2;
+        const isHighDemand = calc.totalAnnualDemand >= 200 || calc.recipeUsage >= 8;
+        const commonBadgeClass = calc.machineCount >= 4 ? 'background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);' : (isCommon ? 'background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3);' : 'background:rgba(255,255,255,0.05); color:var(--text-muted); border:1px solid rgba(255,255,255,0.08);');
+        
         const usageBadge = `
-            <div style="display: flex; flex-direction: column; gap: 3px; font-size: 11px;">
-                <span style="display: inline-flex; align-items: center; gap: 4px; color: ${isHighUsage ? '#fca5a5' : 'var(--text-muted)'}; font-weight: ${isHighUsage ? '700' : '500'};">
-                    <i class="fa-solid fa-screwdriver-wrench" style="font-size: 10px; opacity: 0.7;"></i> Reçete: ${calc.recipeUsage} ad/makine
+            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px;">
+                <span class="badge" style="${commonBadgeClass} padding: 2px 7px; font-weight: 700; font-size: 10.5px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; width: fit-content;">
+                    <i class="fa-solid ${calc.machineCount >= 4 ? 'fa-fire text-orange' : (isCommon ? 'fa-diagram-project' : 'fa-cube')}"></i> ${calc.machineCount >= 2 ? calc.machineCount + ' Makinede Ortak' : 'Özel Parça (Tek Makine)'}
                 </span>
-                <span style="display: inline-flex; align-items: center; gap: 4px; color: ${isMultiProject ? '#fbbf24' : 'var(--text-dim)'}; font-size: 10px;">
-                    <i class="fa-solid ${isMultiProject ? 'fa-fire text-orange' : 'fa-file'}"></i> ${calc.sourceCount} Projede Mevcut
-                </span>
+                <div style="display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-dim);">
+                    <span><i class="fa-solid fa-wrench" style="opacity:0.6;"></i> Reçete: <b>${calc.recipeUsage} ad</b></span>
+                    ${calc.totalAnnualDemand > 0 ? `<span style="color:#38bdf8;"><i class="fa-solid fa-chart-line"></i> Yıllık: <b>~${Math.round(calc.totalAnnualDemand)} ad</b></span>` : ''}
+                </div>
             </div>
         `;
 

@@ -1,0 +1,6805 @@
+{
+    "10234": {
+        "kod": "10234",
+        "makineler": {
+            "10282_x2.xls": 20.0,
+            "10286_x1.xls": 18.0,
+            "10565_x3.xls": 69.0,
+            "10566_x4.xls": 56.0,
+            "10567_x3.xls": 30.0,
+            "11480_x1.xls": 14.0,
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 215.0
+    },
+    "10232": {
+        "kod": "10232",
+        "makineler": {
+            "10282_x2.xls": 20.0,
+            "10286_x1.xls": 18.0,
+            "10565_x3.xls": 69.0,
+            "10566_x4.xls": 56.0,
+            "10567_x3.xls": 30.0,
+            "11480_x1.xls": 14.0,
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 215.0
+    },
+    "10235": {
+        "kod": "10235",
+        "makineler": {
+            "10282_x2.xls": 20.0,
+            "10286_x1.xls": 18.0,
+            "10565_x3.xls": 69.0,
+            "10566_x4.xls": 56.0,
+            "10567_x3.xls": 30.0,
+            "11480_x1.xls": 14.0,
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 215.0
+    },
+    "10233": {
+        "kod": "10233",
+        "makineler": {
+            "10282_x2.xls": 20.0,
+            "10286_x1.xls": 18.0,
+            "10565_x3.xls": 69.0,
+            "10566_x4.xls": 56.0,
+            "10567_x3.xls": 30.0,
+            "11480_x1.xls": 14.0,
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 215.0
+    },
+    "10197": {
+        "kod": "10197",
+        "makineler": {
+            "10282_x2.xls": 8.0,
+            "10286_x1.xls": 8.0,
+            "10565_x3.xls": 30.0,
+            "10566_x4.xls": 24.0,
+            "10567_x3.xls": 12.0,
+            "11480_x1.xls": 6.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 91.0
+    },
+    "10205": {
+        "kod": "10205",
+        "makineler": {
+            "10282_x2.xls": 16.0,
+            "10286_x1.xls": 16.0,
+            "10565_x3.xls": 54.0,
+            "10566_x4.xls": 48.0,
+            "10567_x3.xls": 12.0,
+            "11480_x1.xls": 12.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 162.0
+    },
+    "10202": {
+        "kod": "10202",
+        "makineler": {
+            "10282_x2.xls": 16.0,
+            "10286_x1.xls": 16.0,
+            "10565_x3.xls": 54.0,
+            "10566_x4.xls": 48.0,
+            "10567_x3.xls": 12.0,
+            "11480_x1.xls": 12.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 162.0
+    },
+    "10940": {
+        "kod": "10940",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10555": {
+        "kod": "10555",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10877": {
+        "kod": "10877",
+        "makineler": {
+            "10282_x2.xls": 32.0,
+            "10286_x1.xls": 36.0,
+            "10565_x3.xls": 114.0,
+            "10566_x4.xls": 112.0,
+            "10567_x3.xls": 54.0,
+            "11480_x1.xls": 28.0,
+            "152.03.01.10_x1.xls": 31.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 407.0
+    },
+    "10229": {
+        "kod": "10229",
+        "makineler": {
+            "10282_x2.xls": 6.0,
+            "10286_x1.xls": 9.0,
+            "10565_x3.xls": 24.0,
+            "10566_x4.xls": 20.0,
+            "10567_x3.xls": 12.0,
+            "11480_x1.xls": 5.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 79.0
+    },
+    "10939": {
+        "kod": "10939",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10196": {
+        "kod": "10196",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10201": {
+        "kod": "10201",
+        "makineler": {
+            "10282_x2.xls": 16.0,
+            "10286_x1.xls": 16.0,
+            "10565_x3.xls": 48.0,
+            "10566_x4.xls": 48.0,
+            "10567_x3.xls": 24.0,
+            "11480_x1.xls": 12.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 170.0
+    },
+    "10206": {
+        "kod": "10206",
+        "makineler": {
+            "10282_x2.xls": 16.0,
+            "10286_x1.xls": 16.0,
+            "10565_x3.xls": 48.0,
+            "10566_x4.xls": 48.0,
+            "10567_x3.xls": 24.0,
+            "11480_x1.xls": 12.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 170.0
+    },
+    "10226": {
+        "kod": "10226",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 8.0,
+            "10567_x3.xls": 3.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 21.0
+    },
+    "10880": {
+        "kod": "10880",
+        "makineler": {
+            "10282_x2.xls": 6.0,
+            "10286_x1.xls": 9.0,
+            "10565_x3.xls": 21.0,
+            "10566_x4.xls": 20.0,
+            "10567_x3.xls": 3.0,
+            "11480_x1.xls": 5.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 65.0
+    },
+    "10193": {
+        "kod": "10193",
+        "makineler": {
+            "10282_x2.xls": 6.0,
+            "10286_x1.xls": 9.0,
+            "10565_x3.xls": 21.0,
+            "10566_x4.xls": 20.0,
+            "10567_x3.xls": 3.0,
+            "11480_x1.xls": 5.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 65.0
+    },
+    "10199": {
+        "kod": "10199",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "10565_x3.xls": 3.0,
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 10.0
+    },
+    "10278": {
+        "kod": "10278",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 4.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 42.0
+    },
+    "10228": {
+        "kod": "10228",
+        "makineler": {
+            "10282_x2.xls": 8.0,
+            "10286_x1.xls": 8.0,
+            "10565_x3.xls": 24.0,
+            "10566_x4.xls": 32.0,
+            "11480_x1.xls": 8.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 84.0
+    },
+    "10096": {
+        "kod": "10096",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 16.0,
+            "10567_x3.xls": 6.0,
+            "10568_x3.xls": 6.0,
+            "11480_x1.xls": 4.0,
+            "152.03.01.10_x1.xls": 7.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 59.0
+    },
+    "10295": {
+        "kod": "10295",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 30.0
+    },
+    "10089": {
+        "kod": "10089",
+        "makineler": {
+            "10282_x2.xls": 8.0,
+            "10286_x1.xls": 8.0,
+            "10565_x3.xls": 24.0,
+            "10566_x4.xls": 32.0,
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "11480_x1.xls": 8.0,
+            "152.03.01.10_x1.xls": 52.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 156.0
+    },
+    "10224": {
+        "kod": "10224",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 30.0
+    },
+    "10090": {
+        "kod": "10090",
+        "makineler": {
+            "10282_x2.xls": 16.0,
+            "10286_x1.xls": 16.0,
+            "10565_x3.xls": 48.0,
+            "10566_x4.xls": 32.0,
+            "10567_x3.xls": 24.0,
+            "10568_x3.xls": 24.0,
+            "11480_x1.xls": 8.0,
+            "152.03.01.10_x1.xls": 49.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 217.0
+    },
+    "15409": {
+        "kod": "15409",
+        "makineler": {
+            "10282_x2.xls": 8.0,
+            "10286_x1.xls": 8.0,
+            "10565_x3.xls": 24.0,
+            "10566_x4.xls": 32.0,
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "11480_x1.xls": 8.0,
+            "152.03.01.10_x1.xls": 52.0,
+            "152.04.02.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 9,
+        "toplam_birim_adet": 160.0
+    },
+    "15408": {
+        "kod": "15408",
+        "makineler": {
+            "10282_x2.xls": 8.0,
+            "10286_x1.xls": 8.0,
+            "10565_x3.xls": 24.0,
+            "10566_x4.xls": 32.0,
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "11480_x1.xls": 8.0,
+            "152.03.01.10_x1.xls": 52.0,
+            "152.04.02.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 9,
+        "toplam_birim_adet": 160.0
+    },
+    "15402": {
+        "kod": "15402",
+        "makineler": {
+            "10282_x2.xls": 16.0,
+            "10286_x1.xls": 16.0,
+            "10565_x3.xls": 48.0,
+            "10566_x4.xls": 64.0,
+            "10567_x3.xls": 24.0,
+            "10568_x3.xls": 24.0,
+            "11480_x1.xls": 16.0,
+            "152.03.01.10_x1.xls": 104.0,
+            "152.04.02.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 9,
+        "toplam_birim_adet": 320.0
+    },
+    "10237": {
+        "kod": "10237",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 30.0
+    },
+    "10221": {
+        "kod": "10221",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 4.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 40.0
+    },
+    "10218": {
+        "kod": "10218",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 30.0
+    },
+    "10236": {
+        "kod": "10236",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 4.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 40.0
+    },
+    "10220": {
+        "kod": "10220",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 4.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 40.0
+    },
+    "10219": {
+        "kod": "10219",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 4.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 40.0
+    },
+    "10149": {
+        "kod": "10149",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 12.0
+    },
+    "10144": {
+        "kod": "10144",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 12.0
+    },
+    "10146": {
+        "kod": "10146",
+        "makineler": {
+            "10282_x2.xls": 6.0,
+            "10286_x1.xls": 3.0,
+            "10565_x3.xls": 9.0,
+            "10566_x4.xls": 12.0,
+            "11480_x1.xls": 3.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 36.0
+    },
+    "10145": {
+        "kod": "10145",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 24.0
+    },
+    "10143": {
+        "kod": "10143",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 12.0
+    },
+    "10147": {
+        "kod": "10147",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 12.0
+    },
+    "10148": {
+        "kod": "10148",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 12.0
+    },
+    "10141": {
+        "kod": "10141",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "10567_x3.xls": 3.0,
+            "10568_x3.xls": 3.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 20.0
+    },
+    "10142": {
+        "kod": "10142",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "10567_x3.xls": 6.0,
+            "10568_x3.xls": 6.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 40.0
+    },
+    "10154": {
+        "kod": "10154",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "10567_x3.xls": 6.0,
+            "10568_x3.xls": 6.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 40.0
+    },
+    "10150": {
+        "kod": "10150",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 12.0
+    },
+    "10152": {
+        "kod": "10152",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 12.0
+    },
+    "10151": {
+        "kod": "10151",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 24.0
+    },
+    "10153": {
+        "kod": "10153",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 24.0
+    },
+    "10484": {
+        "kod": "10484",
+        "makineler": {
+            "10282_x2.xls": 6.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 9.0
+    },
+    "10941": {
+        "kod": "10941",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10942": {
+        "kod": "10942",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10110": {
+        "kod": "10110",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 24.0
+    },
+    "10133": {
+        "kod": "10133",
+        "makineler": {
+            "10282_x2.xls": 8.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 16.0,
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "11480_x1.xls": 4.0,
+            "152.03.01.10_x1.xls": 12.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 80.0
+    },
+    "10556": {
+        "kod": "10556",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 3.0
+    },
+    "10124": {
+        "kod": "10124",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "10565_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 6.0
+    },
+    "10076": {
+        "kod": "10076",
+        "makineler": {
+            "10282_x2.xls": 6.0,
+            "10286_x1.xls": 6.0,
+            "10565_x3.xls": 18.0,
+            "10566_x4.xls": 24.0,
+            "10567_x3.xls": 9.0,
+            "10568_x3.xls": 9.0,
+            "11480_x1.xls": 6.0,
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 86.0
+    },
+    "10078": {
+        "kod": "10078",
+        "makineler": {
+            "10282_x2.xls": 12.0,
+            "10286_x1.xls": 12.0,
+            "10565_x3.xls": 36.0,
+            "10566_x4.xls": 48.0,
+            "10567_x3.xls": 18.0,
+            "10568_x3.xls": 18.0,
+            "11480_x1.xls": 12.0,
+            "152.03.01.10_x1.xls": 16.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 172.0
+    },
+    "10077": {
+        "kod": "10077",
+        "makineler": {
+            "10282_x2.xls": 6.0,
+            "10286_x1.xls": 6.0,
+            "10565_x3.xls": 18.0,
+            "10566_x4.xls": 24.0,
+            "10567_x3.xls": 9.0,
+            "10568_x3.xls": 9.0,
+            "11480_x1.xls": 6.0,
+            "152.03.01.10_x1.xls": 9.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 87.0
+    },
+    "10560": {
+        "kod": "10560",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 3.0
+    },
+    "10368": {
+        "kod": "10368",
+        "makineler": {
+            "10282_x2.xls": 6.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 9.0
+    },
+    "10388": {
+        "kod": "10388",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "10567_x3.xls": 6.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 7,
+        "toplam_birim_adet": 32.0
+    },
+    "10945": {
+        "kod": "10945",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10946": {
+        "kod": "10946",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10132": {
+        "kod": "10132",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 12.0,
+            "10565_x3.xls": 36.0,
+            "10566_x4.xls": 48.0,
+            "11480_x1.xls": 12.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 114.0
+    },
+    "10123": {
+        "kod": "10123",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "10565_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 6.0
+    },
+    "10558": {
+        "kod": "10558",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 3.0
+    },
+    "10559": {
+        "kod": "10559",
+        "makineler": {
+            "10282_x2.xls": 2.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 3.0
+    },
+    "10943": {
+        "kod": "10943",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10944": {
+        "kod": "10944",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10134": {
+        "kod": "10134",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "10567_x3.xls": 6.0,
+            "10568_x3.xls": 6.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 40.0
+    },
+    "10947": {
+        "kod": "10947",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10948": {
+        "kod": "10948",
+        "makineler": {
+            "10282_x2.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10105": {
+        "kod": "10105",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 24.0
+    },
+    "10131": {
+        "kod": "10131",
+        "makineler": {
+            "10282_x2.xls": 12.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 4.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 54.0
+    },
+    "10122": {
+        "kod": "10122",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 6,
+        "toplam_birim_adet": 24.0
+    },
+    "10271": {
+        "kod": "10271",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10567_x3.xls": 6.0,
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 22.0
+    },
+    "10474": {
+        "kod": "10474",
+        "makineler": {
+            "10282_x2.xls": 8.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 16.0,
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "11480_x1.xls": 4.0,
+            "152.03.01.10_x1.xls": 36.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 104.0
+    },
+    "10384": {
+        "kod": "10384",
+        "makineler": {
+            "10282_x2.xls": 16.0,
+            "10567_x3.xls": 24.0,
+            "10568_x3.xls": 24.0,
+            "152.03.01.10_x1.xls": 48.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 112.0
+    },
+    "10476": {
+        "kod": "10476",
+        "makineler": {
+            "10282_x2.xls": 4.0,
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "10567_x3.xls": 6.0,
+            "10568_x3.xls": 6.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 40.0
+    },
+    "10383": {
+        "kod": "10383",
+        "makineler": {
+            "10282_x2.xls": 8.0,
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 16.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 48.0
+    },
+    "10472": {
+        "kod": "10472",
+        "makineler": {
+            "10282_x2.xls": 8.0,
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 16.0,
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "11480_x1.xls": 4.0,
+            "152.03.01.10_x1.xls": 36.0
+        },
+        "makine_sayisi": 8,
+        "toplam_birim_adet": 104.0
+    },
+    "10541": {
+        "kod": "10541",
+        "makineler": {
+            "10286_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10540": {
+        "kod": "10540",
+        "makineler": {
+            "10286_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10477": {
+        "kod": "10477",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10542": {
+        "kod": "10542",
+        "makineler": {
+            "10286_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10543": {
+        "kod": "10543",
+        "makineler": {
+            "10286_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10747": {
+        "kod": "10747",
+        "makineler": {
+            "10286_x1.xls": 3.0,
+            "10565_x3.xls": 9.0,
+            "10566_x4.xls": 12.0,
+            "11480_x1.xls": 3.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 27.0
+    },
+    "10964": {
+        "kod": "10964",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10965": {
+        "kod": "10965",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10119": {
+        "kod": "10119",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10957": {
+        "kod": "10957",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10958": {
+        "kod": "10958",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10139": {
+        "kod": "10139",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10136": {
+        "kod": "10136",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10128": {
+        "kod": "10128",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 10.0
+    },
+    "10127": {
+        "kod": "10127",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 10.0
+    },
+    "10746": {
+        "kod": "10746",
+        "makineler": {
+            "10286_x1.xls": 6.0,
+            "10565_x3.xls": 18.0,
+            "10566_x4.xls": 24.0,
+            "11480_x1.xls": 6.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 54.0
+    },
+    "10121": {
+        "kod": "10121",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10961": {
+        "kod": "10961",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10962": {
+        "kod": "10962",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10177": {
+        "kod": "10177",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 6.0
+    },
+    "10115": {
+        "kod": "10115",
+        "makineler": {
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 18.0
+    },
+    "10955": {
+        "kod": "10955",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10956": {
+        "kod": "10956",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10138": {
+        "kod": "10138",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10125": {
+        "kod": "10125",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10126": {
+        "kod": "10126",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10966": {
+        "kod": "10966",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10967": {
+        "kod": "10967",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10120": {
+        "kod": "10120",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10959": {
+        "kod": "10959",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10960": {
+        "kod": "10960",
+        "makineler": {
+            "10286_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10140": {
+        "kod": "10140",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10114": {
+        "kod": "10114",
+        "makineler": {
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 18.0
+    },
+    "10137": {
+        "kod": "10137",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10130": {
+        "kod": "10130",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10129": {
+        "kod": "10129",
+        "makineler": {
+            "10286_x1.xls": 1.0,
+            "10565_x3.xls": 3.0,
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 9.0
+    },
+    "10467": {
+        "kod": "10467",
+        "makineler": {
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 18.0
+    },
+    "10471": {
+        "kod": "10471",
+        "makineler": {
+            "10286_x1.xls": 8.0,
+            "10565_x3.xls": 24.0,
+            "10566_x4.xls": 32.0,
+            "11480_x1.xls": 8.0,
+            "152.03.01.10_x1.xls": 16.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 88.0
+    },
+    "10473": {
+        "kod": "10473",
+        "makineler": {
+            "10286_x1.xls": 4.0,
+            "10565_x3.xls": 12.0,
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 4.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 36.0
+    },
+    "10470": {
+        "kod": "10470",
+        "makineler": {
+            "10286_x1.xls": 8.0,
+            "10565_x3.xls": 24.0,
+            "10566_x4.xls": 32.0,
+            "11480_x1.xls": 8.0,
+            "152.03.01.10_x1.xls": 16.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 88.0
+    },
+    "10468": {
+        "kod": "10468",
+        "makineler": {
+            "10286_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10492": {
+        "kod": "10492",
+        "makineler": {
+            "10286_x1.xls": 6.0,
+            "10565_x3.xls": 18.0,
+            "10566_x4.xls": 24.0,
+            "11480_x1.xls": 6.0,
+            "152.03.01.10_x1.xls": 12.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 66.0
+    },
+    "10475": {
+        "kod": "10475",
+        "makineler": {
+            "10286_x1.xls": 8.0,
+            "10565_x3.xls": 24.0,
+            "10566_x4.xls": 32.0,
+            "11480_x1.xls": 8.0,
+            "152.03.01.10_x1.xls": 16.0
+        },
+        "makine_sayisi": 5,
+        "toplam_birim_adet": 88.0
+    },
+    "10488": {
+        "kod": "10488",
+        "makineler": {
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 12.0
+    },
+    "10469": {
+        "kod": "10469",
+        "makineler": {
+            "10286_x1.xls": 2.0,
+            "10565_x3.xls": 6.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10883": {
+        "kod": "10883",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10190": {
+        "kod": "10190",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10204": {
+        "kod": "10204",
+        "makineler": {
+            "10565_x3.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "10200": {
+        "kod": "10200",
+        "makineler": {
+            "10565_x3.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "10238": {
+        "kod": "10238",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10240": {
+        "kod": "10240",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "10566_x4.xls": 24.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 4,
+        "toplam_birim_adet": 34.0
+    },
+    "10239": {
+        "kod": "10239",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10241": {
+        "kod": "10241",
+        "makineler": {
+            "10565_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 11.0
+    },
+    "10244": {
+        "kod": "10244",
+        "makineler": {
+            "10565_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10761": {
+        "kod": "10761",
+        "makineler": {
+            "10565_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10242": {
+        "kod": "10242",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10243": {
+        "kod": "10243",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10247": {
+        "kod": "10247",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10246": {
+        "kod": "10246",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10245": {
+        "kod": "10245",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10223": {
+        "kod": "10223",
+        "makineler": {
+            "10565_x3.xls": 12.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 12.0
+    },
+    "10885": {
+        "kod": "10885",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10192": {
+        "kod": "10192",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "FN.116": {
+        "kod": "FN.116",
+        "makineler": {
+            "10565_x3.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "FN.122": {
+        "kod": "FN.122",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.121": {
+        "kod": "FN.121",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.123": {
+        "kod": "FN.123",
+        "makineler": {
+            "10565_x3.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "FN.035": {
+        "kod": "FN.035",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.020": {
+        "kod": "FN.020",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.036": {
+        "kod": "FN.036",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.108": {
+        "kod": "FN.108",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.105": {
+        "kod": "FN.105",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.107": {
+        "kod": "FN.107",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.106": {
+        "kod": "FN.106",
+        "makineler": {
+            "10565_x3.xls": 72.0,
+            "11480_x1.xls": 12.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 84.0
+    },
+    "FN.037": {
+        "kod": "FN.037",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.117": {
+        "kod": "FN.117",
+        "makineler": {
+            "10565_x3.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "FN.110": {
+        "kod": "FN.110",
+        "makineler": {
+            "10565_x3.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "FN.103": {
+        "kod": "FN.103",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.109": {
+        "kod": "FN.109",
+        "makineler": {
+            "10565_x3.xls": 18.0,
+            "11480_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 21.0
+    },
+    "FN.102": {
+        "kod": "FN.102",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.104": {
+        "kod": "FN.104",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.112": {
+        "kod": "FN.112",
+        "makineler": {
+            "10565_x3.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "FN.119": {
+        "kod": "FN.119",
+        "makineler": {
+            "10565_x3.xls": 6.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "FN.111": {
+        "kod": "FN.111",
+        "makineler": {
+            "10565_x3.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "FN.113": {
+        "kod": "FN.113",
+        "makineler": {
+            "10565_x3.xls": 12.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 14.0
+    },
+    "FN.118": {
+        "kod": "FN.118",
+        "makineler": {
+            "10565_x3.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "10884": {
+        "kod": "10884",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10191": {
+        "kod": "10191",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10532": {
+        "kod": "10532",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10230": {
+        "kod": "10230",
+        "makineler": {
+            "10565_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "11511": {
+        "kod": "11511",
+        "makineler": {
+            "10565_x3.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "10101": {
+        "kod": "10101",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10100": {
+        "kod": "10100",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10113": {
+        "kod": "10113",
+        "makineler": {
+            "10565_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10112": {
+        "kod": "10112",
+        "makineler": {
+            "10565_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10106": {
+        "kod": "10106",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10104": {
+        "kod": "10104",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10135": {
+        "kod": "10135",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10111": {
+        "kod": "10111",
+        "makineler": {
+            "10565_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10109": {
+        "kod": "10109",
+        "makineler": {
+            "10565_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10102": {
+        "kod": "10102",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10103": {
+        "kod": "10103",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10108": {
+        "kod": "10108",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10107": {
+        "kod": "10107",
+        "makineler": {
+            "10565_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10203": {
+        "kod": "10203",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10207": {
+        "kod": "10207",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10495": {
+        "kod": "10495",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10255": {
+        "kod": "10255",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10251": {
+        "kod": "10251",
+        "makineler": {
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 4.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 20.0
+    },
+    "10253": {
+        "kod": "10253",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10254": {
+        "kod": "10254",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10252": {
+        "kod": "10252",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10882": {
+        "kod": "10882",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10194": {
+        "kod": "10194",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10881": {
+        "kod": "10881",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10618": {
+        "kod": "10618",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10464": {
+        "kod": "10464",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10461": {
+        "kod": "10461",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10462": {
+        "kod": "10462",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10399": {
+        "kod": "10399",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10459": {
+        "kod": "10459",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10198": {
+        "kod": "10198",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10496": {
+        "kod": "10496",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10281": {
+        "kod": "10281",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10258": {
+        "kod": "10258",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10259": {
+        "kod": "10259",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10260": {
+        "kod": "10260",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10269": {
+        "kod": "10269",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10270": {
+        "kod": "10270",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10261": {
+        "kod": "10261",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10263": {
+        "kod": "10263",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10262": {
+        "kod": "10262",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10280": {
+        "kod": "10280",
+        "makineler": {
+            "10566_x4.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "10736": {
+        "kod": "10736",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10733": {
+        "kod": "10733",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10732": {
+        "kod": "10732",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10729": {
+        "kod": "10729",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10735": {
+        "kod": "10735",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10731": {
+        "kod": "10731",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10737": {
+        "kod": "10737",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10734": {
+        "kod": "10734",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10284": {
+        "kod": "10284",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 10.0
+    },
+    "10296": {
+        "kod": "10296",
+        "makineler": {
+            "10566_x4.xls": 32.0,
+            "11480_x1.xls": 4.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 40.0
+    },
+    "10297": {
+        "kod": "10297",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 10.0
+    },
+    "10289": {
+        "kod": "10289",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 1.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 10.0
+    },
+    "10291": {
+        "kod": "10291",
+        "makineler": {
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 20.0
+    },
+    "10292": {
+        "kod": "10292",
+        "makineler": {
+            "10566_x4.xls": 32.0,
+            "11480_x1.xls": 4.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 40.0
+    },
+    "10290": {
+        "kod": "10290",
+        "makineler": {
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 20.0
+    },
+    "10294": {
+        "kod": "10294",
+        "makineler": {
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 20.0
+    },
+    "10727": {
+        "kod": "10727",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10726": {
+        "kod": "10726",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10330": {
+        "kod": "10330",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 14.0
+    },
+    "10160": {
+        "kod": "10160",
+        "makineler": {
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 4.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 24.0
+    },
+    "10227": {
+        "kod": "10227",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 14.0
+    },
+    "10158": {
+        "kod": "10158",
+        "makineler": {
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 4.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 24.0
+    },
+    "10156": {
+        "kod": "10156",
+        "makineler": {
+            "10566_x4.xls": 32.0,
+            "11480_x1.xls": 8.0,
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 48.0
+    },
+    "10159": {
+        "kod": "10159",
+        "makineler": {
+            "10566_x4.xls": 16.0,
+            "11480_x1.xls": 4.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 24.0
+    },
+    "10248": {
+        "kod": "10248",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10222": {
+        "kod": "10222",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10489": {
+        "kod": "10489",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10490": {
+        "kod": "10490",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10491": {
+        "kod": "10491",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10250": {
+        "kod": "10250",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10172": {
+        "kod": "10172",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10173": {
+        "kod": "10173",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10167": {
+        "kod": "10167",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10166": {
+        "kod": "10166",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10208": {
+        "kod": "10208",
+        "makineler": {
+            "10566_x4.xls": 8.0,
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 10.0
+    },
+    "10175": {
+        "kod": "10175",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10174": {
+        "kod": "10174",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10165": {
+        "kod": "10165",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10164": {
+        "kod": "10164",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10171": {
+        "kod": "10171",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10170": {
+        "kod": "10170",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10169": {
+        "kod": "10169",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10168": {
+        "kod": "10168",
+        "makineler": {
+            "10566_x4.xls": 4.0,
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "10303": {
+        "kod": "10303",
+        "makineler": {
+            "10566_x4.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "10302": {
+        "kod": "10302",
+        "makineler": {
+            "10566_x4.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "10301": {
+        "kod": "10301",
+        "makineler": {
+            "10566_x4.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "10329": {
+        "kod": "10329",
+        "makineler": {
+            "10566_x4.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "10299": {
+        "kod": "10299",
+        "makineler": {
+            "10566_x4.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "10300": {
+        "kod": "10300",
+        "makineler": {
+            "10566_x4.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "10217": {
+        "kod": "10217",
+        "makineler": {
+            "10566_x4.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "10216": {
+        "kod": "10216",
+        "makineler": {
+            "10566_x4.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "10743": {
+        "kod": "10743",
+        "makineler": {
+            "10566_x4.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "10739": {
+        "kod": "10739",
+        "makineler": {
+            "10566_x4.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "10740": {
+        "kod": "10740",
+        "makineler": {
+            "10566_x4.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "10744": {
+        "kod": "10744",
+        "makineler": {
+            "10566_x4.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "10745": {
+        "kod": "10745",
+        "makineler": {
+            "10566_x4.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "10741": {
+        "kod": "10741",
+        "makineler": {
+            "10566_x4.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "10742": {
+        "kod": "10742",
+        "makineler": {
+            "10566_x4.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "10738": {
+        "kod": "10738",
+        "makineler": {
+            "10566_x4.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "10515": {
+        "kod": "10515",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10521": {
+        "kod": "10521",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10520": {
+        "kod": "10520",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10518": {
+        "kod": "10518",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10519": {
+        "kod": "10519",
+        "makineler": {
+            "10567_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 16.0
+    },
+    "10516": {
+        "kod": "10516",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10879": {
+        "kod": "10879",
+        "makineler": {
+            "10567_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10195": {
+        "kod": "10195",
+        "makineler": {
+            "10567_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10876": {
+        "kod": "10876",
+        "makineler": {
+            "10567_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10875": {
+        "kod": "10875",
+        "makineler": {
+            "10567_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10287": {
+        "kod": "10287",
+        "makineler": {
+            "10567_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 16.0
+    },
+    "10878": {
+        "kod": "10878",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10649": {
+        "kod": "10649",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10657": {
+        "kod": "10657",
+        "makineler": {
+            "10567_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 14.0
+    },
+    "10285": {
+        "kod": "10285",
+        "makineler": {
+            "10567_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 14.0
+    },
+    "10523": {
+        "kod": "10523",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10524": {
+        "kod": "10524",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10528": {
+        "kod": "10528",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10526": {
+        "kod": "10526",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10527": {
+        "kod": "10527",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10003": {
+        "kod": "10003",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 8.0
+    },
+    "10015": {
+        "kod": "10015",
+        "makineler": {
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 32.0
+    },
+    "10002": {
+        "kod": "10002",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 8.0
+    },
+    "10314": {
+        "kod": "10314",
+        "makineler": {
+            "10567_x3.xls": 30.0,
+            "10568_x3.xls": 30.0,
+            "152.03.01.10_x1.xls": 18.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 78.0
+    },
+    "10310": {
+        "kod": "10310",
+        "makineler": {
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 32.0
+    },
+    "10502": {
+        "kod": "10502",
+        "makineler": {
+            "10567_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 7.0
+    },
+    "10504": {
+        "kod": "10504",
+        "makineler": {
+            "10567_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10505": {
+        "kod": "10505",
+        "makineler": {
+            "10567_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10189": {
+        "kod": "10189",
+        "makineler": {
+            "10567_x3.xls": 6.0,
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 16.0
+    },
+    "10529": {
+        "kod": "10529",
+        "makineler": {
+            "10567_x3.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "10503": {
+        "kod": "10503",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10315": {
+        "kod": "10315",
+        "makineler": {
+            "10567_x3.xls": 30.0,
+            "10568_x3.xls": 30.0,
+            "152.03.01.10_x1.xls": 18.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 78.0
+    },
+    "10309": {
+        "kod": "10309",
+        "makineler": {
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 32.0
+    },
+    "10501": {
+        "kod": "10501",
+        "makineler": {
+            "10567_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10320": {
+        "kod": "10320",
+        "makineler": {
+            "10567_x3.xls": 3.0,
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 7.0
+    },
+    "10507": {
+        "kod": "10507",
+        "makineler": {
+            "10567_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10506": {
+        "kod": "10506",
+        "makineler": {
+            "10567_x3.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "10326": {
+        "kod": "10326",
+        "makineler": {
+            "10567_x3.xls": 852.0,
+            "10568_x3.xls": 858.0,
+            "152.03.01.10_x1.xls": 570.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 2280.0
+    },
+    "10273": {
+        "kod": "10273",
+        "makineler": {
+            "10567_x3.xls": 426.0,
+            "10568_x3.xls": 429.0,
+            "152.03.01.10_x1.xls": 285.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 1140.0
+    },
+    "10327": {
+        "kod": "10327",
+        "makineler": {
+            "10567_x3.xls": 426.0,
+            "10568_x3.xls": 429.0,
+            "152.03.01.10_x1.xls": 285.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 1140.0
+    },
+    "10328": {
+        "kod": "10328",
+        "makineler": {
+            "10567_x3.xls": 852.0,
+            "10568_x3.xls": 858.0,
+            "152.03.01.10_x1.xls": 570.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 2280.0
+    },
+    "10091": {
+        "kod": "10091",
+        "makineler": {
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 18.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 42.0
+    },
+    "10083": {
+        "kod": "10083",
+        "makineler": {
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 18.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 42.0
+    },
+    "10095": {
+        "kod": "10095",
+        "makineler": {
+            "10567_x3.xls": 6.0,
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 5.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 17.0
+    },
+    "10097": {
+        "kod": "10097",
+        "makineler": {
+            "10567_x3.xls": 12.0,
+            "10568_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 10.0
+        },
+        "makine_sayisi": 3,
+        "toplam_birim_adet": 34.0
+    },
+    "10377": {
+        "kod": "10377",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10376": {
+        "kod": "10376",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10378": {
+        "kod": "10378",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10379": {
+        "kod": "10379",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10274": {
+        "kod": "10274",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10760": {
+        "kod": "10760",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10366": {
+        "kod": "10366",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10338": {
+        "kod": "10338",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10350": {
+        "kod": "10350",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10342": {
+        "kod": "10342",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10336": {
+        "kod": "10336",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10324": {
+        "kod": "10324",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10346": {
+        "kod": "10346",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10369": {
+        "kod": "10369",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10347": {
+        "kod": "10347",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10374": {
+        "kod": "10374",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10352": {
+        "kod": "10352",
+        "makineler": {
+            "10568_x3.xls": 36.0,
+            "152.03.01.10_x1.xls": 12.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 48.0
+    },
+    "10373": {
+        "kod": "10373",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10370": {
+        "kod": "10370",
+        "makineler": {
+            "10568_x3.xls": 72.0,
+            "152.03.01.10_x1.xls": 24.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 96.0
+    },
+    "10367": {
+        "kod": "10367",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10372": {
+        "kod": "10372",
+        "makineler": {
+            "10568_x3.xls": 18.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 24.0
+    },
+    "10343": {
+        "kod": "10343",
+        "makineler": {
+            "10568_x3.xls": 18.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 24.0
+    },
+    "10581": {
+        "kod": "10581",
+        "makineler": {
+            "10568_x3.xls": 18.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 24.0
+    },
+    "10351": {
+        "kod": "10351",
+        "makineler": {
+            "10568_x3.xls": 18.0,
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 24.0
+    },
+    "10371": {
+        "kod": "10371",
+        "makineler": {
+            "10568_x3.xls": 9.0,
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 12.0
+    },
+    "10364": {
+        "kod": "10364",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10362": {
+        "kod": "10362",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10363": {
+        "kod": "10363",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10337": {
+        "kod": "10337",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10360": {
+        "kod": "10360",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10293": {
+        "kod": "10293",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10356": {
+        "kod": "10356",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10359": {
+        "kod": "10359",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10358": {
+        "kod": "10358",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10357": {
+        "kod": "10357",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10361": {
+        "kod": "10361",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10872": {
+        "kod": "10872",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10582": {
+        "kod": "10582",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "45522": {
+        "kod": "45522",
+        "makineler": {
+            "10568_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 16.0
+    },
+    "10583": {
+        "kod": "10583",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10584": {
+        "kod": "10584",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10386": {
+        "kod": "10386",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10319": {
+        "kod": "10319",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10311": {
+        "kod": "10311",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10313": {
+        "kod": "10313",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10268": {
+        "kod": "10268",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10318": {
+        "kod": "10318",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10267": {
+        "kod": "10267",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10317": {
+        "kod": "10317",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10213": {
+        "kod": "10213",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10321": {
+        "kod": "10321",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10312": {
+        "kod": "10312",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10305": {
+        "kod": "10305",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10694": {
+        "kod": "10694",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10307": {
+        "kod": "10307",
+        "makineler": {
+            "10568_x3.xls": 12.0,
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 16.0
+    },
+    "10695": {
+        "kod": "10695",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10304": {
+        "kod": "10304",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10306": {
+        "kod": "10306",
+        "makineler": {
+            "10568_x3.xls": 6.0,
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "10265": {
+        "kod": "10265",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "10308": {
+        "kod": "10308",
+        "makineler": {
+            "10568_x3.xls": 3.0,
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "FN.154": {
+        "kod": "FN.154",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "FN.155": {
+        "kod": "FN.155",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "FN.156": {
+        "kod": "FN.156",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "FN.157": {
+        "kod": "FN.157",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "FN.150": {
+        "kod": "FN.150",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "FN.153": {
+        "kod": "FN.153",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "FN.152": {
+        "kod": "FN.152",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11481": {
+        "kod": "11481",
+        "makineler": {
+            "11480_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "11492": {
+        "kod": "11492",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11488": {
+        "kod": "11488",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11483": {
+        "kod": "11483",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11489": {
+        "kod": "11489",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11482": {
+        "kod": "11482",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11493": {
+        "kod": "11493",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11485": {
+        "kod": "11485",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11491": {
+        "kod": "11491",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11487": {
+        "kod": "11487",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11490": {
+        "kod": "11490",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11486": {
+        "kod": "11486",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11494": {
+        "kod": "11494",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11484": {
+        "kod": "11484",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11476": {
+        "kod": "11476",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11466": {
+        "kod": "11466",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11468": {
+        "kod": "11468",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11467": {
+        "kod": "11467",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11475": {
+        "kod": "11475",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11465": {
+        "kod": "11465",
+        "makineler": {
+            "11480_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "11462": {
+        "kod": "11462",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11464": {
+        "kod": "11464",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11512": {
+        "kod": "11512",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11463": {
+        "kod": "11463",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11469": {
+        "kod": "11469",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11474": {
+        "kod": "11474",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11470": {
+        "kod": "11470",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11473": {
+        "kod": "11473",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11472": {
+        "kod": "11472",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11471": {
+        "kod": "11471",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11510": {
+        "kod": "11510",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11509": {
+        "kod": "11509",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11496": {
+        "kod": "11496",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11498": {
+        "kod": "11498",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11495": {
+        "kod": "11495",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11501": {
+        "kod": "11501",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11497": {
+        "kod": "11497",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11500": {
+        "kod": "11500",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11499": {
+        "kod": "11499",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11503": {
+        "kod": "11503",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11508": {
+        "kod": "11508",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11505": {
+        "kod": "11505",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11507": {
+        "kod": "11507",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11504": {
+        "kod": "11504",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11506": {
+        "kod": "11506",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "11513": {
+        "kod": "11513",
+        "makineler": {
+            "11480_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "11461": {
+        "kod": "11461",
+        "makineler": {
+            "11480_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12623": {
+        "kod": "12623",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12619": {
+        "kod": "12619",
+        "makineler": {
+            "152.03.01.10_x1.xls": 7.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 7.0
+    },
+    "12616": {
+        "kod": "12616",
+        "makineler": {
+            "152.03.01.10_x1.xls": 12.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 12.0
+    },
+    "12615": {
+        "kod": "12615",
+        "makineler": {
+            "152.03.01.10_x1.xls": 12.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 12.0
+    },
+    "12612": {
+        "kod": "12612",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12561": {
+        "kod": "12561",
+        "makineler": {
+            "152.03.01.10_x1.xls": 42.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 42.0
+    },
+    "12559": {
+        "kod": "12559",
+        "makineler": {
+            "152.03.01.10_x1.xls": 22.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 22.0
+    },
+    "12622": {
+        "kod": "12622",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12614": {
+        "kod": "12614",
+        "makineler": {
+            "152.03.01.10_x1.xls": 14.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 14.0
+    },
+    "12621": {
+        "kod": "12621",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12560": {
+        "kod": "12560",
+        "makineler": {
+            "152.03.01.10_x1.xls": 22.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 22.0
+    },
+    "12563": {
+        "kod": "12563",
+        "makineler": {
+            "152.03.01.10_x1.xls": 30.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 30.0
+    },
+    "12610": {
+        "kod": "12610",
+        "makineler": {
+            "152.03.01.10_x1.xls": 5.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 5.0
+    },
+    "12613": {
+        "kod": "12613",
+        "makineler": {
+            "152.03.01.10_x1.xls": 5.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 5.0
+    },
+    "12809": {
+        "kod": "12809",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12805": {
+        "kod": "12805",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12810": {
+        "kod": "12810",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12806": {
+        "kod": "12806",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12808": {
+        "kod": "12808",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12807": {
+        "kod": "12807",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12804": {
+        "kod": "12804",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12611": {
+        "kod": "12611",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12620": {
+        "kod": "12620",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12895": {
+        "kod": "12895",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12618": {
+        "kod": "12618",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12617": {
+        "kod": "12617",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12558": {
+        "kod": "12558",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12606": {
+        "kod": "12606",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12608": {
+        "kod": "12608",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12576": {
+        "kod": "12576",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12574": {
+        "kod": "12574",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12557": {
+        "kod": "12557",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12602": {
+        "kod": "12602",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12556": {
+        "kod": "12556",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12595": {
+        "kod": "12595",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12552": {
+        "kod": "12552",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12564": {
+        "kod": "12564",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12592": {
+        "kod": "12592",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12591": {
+        "kod": "12591",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12554": {
+        "kod": "12554",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12586": {
+        "kod": "12586",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12585": {
+        "kod": "12585",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12609": {
+        "kod": "12609",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12579": {
+        "kod": "12579",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12580": {
+        "kod": "12580",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12605": {
+        "kod": "12605",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12572": {
+        "kod": "12572",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12573": {
+        "kod": "12573",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12599": {
+        "kod": "12599",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12598": {
+        "kod": "12598",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12569": {
+        "kod": "12569",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12594": {
+        "kod": "12594",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12589": {
+        "kod": "12589",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12590": {
+        "kod": "12590",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12584": {
+        "kod": "12584",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12583": {
+        "kod": "12583",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12607": {
+        "kod": "12607",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12578": {
+        "kod": "12578",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12577": {
+        "kod": "12577",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12571": {
+        "kod": "12571",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12570": {
+        "kod": "12570",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12596": {
+        "kod": "12596",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12597": {
+        "kod": "12597",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12603": {
+        "kod": "12603",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12601": {
+        "kod": "12601",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12565": {
+        "kod": "12565",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12600": {
+        "kod": "12600",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "12566": {
+        "kod": "12566",
+        "makineler": {
+            "152.03.01.10_x1.xls": 9.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 9.0
+    },
+    "12568": {
+        "kod": "12568",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12604": {
+        "kod": "12604",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12567": {
+        "kod": "12567",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12555": {
+        "kod": "12555",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12593": {
+        "kod": "12593",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12587": {
+        "kod": "12587",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12588": {
+        "kod": "12588",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12582": {
+        "kod": "12582",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12581": {
+        "kod": "12581",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12625": {
+        "kod": "12625",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12648": {
+        "kod": "12648",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12640": {
+        "kod": "12640",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12645": {
+        "kod": "12645",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12626": {
+        "kod": "12626",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12651": {
+        "kod": "12651",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12638": {
+        "kod": "12638",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12639": {
+        "kod": "12639",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12649": {
+        "kod": "12649",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12650": {
+        "kod": "12650",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12636": {
+        "kod": "12636",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12646": {
+        "kod": "12646",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12647": {
+        "kod": "12647",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12635": {
+        "kod": "12635",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12641": {
+        "kod": "12641",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12634": {
+        "kod": "12634",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12644": {
+        "kod": "12644",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12633": {
+        "kod": "12633",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12642": {
+        "kod": "12642",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12624": {
+        "kod": "12624",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12637": {
+        "kod": "12637",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12632": {
+        "kod": "12632",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "12629": {
+        "kod": "12629",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12631": {
+        "kod": "12631",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12628": {
+        "kod": "12628",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12630": {
+        "kod": "12630",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12627": {
+        "kod": "12627",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12157": {
+        "kod": "12157",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15006": {
+        "kod": "15006",
+        "makineler": {
+            "152.03.01.10_x1.xls": 154.0,
+            "152.04.02.10_x1.xls": 108.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 262.0
+    },
+    "15499": {
+        "kod": "15499",
+        "makineler": {
+            "152.03.01.10_x1.xls": 77.0,
+            "152.04.02.10_x1.xls": 54.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 131.0
+    },
+    "15003": {
+        "kod": "15003",
+        "makineler": {
+            "152.03.01.10_x1.xls": 77.0,
+            "152.04.02.10_x1.xls": 54.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 131.0
+    },
+    "15005": {
+        "kod": "15005",
+        "makineler": {
+            "152.03.01.10_x1.xls": 154.0,
+            "152.04.02.10_x1.xls": 108.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 262.0
+    },
+    "12168": {
+        "kod": "12168",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12170": {
+        "kod": "12170",
+        "makineler": {
+            "152.03.01.10_x1.xls": 12.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 12.0
+    },
+    "12171": {
+        "kod": "12171",
+        "makineler": {
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "12169": {
+        "kod": "12169",
+        "makineler": {
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "12173": {
+        "kod": "12173",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12861": {
+        "kod": "12861",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "12867": {
+        "kod": "12867",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12154": {
+        "kod": "12154",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "12195": {
+        "kod": "12195",
+        "makineler": {
+            "152.03.01.10_x1.xls": 12.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 12.0
+    },
+    "12153": {
+        "kod": "12153",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "15417": {
+        "kod": "15417",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0,
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "15419": {
+        "kod": "15419",
+        "makineler": {
+            "152.03.01.10_x1.xls": 6.0,
+            "152.04.02.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 8.0
+    },
+    "15418": {
+        "kod": "15418",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0,
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "12156": {
+        "kod": "12156",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12121": {
+        "kod": "12121",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12155": {
+        "kod": "12155",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "12151": {
+        "kod": "12151",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12152": {
+        "kod": "12152",
+        "makineler": {
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "12158": {
+        "kod": "12158",
+        "makineler": {
+            "152.03.01.10_x1.xls": 12.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 12.0
+    },
+    "15011": {
+        "kod": "15011",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0,
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "3884": {
+        "kod": "3884",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0,
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "12208": {
+        "kod": "12208",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "12209": {
+        "kod": "12209",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "12203": {
+        "kod": "12203",
+        "makineler": {
+            "152.03.01.10_x1.xls": 9.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 9.0
+    },
+    "12505": {
+        "kod": "12505",
+        "makineler": {
+            "152.03.01.10_x1.xls": 36.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 36.0
+    },
+    "12506": {
+        "kod": "12506",
+        "makineler": {
+            "152.03.01.10_x1.xls": 24.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 24.0
+    },
+    "12204": {
+        "kod": "12204",
+        "makineler": {
+            "152.03.01.10_x1.xls": 18.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 18.0
+    },
+    "12174": {
+        "kod": "12174",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12164": {
+        "kod": "12164",
+        "makineler": {
+            "152.03.01.10_x1.xls": 9.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 9.0
+    },
+    "12166": {
+        "kod": "12166",
+        "makineler": {
+            "152.03.01.10_x1.xls": 9.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 9.0
+    },
+    "12165": {
+        "kod": "12165",
+        "makineler": {
+            "152.03.01.10_x1.xls": 9.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 9.0
+    },
+    "12176": {
+        "kod": "12176",
+        "makineler": {
+            "152.03.01.10_x1.xls": 9.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 9.0
+    },
+    "12161": {
+        "kod": "12161",
+        "makineler": {
+            "152.03.01.10_x1.xls": 9.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 9.0
+    },
+    "12162": {
+        "kod": "12162",
+        "makineler": {
+            "152.03.01.10_x1.xls": 9.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 9.0
+    },
+    "12163": {
+        "kod": "12163",
+        "makineler": {
+            "152.03.01.10_x1.xls": 22.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 22.0
+    },
+    "12159": {
+        "kod": "12159",
+        "makineler": {
+            "152.03.01.10_x1.xls": 13.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 13.0
+    },
+    "12160": {
+        "kod": "12160",
+        "makineler": {
+            "152.03.01.10_x1.xls": 13.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 13.0
+    },
+    "12202": {
+        "kod": "12202",
+        "makineler": {
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "12884": {
+        "kod": "12884",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12851": {
+        "kod": "12851",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15045": {
+        "kod": "15045",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0,
+            "152.04.02.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 5.0
+    },
+    "12110": {
+        "kod": "12110",
+        "makineler": {
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "12721": {
+        "kod": "12721",
+        "makineler": {
+            "152.03.01.10_x1.xls": 12.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 12.0
+    },
+    "12720": {
+        "kod": "12720",
+        "makineler": {
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "19311": {
+        "kod": "19311",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "19312": {
+        "kod": "19312",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "19313": {
+        "kod": "19313",
+        "makineler": {
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "12188": {
+        "kod": "12188",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12197": {
+        "kod": "12197",
+        "makineler": {
+            "152.03.01.10_x1.xls": 42.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 42.0
+    },
+    "12213": {
+        "kod": "12213",
+        "makineler": {
+            "152.03.01.10_x1.xls": 36.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 36.0
+    },
+    "12196": {
+        "kod": "12196",
+        "makineler": {
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "12214": {
+        "kod": "12214",
+        "makineler": {
+            "152.03.01.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "12872": {
+        "kod": "12872",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12873": {
+        "kod": "12873",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12870": {
+        "kod": "12870",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12535": {
+        "kod": "12535",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12175": {
+        "kod": "12175",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12540": {
+        "kod": "12540",
+        "makineler": {
+            "152.03.01.10_x1.xls": 78.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 78.0
+    },
+    "12528": {
+        "kod": "12528",
+        "makineler": {
+            "152.03.01.10_x1.xls": 131.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 131.0
+    },
+    "12216": {
+        "kod": "12216",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12814": {
+        "kod": "12814",
+        "makineler": {
+            "152.03.01.10_x1.xls": 18.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 18.0
+    },
+    "12210": {
+        "kod": "12210",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "2014": {
+        "kod": "2014",
+        "makineler": {
+            "152.03.01.10_x1.xls": 130.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 130.0
+    },
+    "12533": {
+        "kod": "12533",
+        "makineler": {
+            "152.03.01.10_x1.xls": 130.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 130.0
+    },
+    "12527": {
+        "kod": "12527",
+        "makineler": {
+            "152.03.01.10_x1.xls": 130.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 130.0
+    },
+    "12529": {
+        "kod": "12529",
+        "makineler": {
+            "152.03.01.10_x1.xls": 130.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 130.0
+    },
+    "12526": {
+        "kod": "12526",
+        "makineler": {
+            "152.03.01.10_x1.xls": 130.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 130.0
+    },
+    "12111": {
+        "kod": "12111",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12113": {
+        "kod": "12113",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12112": {
+        "kod": "12112",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "7552": {
+        "kod": "7552",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "5699": {
+        "kod": "5699",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12190": {
+        "kod": "12190",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12179": {
+        "kod": "12179",
+        "makineler": {
+            "152.03.01.10_x1.xls": 9.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 9.0
+    },
+    "12191": {
+        "kod": "12191",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12180": {
+        "kod": "12180",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "12215": {
+        "kod": "12215",
+        "makineler": {
+            "152.03.01.10_x1.xls": 12.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 12.0
+    },
+    "12538": {
+        "kod": "12538",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12893": {
+        "kod": "12893",
+        "makineler": {
+            "152.03.01.10_x1.xls": 15.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 15.0
+    },
+    "12891": {
+        "kod": "12891",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12725": {
+        "kod": "12725",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12723": {
+        "kod": "12723",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12856": {
+        "kod": "12856",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12857": {
+        "kod": "12857",
+        "makineler": {
+            "152.03.01.10_x1.xls": 16.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 16.0
+    },
+    "2004": {
+        "kod": "2004",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12854": {
+        "kod": "12854",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12882": {
+        "kod": "12882",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12845": {
+        "kod": "12845",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12541": {
+        "kod": "12541",
+        "makineler": {
+            "152.03.01.10_x1.xls": 27.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 27.0
+    },
+    "12887": {
+        "kod": "12887",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12852": {
+        "kod": "12852",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12816": {
+        "kod": "12816",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12829": {
+        "kod": "12829",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12818": {
+        "kod": "12818",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12819": {
+        "kod": "12819",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "12820": {
+        "kod": "12820",
+        "makineler": {
+            "152.03.01.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "12823": {
+        "kod": "12823",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12822": {
+        "kod": "12822",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12260": {
+        "kod": "12260",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12263": {
+        "kod": "12263",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12262": {
+        "kod": "12262",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12261": {
+        "kod": "12261",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12697": {
+        "kod": "12697",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12696": {
+        "kod": "12696",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12660": {
+        "kod": "12660",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12664": {
+        "kod": "12664",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12665": {
+        "kod": "12665",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12802": {
+        "kod": "12802",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12661": {
+        "kod": "12661",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12662": {
+        "kod": "12662",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12667": {
+        "kod": "12667",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12670": {
+        "kod": "12670",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12801": {
+        "kod": "12801",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12666": {
+        "kod": "12666",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12669": {
+        "kod": "12669",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12698": {
+        "kod": "12698",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12699": {
+        "kod": "12699",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12668": {
+        "kod": "12668",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "10277": {
+        "kod": "10277",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10365": {
+        "kod": "10365",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10554": {
+        "kod": "10554",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10557": {
+        "kod": "10557",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10279": {
+        "kod": "10279",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "10225": {
+        "kod": "10225",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12865": {
+        "kod": "12865",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12864": {
+        "kod": "12864",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12886": {
+        "kod": "12886",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12177": {
+        "kod": "12177",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12178": {
+        "kod": "12178",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12124": {
+        "kod": "12124",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12125": {
+        "kod": "12125",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12885": {
+        "kod": "12885",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12240": {
+        "kod": "12240",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12127": {
+        "kod": "12127",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12860": {
+        "kod": "12860",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12122": {
+        "kod": "12122",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12126": {
+        "kod": "12126",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12858": {
+        "kod": "12858",
+        "makineler": {
+            "152.03.01.10_x1.xls": 16.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 16.0
+    },
+    "XYLOKAT.OYBM.088": {
+        "kod": "XYLOKAT.OYBM.088",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "18345": {
+        "kod": "18345",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "18037": {
+        "kod": "18037",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0,
+            "152.04.02.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 2,
+        "toplam_birim_adet": 4.0
+    },
+    "12232": {
+        "kod": "12232",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12185": {
+        "kod": "12185",
+        "makineler": {
+            "152.03.01.10_x1.xls": 20.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 20.0
+    },
+    "12187": {
+        "kod": "12187",
+        "makineler": {
+            "152.03.01.10_x1.xls": 40.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 40.0
+    },
+    "12186": {
+        "kod": "12186",
+        "makineler": {
+            "152.03.01.10_x1.xls": 20.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 20.0
+    },
+    "12246": {
+        "kod": "12246",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12236": {
+        "kod": "12236",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12247": {
+        "kod": "12247",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12248": {
+        "kod": "12248",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12242": {
+        "kod": "12242",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12225": {
+        "kod": "12225",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12862": {
+        "kod": "12862",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12863": {
+        "kod": "12863",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12542": {
+        "kod": "12542",
+        "makineler": {
+            "152.03.01.10_x1.xls": 26.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 26.0
+    },
+    "12880": {
+        "kod": "12880",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12881": {
+        "kod": "12881",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12116": {
+        "kod": "12116",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12115": {
+        "kod": "12115",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12114": {
+        "kod": "12114",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12118": {
+        "kod": "12118",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12117": {
+        "kod": "12117",
+        "makineler": {
+            "152.03.01.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "12243": {
+        "kod": "12243",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12253": {
+        "kod": "12253",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12221": {
+        "kod": "12221",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12219": {
+        "kod": "12219",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12251": {
+        "kod": "12251",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12217": {
+        "kod": "12217",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "12254": {
+        "kod": "12254",
+        "makineler": {
+            "152.03.01.10_x1.xls": 16.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 16.0
+    },
+    "12866": {
+        "kod": "12866",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12226": {
+        "kod": "12226",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12183": {
+        "kod": "12183",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12182": {
+        "kod": "12182",
+        "makineler": {
+            "152.03.01.10_x1.xls": 8.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 8.0
+    },
+    "18239": {
+        "kod": "18239",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12184": {
+        "kod": "12184",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12900": {
+        "kod": "12900",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12894": {
+        "kod": "12894",
+        "makineler": {
+            "152.03.01.10_x1.xls": 13.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 13.0
+    },
+    "12898": {
+        "kod": "12898",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12897": {
+        "kod": "12897",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12901": {
+        "kod": "12901",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12223": {
+        "kod": "12223",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12224": {
+        "kod": "12224",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12241": {
+        "kod": "12241",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12218": {
+        "kod": "12218",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12119": {
+        "kod": "12119",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12536": {
+        "kod": "12536",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12233": {
+        "kod": "12233",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12234": {
+        "kod": "12234",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12249": {
+        "kod": "12249",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12250": {
+        "kod": "12250",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12027": {
+        "kod": "12027",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "7548": {
+        "kod": "7548",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12231": {
+        "kod": "12231",
+        "makineler": {
+            "152.03.01.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "12198": {
+        "kod": "12198",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12227": {
+        "kod": "12227",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12230": {
+        "kod": "12230",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12871": {
+        "kod": "12871",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12537": {
+        "kod": "12537",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "12811": {
+        "kod": "12811",
+        "makineler": {
+            "152.03.01.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15103": {
+        "kod": "15103",
+        "makineler": {
+            "152.04.02.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "15102": {
+        "kod": "15102",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15412": {
+        "kod": "15412",
+        "makineler": {
+            "152.04.02.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "15501": {
+        "kod": "15501",
+        "makineler": {
+            "152.04.02.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "15411": {
+        "kod": "15411",
+        "makineler": {
+            "152.04.02.10_x1.xls": 6.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 6.0
+    },
+    "15129": {
+        "kod": "15129",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15487": {
+        "kod": "15487",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15406": {
+        "kod": "15406",
+        "makineler": {
+            "152.04.02.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "JHN.FLS.088": {
+        "kod": "JHN.FLS.088",
+        "makineler": {
+            "152.04.02.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "15420": {
+        "kod": "15420",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15544": {
+        "kod": "15544",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15104": {
+        "kod": "15104",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "SEP.UV.046": {
+        "kod": "SEP.UV.046",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15100": {
+        "kod": "15100",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15410": {
+        "kod": "15410",
+        "makineler": {
+            "152.04.02.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "15413": {
+        "kod": "15413",
+        "makineler": {
+            "152.04.02.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "15414": {
+        "kod": "15414",
+        "makineler": {
+            "152.04.02.10_x1.xls": 4.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 4.0
+    },
+    "15128": {
+        "kod": "15128",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15407": {
+        "kod": "15407",
+        "makineler": {
+            "152.04.02.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "15405": {
+        "kod": "15405",
+        "makineler": {
+            "152.04.02.10_x1.xls": 3.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 3.0
+    },
+    "15540": {
+        "kod": "15540",
+        "makineler": {
+            "152.04.02.10_x1.xls": 2.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 2.0
+    },
+    "15529": {
+        "kod": "15529",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15498": {
+        "kod": "15498",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15528": {
+        "kod": "15528",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15101": {
+        "kod": "15101",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    },
+    "15546": {
+        "kod": "15546",
+        "makineler": {
+            "152.04.02.10_x1.xls": 1.0
+        },
+        "makine_sayisi": 1,
+        "toplam_birim_adet": 1.0
+    }
+}
