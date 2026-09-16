@@ -1269,8 +1269,27 @@ function recalculateAll() {
                 totalProd = 0;
             }
 
+            let origReq = row.uretilecek || 0;
+            if (row.parcaKodu) {
+                const pKod = row.parcaKodu;
+                const ulItem = uretimListesiRows.find(u => u.kod === pKod);
+                if (ulItem && ulItem.orijinalUretilecek !== undefined) {
+                    origReq = ulItem.orijinalUretilecek;
+                } else {
+                    const reqs = uretimTakipRows.filter(u => u.kod === pKod);
+                    if (reqs.length > 0) {
+                        origReq = reqs.reduce((sum, u) => sum + (u.orijinalUretilecek !== undefined ? u.orijinalUretilecek : u.uretilecek), 0.0);
+                    }
+                }
+            } else if (row.isDirectOrder) {
+                origReq = row.uretilecek || 0;
+            }
+
             const hBirim = row.hBirimMiktar || 1.0;
             const hToplam = totalReq * hBirim;
+            const hOrijinalToplam = origReq * hBirim;
+            const hEkstraToplam = Math.max(0, hToplam - hOrijinalToplam);
+            const extraQty = Math.max(0, totalReq - origReq);
             const hUretilen = totalProd * hBirim;
             const hKalan = Math.max(0, hToplam - hUretilen);
 
@@ -1279,6 +1298,8 @@ function recalculateAll() {
                     kod: hKod,
                     ad: row.hAd || '-',
                     toplamGereken: 0,
+                    toplamOrijinalGereken: 0,
+                    toplamEkstraHammadde: 0,
                     uretilenDusulen: 0,
                     kalanSiparis: 0,
                     details: []
@@ -1287,6 +1308,8 @@ function recalculateAll() {
                 rawAgg[hKod].ad = row.hAd;
             }
             rawAgg[hKod].toplamGereken += hToplam;
+            rawAgg[hKod].toplamOrijinalGereken += hOrijinalToplam;
+            rawAgg[hKod].toplamEkstraHammadde += hEkstraToplam;
             rawAgg[hKod].uretilenDusulen += hUretilen;
             rawAgg[hKod].kalanSiparis += hKalan;
             // Parça bazlı detay bilgisi
@@ -1295,7 +1318,11 @@ function recalculateAll() {
                     parcaKodu: row.parcaKodu,
                     birimMiktar: row.hBirimMiktar || 1,
                     uretilecek: totalReq,
+                    orijinalUretilecek: origReq,
+                    extraQty: extraQty,
                     toplamMiktar: hToplam,
+                    orijinalToplamMiktar: hOrijinalToplam,
+                    extraMiktar: hEkstraToplam,
                     uretilenMiktar: hUretilen,
                     kalanMiktar: hKalan
                 });
@@ -4566,11 +4593,28 @@ function renderRawMaterialsTable() {
             ? `<button class="raw-detail-btn" title="Parça detaylarını göster" onclick="toggleRawDetail(this, ${idx})" style="background:${autoOpen ? 'rgba(99,102,241,0.2)' : 'none'};border:1px solid ${autoOpen ? '#6366f1' : 'var(--border)'};border-radius:4px;padding:2px 7px;cursor:pointer;color:${autoOpen ? '#a78bfa' : 'var(--text-muted)'};font-size:11px;margin-left:6px;">${autoOpen ? '▲' : '▼'}</button>`
             : '';
 
+        // Ekstra Parti Hammadde Rozeti (Ana Satır)
+        const extraRawTotal = Math.round((row.toplamEkstraHammadde || 0) * 100) / 100;
+        const origRawTotal = Math.round((row.toplamOrijinalGereken || row.toplamGereken) * 100) / 100;
+        const totalReqDisplay = row.toplamGereken % 1 === 0 ? row.toplamGereken : row.toplamGereken.toFixed(2);
+        
+        const extraRawBadge = extraRawTotal > 0 ? `
+            <div style="font-size:10.5px; margin-top:4px; display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+                <span style="color:rgba(255,255,255,0.6); font-size:10px;">Orijinal: <strong style="color:white;">${origRawTotal}</strong></span>
+                <span class="badge" style="background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.3); font-size:10px; font-weight:700; padding:1px 6px; border-radius:3px;">
+                    <i class="fa-solid fa-cube" style="font-size:9px;"></i> Ekstra: +${extraRawTotal} m
+                </span>
+            </div>
+        ` : '';
+
         tr.innerHTML = `
             <td>${idx + 1}</td>
             <td style="font-weight:700; color:white; white-space:nowrap;">${row.kod}${detailBtnHtml}</td>
-            <td style="color:var(--text-muted);">${row.ad}</td>
-            <td class="text-right" style="font-weight:600;">${row.toplamGereken % 1 === 0 ? row.toplamGereken : row.toplamGereken.toFixed(2)}</td>
+            <td style="color:var(--text-muted); max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${row.ad}">${row.ad}</td>
+            <td class="text-right" style="font-weight:600;">
+                <div>${totalReqDisplay}</div>
+                ${extraRawBadge}
+            </td>
             <td class="text-right" style="color:var(--success); font-weight:600;">${row.uretilenDusulen % 1 === 0 ? row.uretilenDusulen : row.uretilenDusulen.toFixed(2)}</td>
             <td class="text-right" style="color:var(--warning); font-weight:700; font-size:14px;">${row.kalanSiparis % 1 === 0 ? row.kalanSiparis : row.kalanSiparis.toFixed(2)}</td>
             <td>${progressHtml}</td>
@@ -4593,17 +4637,40 @@ function renderRawMaterialsTable() {
                 const isMatchedPart = searchVal && String(d.parcaKodu || '').toLowerCase().includes(searchVal);
                 const partBg = isMatchedPart ? 'rgba(99,102,241,0.18)' : 'rgba(255,255,255,0.03)';
                 const partBorder = isMatchedPart ? 'border-left: 3px solid #6366f1;' : '';
+                
+                const extraPartQty = Math.round((d.extraQty || 0) * 100) / 100;
+                const extraPartRaw = Math.round((d.extraMiktar || 0) * 100) / 100;
+                
+                const qtyDetailHtml = extraPartQty > 0 ? `
+                    <div>
+                        Adet: <b style="color:white;">${d.uretilecek}</b>${birimStr}
+                        <span class="badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); font-size:10px; font-weight:700; padding:1px 5px; margin-left:6px; border-radius:3px;">
+                            +${extraPartQty} Adet
+                        </span>
+                        <span style="color:rgba(255,255,255,0.5); font-size:10px; margin-left:4px;">(Orijinal: ${d.orijinalUretilecek})</span>
+                    </div>
+                ` : `Adet: <b style="color:white;">${d.uretilecek}</b>${birimStr}`;
+
+                const totalDetailHtml = extraPartRaw > 0 ? `
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+                        <span>Toplam: <b style="color:white;">${d.toplamMiktar % 1 === 0 ? d.toplamMiktar : d.toplamMiktar.toFixed(2)}</b></span>
+                        <span style="color:#38bdf8; font-size:10px; font-weight:700; background:rgba(56,189,248,0.12); padding:1px 5px; border-radius:3px; border:1px solid rgba(56,189,248,0.25);">
+                            +${extraPartRaw} m Ekstra
+                        </span>
+                    </div>
+                ` : `Toplam: <b style="color:white;">${d.toplamMiktar % 1 === 0 ? d.toplamMiktar : d.toplamMiktar.toFixed(2)}</b>`;
+
                 return `
                     <tr style="background:${partBg}; border-bottom:1px solid var(--border); ${partBorder}">
-                        <td style="padding:5px 12px; font-weight:700; color:${isMatchedPart ? '#38bdf8' : '#a78bfa'}; white-space:nowrap;">
+                        <td style="padding:6px 12px; font-weight:700; color:${isMatchedPart ? '#38bdf8' : '#a78bfa'}; white-space:nowrap;">
                             ${d.parcaKodu}
-                            <button class="part-img-btn" onclick="openPartImageModal('${d.parcaKodu}', '')" title="Parça Görselini Görüntüle"><i class="fa-solid fa-image"></i></button>
+                            <button class="part-img-btn" onclick="openPartImageModal('${d.parcaKodu}', '')" onmouseenter="window.showPartHoverPreview(event, '${d.parcaKodu}')" onmousemove="window.movePartHoverPreview(event)" onmouseleave="window.hidePartHoverPreview()" title="Parça Görselini Görüntüle"><i class="fa-solid fa-image"></i></button>
                             ${isMatchedPart ? ' <span style="font-size:10px; background:#6366f1; color:white; padding:1px 5px; border-radius:3px; margin-left:4px;">Eşleşti</span>' : ''}
                         </td>
-                        <td style="padding:5px 12px; color:var(--text-muted);">Adet: <b style="color:white;">${d.uretilecek}</b>${birimStr}</td>
-                        <td style="padding:5px 12px; text-align:right;">Toplam: <b style="color:white;">${d.toplamMiktar % 1 === 0 ? d.toplamMiktar : d.toplamMiktar.toFixed(2)}</b></td>
-                        <td style="padding:5px 12px; text-align:right;">Kullanılan: <b style="color:var(--success);">${d.uretilenMiktar % 1 === 0 ? d.uretilenMiktar : d.uretilenMiktar.toFixed(2)}</b></td>
-                        <td style="padding:5px 12px; text-align:right;">Kalan: <b style="color:${kalanColor};">${d.kalanMiktar % 1 === 0 ? d.kalanMiktar : d.kalanMiktar.toFixed(2)}</b></td>
+                        <td style="padding:6px 12px; color:var(--text-muted);">${qtyDetailHtml}</td>
+                        <td style="padding:6px 12px; text-align:right;">${totalDetailHtml}</td>
+                        <td style="padding:6px 12px; text-align:right;">Kullanılan: <b style="color:var(--success);">${d.uretilenMiktar % 1 === 0 ? d.uretilenMiktar : d.uretilenMiktar.toFixed(2)}</b></td>
+                        <td style="padding:6px 12px; text-align:right;">Kalan: <b style="color:${kalanColor};">${d.kalanMiktar % 1 === 0 ? d.kalanMiktar : d.kalanMiktar.toFixed(2)}</b></td>
                     </tr>`;
             }).join('');
 
@@ -4612,11 +4679,11 @@ function renderRawMaterialsTable() {
                     <table style="width:100%; border-collapse:collapse; font-size:12px;">
                         <thead>
                             <tr style="background:rgba(99,102,241,0.1);">
-                                <th style="padding:5px 12px; text-align:left; color:#a78bfa;">Parça Kodu</th>
-                                <th style="padding:5px 12px; text-align:left; color:#a78bfa;">Üretilecek Adet</th>
-                                <th style="padding:5px 12px; text-align:right; color:#a78bfa;">Toplam Miktar</th>
-                                <th style="padding:5px 12px; text-align:right; color:#a78bfa;">Kullanılan</th>
-                                <th style="padding:5px 12px; text-align:right; color:#a78bfa;">Kalan</th>
+                                <th style="padding:6px 12px; text-align:left; color:#a78bfa;">Parça Kodu</th>
+                                <th style="padding:6px 12px; text-align:left; color:#a78bfa;">Üretilecek Adet</th>
+                                <th style="padding:6px 12px; text-align:right; color:#a78bfa;">Toplam Miktar</th>
+                                <th style="padding:6px 12px; text-align:right; color:#a78bfa;">Kullanılan</th>
+                                <th style="padding:6px 12px; text-align:right; color:#a78bfa;">Kalan</th>
                             </tr>
                         </thead>
                         <tbody>${detailRows}</tbody>
