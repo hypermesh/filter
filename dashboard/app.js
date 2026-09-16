@@ -3386,16 +3386,26 @@ function determinePartClassification(row) {
         };
     }
 
-    // 2. Lazer Kesim Sac / Plazma / Abkant Parçaları (Adet — formül dışı):
-    // 150.01.01 → Lazer Kesim Sac
-    // 150.01.04 → Plazma/Abkant vb. sac işleme — Adet olarak sayılır
+    // 2. Profil Ünitesi / Şase (150.01.04) — Adet, formül dışı (kaynaklı/alt montaj gibi ama sac değil):
+    if (hKod.startsWith('150.01.04')) {
+        return {
+            category: 'profil_unite',
+            unitType: 'adet',
+            unitDim: 1.0,
+            unitLabel: '1 Adet',
+            badgeStyle: 'background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:700; font-size:11px;',
+            isExcluded: true,
+            exclusionReason: 'Profil Ünitesi / Şase (150.01.04)',
+            exclusionTag: 'Profil Ünitesi'
+        };
+    }
+
+    // 3. Lazer Kesim Sac Parçaları — 150.01.01 ve hammadde adı eşleşenleri (Adet, formül dışı):
     // 150.01.02 (çubuk), 150.01.03 (boru) → lazer DEĞİL, formül uygulanır
-    const isLaserSheet = hKod.startsWith('150.01.01') || hKod.startsWith('150.01.04') ||
+    const isLaserSheet = hKod.startsWith('150.01.01') ||
                          (Array.isArray(rules.haric_hammadde_onekleri) && rules.haric_hammadde_onekleri.some(p => p && hKod.startsWith(p))) ||
                          ['ÇELİK SAC |', 'DKP SAC', 'PASLANMAZ SAC'].some(w => hammadde.includes(w));
     if (isLaserSheet) {
-        const sacTag = hKod.startsWith('150.01.04') ? 'Sac (150.01.04)' : 'Lazer Sac';
-        const sacReason = hKod.startsWith('150.01.04') ? 'Sac Parça (150.01.04)' : 'Lazer Kesim Sac (150.01.01)';
         return {
             category: 'lazer_sac',
             unitType: 'adet',
@@ -3403,8 +3413,8 @@ function determinePartClassification(row) {
             unitLabel: '1 Adet',
             badgeStyle: 'background:rgba(234,179,8,0.15); color:#fde047; border:1px solid rgba(234,179,8,0.3); font-weight:700; font-size:11px;',
             isExcluded: true,
-            exclusionReason: sacReason,
-            exclusionTag: sacTag
+            exclusionReason: 'Lazer Kesim Sac (150.01.01)',
+            exclusionTag: 'Lazer Sac'
         };
     }
 
