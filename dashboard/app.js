@@ -3388,9 +3388,10 @@ function determinePartClassification(row) {
 
     // 2. Lazer Kesim Sac Parçaları:
     // Hammadde kodu 150.01.01... veya hammadde adı Çelik Sac / DKP Sac / Plaka olanlar
-    const isLaserSheet = hKod.startsWith('150.01.01') || hKod.startsWith('150.01') || 
+    // Sadece 150.01.01 lazer sac — 150.01.02 (çubuk), 150.01.03 (boru) lazer DEĞİL
+    const isLaserSheet = hKod.startsWith('150.01.01') || 
                          (Array.isArray(rules.haric_hammadde_onekleri) && rules.haric_hammadde_onekleri.some(p => p && hKod.startsWith(p))) ||
-                         ['ÇELİK SAC', 'DKP SAC', 'PASLANMAZ SAC', 'SAC |', 'PLAKA', 'LEVHA'].some(w => hammadde.includes(w));
+                         ['ÇELİK SAC |', 'DKP SAC', 'PASLANMAZ SAC'].some(w => hammadde.includes(w));
     if (isLaserSheet) {
         return {
             category: 'lazer_sac',
