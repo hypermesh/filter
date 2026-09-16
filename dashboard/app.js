@@ -2,6 +2,8 @@
 let workbook = null;
 let currentTab = 'dashboard';
 let loadedExcelFileName = ''; // Yüklü Excel dosya adı (localStorage anahtarı için)
+let parcaReceteTuketimMap = {}; // veritabanlari/parca_recete_tuketim.json verisi { "10005": 24, "1206": 2 }
+let parcaBirimHammaddeMap = {}; // parça bazlı birim hammadde boyu/ölçüsü { "5031": { birim: 0.12, birimStr: "0.12 m", hKod: "...", hAd: "..." } }
 
 // Parsed Data Structures
 let uretimTakipRows = []; // Üretim Takip requirements (Col A-G)
@@ -38,6 +40,32 @@ function loadProductionLogFromStorage() {
         console.warn('localStorage okuma hatası:', e);
     }
 }
+
+// Parça Reçete Başı Tüketim Veritabanını Yükle
+function loadParcaReceteTuketimDatabase() {
+    try {
+        fetch('../veritabanlari/parca_recete_tuketim.json')
+            .then(res => res.json())
+            .then(data => {
+                if (data && typeof data === 'object') {
+                    parcaReceteTuketimMap = data;
+                    console.log(`[DB] ${Object.keys(data).length} parça için reçete tüketim verisi yüklendi.`);
+                }
+            })
+            .catch(err => {
+                // Fallback: Doğrudan dahili varsayılan veritabanı
+                parcaReceteTuketimMap = {
+                    "1206": 2, "10005": 24, "5031": 1, "3534": 2, "3701": 2, "3704": 1,
+                    "5438": 4, "5489": 2, "5403": 6, "5429": 4, "6433": 1, "6810": 2,
+                    "7201": 8, "18705": 1, "18703": 1, "18708": 1, "7500": 4, "5516": 2,
+                    "17425": 5, "18862": 22, "5050": 5, "5100": 18, "5101": 18, "5105": 7, "5106": 9, "5107": 2
+                };
+            });
+    } catch (e) {
+        console.warn('Reçete tüketim veritabanı yüklenemedi:', e);
+    }
+}
+loadParcaReceteTuketimDatabase();
 
 // Global Üretim Geçmişi Storage Fonksiyonları
 function saveProductionHistoryToStorage() {
@@ -911,6 +939,13 @@ function parseWorkbook() {
                     hBirimMiktar: hMiktar,
                     uretilecek: uMiktar
                 });
+                if (pKod) {
+                    parcaBirimHammaddeMap[pKod] = {
+                        birimMiktar: hMiktar,
+                        hKod: hKodVal,
+                        hAd: hAd
+                    };
+                }
             }
         }
     }
@@ -3236,6 +3271,16 @@ function filterAndPaginateUlTable() {
         if (sortVal === 'uretilecek-desc') {
             return b.uretilecek - a.uretilecek;
         }
+        if (sortVal === 'diff-desc') {
+            const diffA = (a.uretilecek || 0) - (a.orijinalUretilecek || 0);
+            const diffB = (b.uretilecek || 0) - (b.orijinalUretilecek || 0);
+            return diffB - diffA;
+        }
+        if (sortVal === 'raw-diff-desc') {
+            const rawA = ((a.uretilecek || 0) - (a.orijinalUretilecek || 0)) * (calculateEmpiricalBatchQty(a).unitDim || 0.2);
+            const rawB = ((b.uretilecek || 0) - (b.orijinalUretilecek || 0)) * (calculateEmpiricalBatchQty(b).unitDim || 0.2);
+            return rawB - rawA;
+        }
         return 0;
     });
 
@@ -3249,14 +3294,111 @@ function filterAndPaginateUlTable() {
     renderUlTable();
 }
 
+// --- AKILLI EMPİRİK PARTİ BOYUTLANDIRMA MOTORU ---
+function calculateEmpiricalBatchQty(row, options) {
+    const cleanCode = String(row.kod || '').trim().toUpperCase();
+    const origQty = parseFloat(row.orijinalUretilecek) || 1;
+    
+    // 1. Birim Hammadde Ölçüsü (metre / kg)
+    const rawInfo = parcaBirimHammaddeMap[cleanCode];
+    let unitDim = rawInfo ? parseFloat(rawInfo.birimMiktar) || 0 : 0;
+    
+    // Eğer birim miktar yoksa malzeme adından veya hammadde adından sezgisel tahmin
+    if (unitDim <= 0) unitDim = 0.20; // Varsayılan 200 mm
+    
+    // 2. Reçete Başı Tüketim (R)
+    let recipeUsage = parcaReceteTuketimMap[cleanCode] || 1;
+    let kRecipe = 1.0;
+    if (recipeUsage >= 15) kRecipe = 2.2;
+    else if (recipeUsage >= 8) kRecipe = 1.8;
+    else if (recipeUsage >= 4) kRecipe = 1.4;
+    else if (recipeUsage >= 2) kRecipe = 1.2;
+
+    // 3. Kaynak Dosya Frekansı (F) - Kaç projede geçiyor
+    const sourceCount = (row.kaynak || '').split(',').length;
+    let kFreq = 1.0;
+    if (sourceCount >= 3) kFreq = 1.5;
+    else if (sourceCount === 2) kFreq = 1.25;
+
+    // 4. Boy Kuralı Tabanı (B)
+    const lengthThreshold = options ? parseFloat(options.lengthThreshold) || 0.50 : 0.50;
+    const shortMin = options ? parseFloat(options.shortMin) || 20 : 20;
+    const longMultiplier = options ? parseFloat(options.longMultiplier) || 1.30 : 1.30;
+
+    let baseQty = origQty;
+    if (unitDim < lengthThreshold) {
+        baseQty = Math.max(shortMin, origQty);
+    } else {
+        baseQty = Math.ceil(origQty * longMultiplier);
+    }
+
+    // 5. Empirik Toplam Parti Adedi
+    const empiricalQty = Math.ceil(origQty * kRecipe * kFreq);
+    const finalBatchQty = Math.max(baseQty, empiricalQty);
+
+    return {
+        unitDim: unitDim,
+        recipeUsage: recipeUsage,
+        sourceCount: sourceCount,
+        kRecipe: kRecipe,
+        kFreq: kFreq,
+        finalQty: finalBatchQty,
+        extraQty: Math.max(0, finalBatchQty - origQty),
+        extraRaw: Math.round((Math.max(0, finalBatchQty - origQty) * unitDim) * 100) / 100
+    };
+}
+
+function applySmartBatchRules() {
+    const lengthThreshold = parseFloat(document.getElementById('batch-length-threshold').value) || 0.50;
+    const shortMin = parseFloat(document.getElementById('batch-short-min').value) || 20;
+    const longMultiplier = parseFloat(document.getElementById('batch-long-multiplier').value) || 1.30;
+
+    const options = { lengthThreshold, shortMin, longMultiplier };
+    let changedCount = 0;
+    let totalExtraRaw = 0;
+
+    uretimListesiRows.forEach(row => {
+        const calc = calculateEmpiricalBatchQty(row, options);
+        if (calc.finalQty !== row.uretilecek) {
+            row.uretilecek = calc.finalQty;
+            uretimListesiMap[row.kod] = calc.finalQty;
+            changedCount++;
+            totalExtraRaw += calc.extraRaw;
+        }
+    });
+
+    recalculateAll();
+    filterAndPaginateUlTable();
+
+    showToast(`⚡ Akıllı parti kuralları ${changedCount} parçaya uygulandı! (+${Math.round(totalExtraRaw)} m/kg hammadde)`, "success");
+}
+window.applySmartBatchRules = applySmartBatchRules;
+
+function resetUlToOriginal() {
+    if (confirm("Tüm parçaları orijinal reçete üretim miktarlarına geri döndürmek istediğinize emin misiniz?")) {
+        uretimListesiRows.forEach(row => {
+            row.uretilecek = row.orijinalUretilecek;
+            uretimListesiMap[row.kod] = row.orijinalUretilecek;
+        });
+
+        recalculateAll();
+        filterAndPaginateUlTable();
+        showToast("Tüm parçalar orijinal ihtiyaç miktarlarına sıfırlandı.", "info");
+    }
+}
+window.resetUlToOriginal = resetUlToOriginal;
+
 function renderUlTable() {
     const tbody = document.getElementById('ul-table-body');
     tbody.innerHTML = '';
     
+    const countBadge = document.getElementById('ul-total-count');
+    if (countBadge) countBadge.textContent = `${uretimListesiRows.length} Kalem`;
+
     const pState = paginationState.ul;
 
     if (pState.total === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="color:var(--text-dim); padding:20px;">Eşleşen parça bulunamadı.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color:var(--text-dim); padding:20px;">Eşleşen parça bulunamadı.</td></tr>';
         return;
     }
 
@@ -3265,35 +3407,58 @@ function renderUlTable() {
     pageRows.forEach(row => {
         const tr = document.createElement('tr');
         
+        // Empirik parti ve hammadde analizini hesapla
+        const calc = calculateEmpiricalBatchQty(row);
+        const unitDimFormatted = calc.unitDim < 1 ? `${Math.round(calc.unitDim * 1000)} mm` : `${calc.unitDim.toFixed(2)} m`;
+
         // Check if quantity has been modified
         const isModified = row.uretilecek !== row.orijinalUretilecek;
         let changeBadgeHtml = '';
-        let inputStyle = 'width: 80px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: white; border-radius: 4px; padding: 4px 8px; font-weight: 600; outline: none; transition: var(--transition);';
+        let inputStyle = 'width: 86px; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); color: white; border-radius: 6px; padding: 5px 8px; font-weight: 700; font-size: 13px; outline: none; transition: var(--transition);';
         
+        const currentDiff = row.uretilecek - row.orijinalUretilecek;
+        const currentExtraRaw = Math.round((currentDiff * calc.unitDim) * 100) / 100;
+
         if (isModified) {
-            const diff = row.uretilecek - row.orijinalUretilecek;
-            const diffText = diff > 0 ? `+${diff}` : `${diff}`;
-            const badgeColor = diff > 0 ? 'var(--success)' : 'var(--danger)';
-            const badgeBg = diff > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
-            const borderGlow = diff > 0 ? 'var(--success-glow)' : 'var(--danger-glow)';
+            const diffText = currentDiff > 0 ? `+${currentDiff} Adet` : `${currentDiff} Adet`;
+            const badgeColor = currentDiff > 0 ? '#34d399' : '#f87171';
+            const badgeBg = currentDiff > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+            const borderGlow = currentDiff > 0 ? 'rgba(52, 211, 153, 0.3)' : 'rgba(239, 68, 68, 0.3)';
             
-            // Custom styling for modified input
-            inputStyle = `width: 80px; background: rgba(16, 22, 40, 0.9); border: 1px solid ${badgeColor}; color: ${badgeColor}; box-shadow: 0 0 8px ${borderGlow}; border-radius: 4px; padding: 4px 8px; font-weight: 700; outline: none; transition: var(--transition);`;
+            inputStyle = `width: 86px; background: rgba(16, 22, 40, 0.95); border: 1.5px solid ${badgeColor}; color: ${badgeColor}; box-shadow: 0 0 10px ${borderGlow}; border-radius: 6px; padding: 5px 8px; font-weight: 800; font-size: 13px; outline: none; transition: var(--transition);`;
             
-            // Highly visible layout with label
             changeBadgeHtml = `
-                <div style="font-size: 11px; margin-top: 5px; display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-weight: 600; white-space: nowrap;">
-                    <span style="color: rgba(255, 255, 255, 0.7); font-size: 10.5px;">Orijinal: <strong style="color: white; font-weight: 700;">${row.orijinalUretilecek}</strong></span>
-                    <span style="color: rgba(255, 255, 255, 0.25); font-size: 11px;">|</span>
-                    <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeColor}30; padding: 2px 6px; font-weight: 700; font-size: 10px; border-radius: 4px; display: inline-block;">
-                        ${diffText}
-                    </span>
+                <div style="font-size: 11px; margin-top: 6px; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; font-weight: 600;">
+                    <div style="display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                        <span style="color: rgba(255, 255, 255, 0.6); font-size: 10.5px;">Orijinal: <strong style="color: white;">${row.orijinalUretilecek}</strong></span>
+                        <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeColor}40; padding: 2px 6px; font-weight: 700; font-size: 10px; border-radius: 4px;">
+                            ${diffText}
+                        </span>
+                    </div>
+                    ${currentExtraRaw > 0 ? `
+                    <div style="font-size: 10px; color: #38bdf8; display: flex; align-items: center; gap: 4px; background: rgba(56, 189, 248, 0.12); padding: 1px 6px; border-radius: 3px; border: 1px solid rgba(56, 189, 248, 0.25);">
+                        <i class="fa-solid fa-cube" style="font-size: 9px;"></i> Ekstra: +${currentExtraRaw} m
+                    </div>` : ''}
                 </div>
             `;
         }
 
+        // Tüketim & Frekans Rozeti
+        const isHighUsage = calc.recipeUsage >= 6;
+        const isMultiProject = calc.sourceCount >= 2;
+        const usageBadge = `
+            <div style="display: flex; flex-direction: column; gap: 3px; font-size: 11px;">
+                <span style="display: inline-flex; align-items: center; gap: 4px; color: ${isHighUsage ? '#fca5a5' : 'var(--text-muted)'}; font-weight: ${isHighUsage ? '700' : '500'};">
+                    <i class="fa-solid fa-screwdriver-wrench" style="font-size: 10px; opacity: 0.7;"></i> Reçete: ${calc.recipeUsage} ad/makine
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; color: ${isMultiProject ? '#fbbf24' : 'var(--text-dim)'}; font-size: 10px;">
+                    <i class="fa-solid ${isMultiProject ? 'fa-fire text-orange' : 'fa-file'}"></i> ${calc.sourceCount} Projede Mevcut
+                </span>
+            </div>
+        `;
+
         tr.innerHTML = `
-            <td style="font-size:12px; color:var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.kaynak}">${row.kaynak}</td>
+            <td style="font-size:12px; color:var(--text-muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.kaynak}">${row.kaynak}</td>
             <td>${row.oncelik}</td>
             <td style="white-space:nowrap; width:140px; min-width:140px; padding:6px 12px;">
                 <div class="code-cell-wrapper">
@@ -3306,9 +3471,14 @@ function renderUlTable() {
                     </button>
                 </div>
             </td>
-            <td style="color:var(--text-dim);">${row.malzeme}</td>
-            <td style="font-size:12px; color:var(--text-muted);">${row.hKod}</td>
-            <td style="color:var(--text-dim);">${row.hammadde}</td>
+            <td style="color:var(--text-dim); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.malzeme}">${row.malzeme}</td>
+            <td style="white-space:nowrap;">
+                <span class="badge" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); font-weight: 700; font-size: 11px;">
+                    ${unitDimFormatted}
+                </span>
+            </td>
+            <td>${usageBadge}</td>
+            <td style="color:var(--text-dim); font-size: 11.5px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${row.hammadde}">${row.hammadde || '-'}</td>
             <td class="text-right">
                 <input type="number" class="table-input ul-qty-input text-right" 
                        value="${row.uretilecek}" 
@@ -3341,7 +3511,7 @@ function renderUlTable() {
             // 4. Re-render list to show badge and color updates
             filterAndPaginateUlTable();
             
-            showToast(`${kod} için yeni üretim miktarı belirlendi: ${newQty}`, "success");
+            showToast(`${kod} için yeni parti üretim miktarı belirlendi: ${newQty}`, "success");
         });
         
         input.addEventListener('focus', function() {

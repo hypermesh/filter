@@ -391,19 +391,59 @@
                 <!-- TAB: Üretim Listesi -->
                 <section class="tab-content" id="tab-uretim-listesi">
                     <div class="section-card glass flex-col flex-1">
-                        <div class="card-header">
-                            <h2><i class="fa-solid fa-list-ol text-blue"></i> Üretim Listesi (Ana Üretim Miktarları)</h2>
-                            <div class="header-filters">
-                                <div class="search-bar">
-                                    <i class="fa-solid fa-magnifying-glass"></i>
-                                    <input type="text" id="ul-search" placeholder="Kod, malzeme ara... (Hariç tutmak için: -kelime)" oninput="filterAndPaginateUlTable()">
+                        <div class="card-header" style="flex-direction: column; align-items: stretch; gap: 14px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <h2 style="margin: 0;"><i class="fa-solid fa-list-ol text-blue"></i> Üretim Listesi (Ana Üretim Miktarları)</h2>
+                                    <span class="badge" id="ul-total-count" style="background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); color: #c7d2fe;">0 Kalem</span>
                                 </div>
-                                <select id="ul-sort" class="select-input">
-                                    <option value="priority-asc">Öncelik (Artan)</option>
-                                    <option value="priority-desc">Öncelik (Azalan)</option>
-                                    <option value="code-asc">Kod (A-Z)</option>
-                                    <option value="uretilecek-desc">Üretilecek (Azalan)</option>
-                                </select>
+                                <div class="header-filters" style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="search-bar" style="min-width: 260px;">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <input type="text" id="ul-search" placeholder="Kod, malzeme ara... (Hariç: -kelime)" oninput="filterAndPaginateUlTable()">
+                                    </div>
+                                    <select id="ul-sort" class="select-input" onchange="filterAndPaginateUlTable()">
+                                        <option value="priority-asc">Öncelik (Artan)</option>
+                                        <option value="priority-desc">Öncelik (Azalan)</option>
+                                        <option value="code-asc">Kod (A-Z)</option>
+                                        <option value="uretilecek-desc">Üretilecek (Azalan)</option>
+                                        <option value="diff-desc">Ekstra Adet (Azalan)</option>
+                                        <option value="raw-diff-desc">Ekstra Hammadde (Azalan)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- AKILLI EMPİRİK PARTİ BOYUTLANDIRMA SİHİRBAZI -->
+                            <div class="batch-wizard-panel" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                                    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #a78bfa;">
+                                        <i class="fa-solid fa-wand-magic-sparkles" style="color: #818cf8;"></i>
+                                        <span>Akıllı Empirik Parti Motoru:</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                                        <span>Kısa Parça (<span style="color:#38bdf8;">&lt;</span></span>
+                                        <input type="number" id="batch-length-threshold" value="0.50" step="0.05" min="0.05" max="5.0" style="width: 58px; padding: 3px 6px; background: rgba(0,0,0,0.4); border: 1px solid rgba(99,102,241,0.4); color: #38bdf8; border-radius: 4px; font-size: 12px; font-weight: 700; text-align: center;">
+                                        <span>m): Min</span>
+                                        <input type="number" id="batch-short-min" value="20" step="1" min="1" max="1000" style="width: 52px; padding: 3px 6px; background: rgba(0,0,0,0.4); border: 1px solid rgba(99,102,241,0.4); color: #38bdf8; border-radius: 4px; font-size: 12px; font-weight: 700; text-align: center;">
+                                        <span>Adet</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                                        <span>Uzun Parça:</span>
+                                        <input type="number" id="batch-long-multiplier" value="1.30" step="0.05" min="1.0" max="5.0" style="width: 58px; padding: 3px 6px; background: rgba(0,0,0,0.4); border: 1px solid rgba(99,102,241,0.4); color: #38bdf8; border-radius: 4px; font-size: 12px; font-weight: 700; text-align: center;">
+                                        <span>× Katsayı</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 5px; font-size: 11px; background: rgba(99,102,241,0.12); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(99,102,241,0.25); color: #c7d2fe;">
+                                        <i class="fa-solid fa-database" style="color:#818cf8;"></i> Reçete Tüketim & Frekans Çarpanı Aktif
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="applySmartBatchRules()" style="display: flex; align-items: center; gap: 6px; font-weight: 600; padding: 6px 14px; box-shadow: 0 0 12px rgba(99,102,241,0.4);">
+                                        <i class="fa-solid fa-bolt"></i> Akıllı Parti Kurallarını Uygula
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="resetUlToOriginal()" style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; padding: 6px 12px;" title="Tüm adetleri orijinal net reçete ihtiyacına geri döndür">
+                                        <i class="fa-solid fa-rotate-left"></i> Orijinale Sıfırla
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="table-wrapper flex-1">
@@ -414,9 +454,10 @@
                                         <th>Öncelik</th>
                                         <th>Parça Kodu</th>
                                         <th>Malzeme Adı</th>
-                                        <th>Hammadde Kod</th>
+                                        <th>Birim Ölçü</th>
+                                        <th>Tüketim / Frekans</th>
                                         <th>Hammadde</th>
-                                        <th class="text-right" style="width: 120px;">Üretilecek Miktar</th>
+                                        <th class="text-right" style="width: 180px;">Parti Üretim Miktarı</th>
                                     </tr>
                                 </thead>
                                 <tbody id="ul-table-body">
