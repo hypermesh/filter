@@ -1,0 +1,19 @@
+{
+  "_aciklama": "Bu listedeki parça kodları hammadde sınıflandırmasına bakılmaksızın buradaki kurala göre davranır.",
+  "_format": "parca_kodu → { davranis, etiket, neden, aciklama }",
+  "_davranis_secenekleri": {
+    "normal_parca": "Formül uygulanır, makine sayısı rozeti gösterilir (normal akış)",
+    "lazer_sac": "Lazer sac gibi Adet / formül dışı",
+    "profil_unite": "Profil Ünitesi gibi Adet / formül dışı",
+    "kaynakli": "Kaynaklı / Alt Montaj gibi Adet / formül dışı",
+    "standart_satinalma": "Standart Satınalma gibi Adet / formül dışı"
+  },
+  "parcalar": {
+    "18862": {
+      "davranis": "normal_parca",
+      "etiket": "Ekstrüzyon Profil",
+      "neden": "Alüminyum ekstrüzyon çekme profil — 150.01.04 altında ama ünite/şase değil, normal parça",
+      "aciklama": "ALÜMİNYUM PROFİL | BASKITAKOZ — ekstrüzyon üretim, normal parti/reçete hesabına dahil"
+    }
+  }
+}

@@ -14,6 +14,7 @@ let partiFormuluHaricKurallar = {
     sadece_noktali_hammadde_gecerli: true
 };
 let hammaddeBirimKurallari = null;
+let ozelDurumParcalar = {}; // veritabanlari/ozel_durum_parcalar.json — parça bazlı özel sınıflandırma overrides
 
 // Parsed Data Structures
 let uretimTakipRows = []; // Üretim Takip requirements (Col A-G)
@@ -101,6 +102,17 @@ function loadParcaReceteTuketimDatabase() {
             if (data && typeof data === 'object') {
                 hammaddeBirimKurallari = data;
                 console.log(`[DB] Hammadde birim standartları kuralları yüklendi.`);
+            }
+        })
+        .catch(() => {});
+
+    // 6. Özel Durum Parçalar — parça bazlı sınıflandırma overrides
+    fetch('../veritabanlari/ozel_durum_parcalar.json')
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.parcalar && typeof data.parcalar === 'object') {
+                ozelDurumParcalar = data.parcalar;
+                console.log(`[DB] ${Object.keys(ozelDurumParcalar).length} özel durum parçası yüklendi.`);
             }
         })
         .catch(() => {});
@@ -3370,10 +3382,41 @@ function determinePartClassification(row) {
     const unitDimRaw = rawInfo ? parseFloat(rawInfo.birimMiktar) || 0 : 0;
 
     const rules = partiFormuluHaricKurallar || {};
+
+    // 0. ÖZEL DURUM PARCALAR LİSTESİ — hammadde kodundan önce kontrol edilir
+    // (veritabanlari/ozel_durum_parcalar.json)
+    const ozelKural = ozelDurumParcalar[cleanCode] || ozelDurumParcalar[String(row.kod || '').trim()];
+    if (ozelKural && ozelKural.davranis) {
+        if (ozelKural.davranis === 'normal_parca') {
+            // Hiçbir override uygulanmaz — normal akışa devam et (return etme, aşağı düş)
+            // null döndürerek normal akışı tetikleyeceğiz; bunun için flag kullan
+        } else {
+            // Diğer override'lar: lazer_sac, profil_unite, kaynakli, standart_satinalma
+            const styleMap = {
+                lazer_sac:          'background:rgba(234,179,8,0.15); color:#fde047; border:1px solid rgba(234,179,8,0.3); font-weight:700; font-size:11px;',
+                profil_unite:       'background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:700; font-size:11px;',
+                kaynakli:           'background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:700; font-size:11px;',
+                standart_satinalma: 'background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:700; font-size:11px;',
+            };
+            return {
+                category: ozelKural.davranis,
+                unitType: 'adet',
+                unitDim: 1.0,
+                unitLabel: '1 Adet',
+                badgeStyle: styleMap[ozelKural.davranis] || styleMap.kaynakli,
+                isExcluded: true,
+                exclusionReason: ozelKural.neden || ozelKural.etiket || 'Özel Kural',
+                exclusionTag: ozelKural.etiket || 'Özel'
+            };
+        }
+    }
+    // normal_parca override'ı varsa aşağıdaki tüm hammadde kodu kontrollerini atla,
+    // direkt profile/çubuk/normal akışa git
+    const skipHammaddeRules = (ozelKural && ozelKural.davranis === 'normal_parca');
     
     // 1. Kaynaklı / Alt Montaj Parçaları:
     // Hammadde kodu DOLU olmalı, noktasız düz parça kodu içermeli (örn: 3704, 5403, 10068)
-    if (hKod.length > 0 && !hKod.includes('.') && !hKod.startsWith('150') && !hKod.startsWith('152') && !hKod.startsWith('153') && !hKod.startsWith('154') && rules.sadece_noktali_hammadde_gecerli !== false) {
+    if (!skipHammaddeRules && hKod.length > 0 && !hKod.includes('.') && !hKod.startsWith('150') && !hKod.startsWith('152') && !hKod.startsWith('153') && !hKod.startsWith('154') && rules.sadece_noktali_hammadde_gecerli !== false) {
         return {
             category: 'kaynakli',
             unitType: 'adet',
@@ -3387,7 +3430,7 @@ function determinePartClassification(row) {
     }
 
     // 2. Profil Ünitesi / Şase (150.01.04) — Adet, formül dışı (kaynaklı/alt montaj gibi ama sac değil):
-    if (hKod.startsWith('150.01.04')) {
+    if (!skipHammaddeRules && hKod.startsWith('150.01.04')) {
         return {
             category: 'profil_unite',
             unitType: 'adet',
@@ -3402,9 +3445,11 @@ function determinePartClassification(row) {
 
     // 3. Lazer Kesim Sac Parçaları — 150.01.01 ve hammadde adı eşleşenleri (Adet, formül dışı):
     // 150.01.02 (çubuk), 150.01.03 (boru) → lazer DEĞİL, formül uygulanır
-    const isLaserSheet = hKod.startsWith('150.01.01') ||
-                         (Array.isArray(rules.haric_hammadde_onekleri) && rules.haric_hammadde_onekleri.some(p => p && hKod.startsWith(p))) ||
-                         ['ÇELİK SAC |', 'DKP SAC', 'PASLANMAZ SAC'].some(w => hammadde.includes(w));
+    const isLaserSheet = !skipHammaddeRules && (
+        hKod.startsWith('150.01.01') ||
+        (Array.isArray(rules.haric_hammadde_onekleri) && rules.haric_hammadde_onekleri.some(p => p && hKod.startsWith(p))) ||
+        ['ÇELİK SAC |', 'DKP SAC', 'PASLANMAZ SAC'].some(w => hammadde.includes(w))
+    );
     if (isLaserSheet) {
         return {
             category: 'lazer_sac',
@@ -3418,9 +3463,11 @@ function determinePartClassification(row) {
         };
     }
 
-    // 3. Standart Satınalma ve Bağlantı Elemanları (Civata, Somun, Rulman, Keçe vb.)
-    const isStandardPurchase = ['153.', '154.', '155.', '156.'].some(p => hKod.startsWith(p)) ||
-                              ['SOMUN |', 'CİVATA |', 'CIVATA |', 'RULMAN |', 'KEÇE |', 'KECE |', 'PİM |', 'PIM |', 'SEGMAN |', 'O-RING'].some(w => hammadde.includes(w));
+    // 4. Standart Satınalma ve Bağlantı Elemanları (Civata, Somun, Rulman, Keçe vb.)
+    const isStandardPurchase = !skipHammaddeRules && (
+        ['153.', '154.', '155.', '156.'].some(p => hKod.startsWith(p)) ||
+        ['SOMUN |', 'CİVATA |', 'CIVATA |', 'RULMAN |', 'KEÇE |', 'KECE |', 'PİM |', 'PIM |', 'SEGMAN |', 'O-RING'].some(w => hammadde.includes(w))
+    );
     if (isStandardPurchase) {
         return {
             category: 'standart_satinalma',
@@ -3434,8 +3481,8 @@ function determinePartClassification(row) {
         };
     }
 
-    // 4. Doğrudan Hariç Tutulan Hammadde veya Parça Kodları (JSON kural listesi)
-    if (Array.isArray(rules.haric_hammadde_kodlari) && rules.haric_hammadde_kodlari.includes(hKod)) {
+    // 5. Doğrudan Hariç Tutulan Hammadde veya Parça Kodları (JSON kural listesi)
+    if (!skipHammaddeRules && Array.isArray(rules.haric_hammadde_kodlari) && rules.haric_hammadde_kodlari.includes(hKod)) {
         return {
             category: 'ozel_haric',
             unitType: 'adet',
