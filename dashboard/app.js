@@ -1354,6 +1354,11 @@ function recalculateAll() {
         });
     }
     rawMaterialsRows = Object.values(rawAgg);
+    
+    // YENİ: Kategori filtre seçeneklerini dinamik oluştur
+    if (typeof populateUlCategoryFilter === 'function') {
+        populateUlCategoryFilter();
+    }
 }
 
 // -------------------------------------------------------------
@@ -2724,6 +2729,35 @@ function renderStationsTab() {
     filterAndPaginateStationData();
 }
 
+function populateStationCategoryFilter() {
+    const select = document.getElementById('station-category-filter');
+    if (!select) return;
+    
+    const currentVal = select.value;
+    const allStationRows = stationSheetsMap[activeStation] || [];
+    
+    const categories = new Map();
+    allStationRows.forEach(row => {
+        const code = String(row['Kod'] || '').trim().toUpperCase();
+        // ulRow'u bul (hammadde kodu vs. için)
+        const ulRow = uretimListesiRows.find(r => r.kod === code);
+        if (!ulRow) return;
+        const cls = determinePartClassification(ulRow);
+        const val = cls.exclusionReason || cls.category;
+        const label = cls.exclusionReason || 'Profil/Boru/Çubuk (Formüle Dahil)';
+        if (!categories.has(val)) categories.set(val, label);
+    });
+    
+    let optionsHtml = '<option value="all">Tüm Kategoriler</option>';
+    Array.from(categories.entries())
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .forEach(([val, label]) => {
+            optionsHtml += `<option value="${val}">${label}</option>`;
+        });
+    select.innerHTML = optionsHtml;
+    if (categories.has(currentVal)) select.value = currentVal;
+}
+
 function filterAndPaginateStationData() {
     const searchVal = document.getElementById('station-search') ? document.getElementById('station-search').value.toLowerCase().trim() : '';
     const statusFilter = document.getElementById('station-filter-status') ? document.getElementById('station-filter-status').value : 'all';
@@ -2799,10 +2833,24 @@ function filterAndPaginateStationData() {
         }
     }
 
+    // 0. Kategori Filtresi
+    const stationCategoryVal = document.getElementById('station-category-filter') ? document.getElementById('station-category-filter').value : 'all';
+
     // 1. Text Search Filter
     let filtered = rows;
+    if (stationCategoryVal !== 'all') {
+        filtered = filtered.filter(row => {
+            const code = String(row['Kod'] || '').trim().toUpperCase();
+            const ulRow = uretimListesiRows.find(r => r.kod === code);
+            if (!ulRow) return false;
+            const cls = determinePartClassification(ulRow);
+            const val = cls.exclusionReason || cls.category;
+            return val === stationCategoryVal;
+        });
+    }
+
     if (searchVal) {
-        filtered = rows.filter(r => {
+        filtered = filtered.filter(r => {
             const code = String(r['Kod'] || '').toLowerCase();
             const mat = String(r['Malzeme Adı'] || '').toLowerCase();
             const hCode = String(r['Hammadde Kod'] || '').toLowerCase();
@@ -2893,6 +2941,12 @@ function renderStationTable(headers) {
     // Add Status header (always visible)
     const finalHeaders = colsToShow.includes('Durum') ? colsToShow : [...colsToShow, 'Durum'];
 
+    // "Tüketim / Frekans" sütununu Malzeme Adı'ndan hemen sonra sabit ekle
+    const _malzemeIdx = finalHeaders.indexOf('Malzeme Adı');
+    if (!finalHeaders.includes('Tüketim / Frekans')) {
+        finalHeaders.splice(_malzemeIdx !== -1 ? _malzemeIdx + 1 : finalHeaders.length - 1, 0, 'Tüketim / Frekans');
+    }
+
     // Create table header cells
     const trHead = document.createElement('tr');
     finalHeaders.forEach(h => {
@@ -2902,6 +2956,9 @@ function renderStationTable(headers) {
         trHead.appendChild(th);
     });
     thead.appendChild(trHead);
+
+    // Kategori filtresini bu istasyona özel güncelle
+    if (typeof populateStationCategoryFilter === 'function') populateStationCategoryFilter();
 
     const pageRows = pState.filtered;
 
@@ -2969,27 +3026,61 @@ function renderStationTable(headers) {
                     td.innerHTML = badgeHtml;
                 }
 
+            } else if (h === 'Tüketim / Frekans') {
+                // Üretim listesindeki usageBadge mantığının aynısı
+                const ulRow = uretimListesiRows.find(r => r.kod === code);
+                if (ulRow) {
+                    const calc = determinePartClassification(ulRow);
+                    const machineCount = calc.machineCount || 1;
+                    
+                    if (calc.isExcluded) {
+                        const badgeIcon = calc.exclusionTag === 'Lazer Sac' ? 'fa-bolt text-yellow' : (calc.exclusionTag === 'Kaynaklı' ? 'fa-layer-group' : 'fa-shield');
+                        const badgeColor = calc.exclusionTag === 'Lazer Sac'
+                            ? 'background:rgba(234,179,8,0.12); color:#fde047; border:1px solid rgba(234,179,8,0.3);'
+                            : 'background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.25);';
+                        td.innerHTML = `
+                            <div style="display:flex; flex-direction:column; gap:3px; font-size:11px;">
+                                <span class="badge" style="${badgeColor} padding:2px 7px; font-weight:700; font-size:10px; border-radius:4px; display:inline-flex; align-items:center; gap:4px; width:fit-content;">
+                                    <i class="fa-solid ${badgeIcon}"></i> ${calc.exclusionReason}
+                                </span>
+                                <span style="font-size:10px; color:var(--text-dim);"><i class="fa-solid fa-shield"></i> Net İhtiyaç (Formül Dışı)</span>
+                            </div>
+                        `;
+                    } else {
+                        const isCommon = machineCount >= 2;
+                        const commonBadgeClass = machineCount >= 4
+                            ? 'background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);'
+                            : (isCommon ? 'background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3);'
+                                        : 'background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);');
+                        td.innerHTML = `
+                            <div style="display:flex; flex-direction:column; gap:4px; font-size:11px;">
+                                <span class="badge" style="${commonBadgeClass} padding:2px 7px; font-weight:700; font-size:10.5px; border-radius:4px; display:inline-flex; align-items:center; gap:4px; width:fit-content;">
+                                    <i class="fa-solid ${machineCount >= 4 ? 'fa-fire' : (isCommon ? 'fa-diagram-project' : 'fa-star')}"></i>
+                                    ${machineCount >= 2 ? machineCount + ' Makinede Ortak' : 'Özel Parça (Tek Makine)'}
+                                </span>
+                                <div style="display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-dim);">
+                                    <span><i class="fa-solid fa-wrench" style="opacity:0.6;"></i> Reçete: <b>${calc.recipeUsage} ad</b></span>
+                                    ${calc.totalAnnualDemand > 0 ? `<span style="color:#38bdf8;"><i class="fa-solid fa-chart-line"></i> Yıllık: <b>~${Math.round(calc.totalAnnualDemand)} ad</b></span>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    td.innerHTML = '<span style="color:var(--text-dim); font-size:11px;">-</span>';
+                }
+
             } else {
                 let val = row[h];
                 
                 // Saat ve Kümülatif Süre formatı
                 if ((h === 'Saat' || h === 'Kümülatif Süre') && typeof val === 'number') {
-                    // val is decimal fraction of a day (e.g. 0.025)
                     const totalHours = Math.floor(val * 24);
                     let totalMins = Math.round((val * 24 * 60) % 60);
-                    
-                    // Handle edge case where rounding minutes makes it 60
                     let displayHours = totalHours;
-                    if (totalMins === 60) {
-                        displayHours += 1;
-                        totalMins = 0;
-                    }
+                    if (totalMins === 60) { displayHours += 1; totalMins = 0; }
                     val = `${displayHours}:${totalMins.toString().padStart(2, '0')}`;
-                } 
-                else if (typeof val === 'number') {
-                    if (!Number.isInteger(val)) {
-                        val = parseFloat(val.toFixed(3));
-                    }
+                } else if (typeof val === 'number') {
+                    if (!Number.isInteger(val)) val = parseFloat(val.toFixed(3));
                 }
                 td.textContent = (val !== undefined && val !== null) ? val : '-';
                 
@@ -3002,7 +3093,6 @@ function renderStationTable(headers) {
                     const isHarici = excludedHariciKodlar.has(code);
                     const hariciIcon = isHarici ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; color:#fda4af;" title="Harici İşlem / Harici Kod"></i>' : '';
                     const textColor = isHarici ? '#fda4af' : 'white';
-                    
                     td.innerHTML = `
                         <div class="code-cell-wrapper">
                             <span class="code-cell-text" style="color:${textColor};">${hariciIcon}${code}</span>
@@ -3287,13 +3377,61 @@ function renderUretimListesiTab() {
     filterAndPaginateUlTable();
 }
 
+function populateUlCategoryFilter() {
+    const select = document.getElementById('ul-category-filter');
+    if (!select || !uretimListesiRows) return;
+    
+    // Mevcut değeri sakla
+    const currentVal = select.value;
+    
+    // Sadece üretim listesindeki kategorileri topla
+    const categories = new Map();
+    
+    uretimListesiRows.forEach(row => {
+        const cls = determinePartClassification(row);
+        let val = cls.exclusionReason || cls.category;
+        let label = cls.exclusionReason || 'Profil/Boru/Çubuk (Formüle Dahil)';
+        
+        if (!categories.has(val)) {
+            categories.set(val, label);
+        }
+    });
+    
+    // HTML'i oluştur
+    let optionsHtml = '<option value="all">Tüm Kategoriler</option>';
+    
+    // Alfabetik sırala
+    const sortedCats = Array.from(categories.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+    
+    sortedCats.forEach(([val, label]) => {
+        optionsHtml += `<option value="${val}">${label}</option>`;
+    });
+    
+    select.innerHTML = optionsHtml;
+    
+    // Eğer önceki seçim hâlâ varsa onu seç
+    if (categories.has(currentVal)) {
+        select.value = currentVal;
+    }
+}
+
 function filterAndPaginateUlTable() {
     const searchVal = document.getElementById('ul-search').value.toLowerCase().trim();
     const sortVal = document.getElementById('ul-sort').value;
 
     let filtered = uretimListesiRows;
     
-    // 0. Source File Filter
+    // 0. Kategori Filtresi
+    const categoryVal = document.getElementById('ul-category-filter') ? document.getElementById('ul-category-filter').value : 'all';
+    if (categoryVal !== 'all') {
+        filtered = filtered.filter(row => {
+            const classification = determinePartClassification(row);
+            // Kategori veya Sebep eşleşmesi (dropdown valuesu bunlardan biri olacak)
+            return classification.category === categoryVal || classification.exclusionReason === categoryVal;
+        });
+    }
+
+    // 0.1 Source File Filter
     if (selectedSourceFiles.size > 0) {
         filtered = filtered.filter(r => {
             const code = String(r.kod || '').trim().toUpperCase();
@@ -3463,12 +3601,22 @@ function determinePartClassification(row) {
         };
     }
 
-    // 4. Standart Satınalma ve Bağlantı Elemanları (Civata, Somun, Rulman, Keçe vb.)
-    const isStandardPurchase = !skipHammaddeRules && (
-        ['153.', '154.', '155.', '156.'].some(p => hKod.startsWith(p)) ||
-        ['SOMUN |', 'CİVATA |', 'CIVATA |', 'RULMAN |', 'KEÇE |', 'KECE |', 'PİM |', 'PIM |', 'SEGMAN |', 'O-RING'].some(w => hammadde.includes(w))
-    );
-    if (isStandardPurchase) {
+    // 4. Standart Satınalma ve Bağlantı Elemanları (Mekanik, Elektrik, Pnömatik, Civata vb.)
+    let purchaseCategory = '';
+    let purchaseTag = 'Satınalma';
+    
+    if (!skipHammaddeRules) {
+        if (hKod.startsWith('150.02')) { purchaseCategory = 'Mekanik (150.02)'; purchaseTag = 'Mekanik'; }
+        else if (hKod.startsWith('150.03')) { purchaseCategory = 'Hidrolik (150.03)'; purchaseTag = 'Hidrolik'; }
+        else if (hKod.startsWith('150.04')) { purchaseCategory = 'Pnömatik (150.04)'; purchaseTag = 'Pnömatik'; }
+        else if (hKod.startsWith('150.05')) { purchaseCategory = 'Elektrik-Otomasyon (150.05)'; purchaseTag = 'Elektrik'; }
+        else if (['153.', '154.', '155.', '156.'].some(p => hKod.startsWith(p)) ||
+                 ['SOMUN |', 'CİVATA |', 'CIVATA |', 'RULMAN |', 'KEÇE |', 'KECE |', 'PİM |', 'PIM |', 'SEGMAN |', 'O-RING'].some(w => hammadde.includes(w))) {
+            purchaseCategory = 'Standart Satınalma';
+        }
+    }
+
+    if (purchaseCategory) {
         return {
             category: 'standart_satinalma',
             unitType: 'adet',
@@ -3476,8 +3624,8 @@ function determinePartClassification(row) {
             unitLabel: '1 Adet',
             badgeStyle: 'background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:700; font-size:11px;',
             isExcluded: true,
-            exclusionReason: 'Standart Satınalma',
-            exclusionTag: 'Satınalma'
+            exclusionReason: purchaseCategory,
+            exclusionTag: purchaseTag
         };
     }
 

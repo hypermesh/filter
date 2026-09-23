@@ -406,6 +406,9 @@
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                         <input type="text" id="ul-search" placeholder="Kod, malzeme ara... (Hariç: -kelime)" oninput="filterAndPaginateUlTable()">
                                     </div>
+                                    <select id="ul-category-filter" class="select-input" onchange="filterAndPaginateUlTable()" style="max-width: 180px;">
+                                        <option value="all">Tüm Kategoriler</option>
+                                    </select>
                                     <select id="ul-sort" class="select-input" onchange="filterAndPaginateUlTable()">
                                         <option value="priority-asc">Öncelik (Artan)</option>
                                         <option value="priority-desc">Öncelik (Azalan)</option>
@@ -532,6 +535,9 @@
                                         <option value="missing">Eksik Olanlar</option>
                                         <option value="production">Üretimde Olanlar</option>
                                         <option value="ready">Hazır (Eksiksiz) Olanlar</option>
+                                    </select>
+                                    <select id="station-category-filter" class="select-input" style="width: auto; max-width: 180px;" onchange="filterAndPaginateStationData()">
+                                        <option value="all">Tüm Kategoriler</option>
                                     </select>
                                     <select id="station-sort" class="select-input" style="width: auto;" onchange="renderStationsTab()">
                                         <option value="priority-asc">Öncelik (Artan)</option>
