@@ -3080,13 +3080,21 @@ function renderStationTable(headers) {
                 } else if (typeof val === 'number') {
                     if (!Number.isInteger(val)) val = parseFloat(val.toFixed(3));
                 }
-                td.textContent = (val !== undefined && val !== null) ? val : '-';
+                const displayVal = (val !== undefined && val !== null) ? val : '-';
+                td.textContent = displayVal;
+                td.title = displayVal; // Hover ile tüm içeriği görebilmek için
                 
-                // Styling specific columns
+                // Tüm sütunlar için varsayılan olarak taşmayı engelle ve kesik göster
+                td.style.whiteSpace = 'nowrap';
+                td.style.overflow = 'hidden';
+                td.style.textOverflow = 'ellipsis';
+                td.style.maxWidth = '160px'; // Varsayılan max genişlik
+                
+                // Sütuna özel stiller
                 if (h === 'Kod') {
-                    td.style.whiteSpace = 'nowrap';
                     td.style.width = '140px';
                     td.style.minWidth = '140px';
+                    td.style.maxWidth = '140px';
                     td.style.padding = '6px 12px';
                     const isHarici = excludedHariciKodlar.has(code);
                     const hariciIcon = isHarici ? '<i class="fa-solid fa-triangle-exclamation" style="font-size:11px; margin-right:6px; color:#fda4af;" title="Harici İşlem / Harici Kod"></i>' : '';
@@ -3101,11 +3109,14 @@ function renderStationTable(headers) {
                     `;
                 } else if (h === 'Malzeme Adı') {
                     td.style.color = 'var(--text-muted)';
-                } else if (h === 'Hammadde') {
+                    td.style.maxWidth = '220px'; // Üretim listesindeki gibi geniş
+                } else if (h === 'Hammadde' || h === 'Hammadde Kod') {
                     td.style.color = 'var(--text-muted)';
+                    td.style.maxWidth = '200px';
                 } else if (h.includes('Miktar') || h.includes('Adet')) {
                     td.className = 'text-right';
                     td.style.fontWeight = '600';
+                    td.style.maxWidth = '120px';
                 }
             }
             tr.appendChild(td);
