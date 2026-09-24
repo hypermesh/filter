@@ -2924,13 +2924,13 @@ function renderStationTable(headers) {
 
     // Select the key columns to display
     const ALL_DISPLAY_COLS = [
-        'Öncelik Sırası', 'Kod', 'Malzeme Adı', 'Hammadde Kod', 'Hammadde',
+        'Öncelik Sırası', 'Kod', 'Malzeme Adı', 'Tüketim / Frekans', 'Hammadde Kod', 'Hammadde',
         'Rezerve Edilecek Miktar', 'Üretilecek Miktar', 'Hammadde Miktar', 'Toplam Hammadde Miktarı',
         'Hazırlık Süresi', 'Birim İşlem Süresi', 'Toplam Süre', 'Saat', 'Kümülatif Süre', 'Durum'
     ];
 
-    // Sadece bu sayfanın headers'ında bulunanları al (Saat / Kümülatif Süre dahil)
-    const displayCols = ALL_DISPLAY_COLS.filter(c => c === 'Durum' || headers.includes(c));
+    // Sadece bu sayfanın headers'ında bulunanları al (Saat / Kümülatif Süre / Durum / Tüketim dahil)
+    const displayCols = ALL_DISPLAY_COLS.filter(c => c === 'Durum' || c === 'Tüketim / Frekans' || headers.includes(c));
 
     // Kullanıcının gizlediği sütunları çıkar
     const colsToShow = displayCols.filter(c => !hiddenStationCols.has(c));
@@ -2941,18 +2941,13 @@ function renderStationTable(headers) {
     // Add Status header (always visible)
     const finalHeaders = colsToShow.includes('Durum') ? colsToShow : [...colsToShow, 'Durum'];
 
-    // "Tüketim / Frekans" sütununu Malzeme Adı'ndan hemen sonra sabit ekle
-    const _malzemeIdx = finalHeaders.indexOf('Malzeme Adı');
-    if (!finalHeaders.includes('Tüketim / Frekans')) {
-        finalHeaders.splice(_malzemeIdx !== -1 ? _malzemeIdx + 1 : finalHeaders.length - 1, 0, 'Tüketim / Frekans');
-    }
-
     // Create table header cells
     const trHead = document.createElement('tr');
     finalHeaders.forEach(h => {
         const th = document.createElement('th');
         th.textContent = h;
         if (h.includes('Miktar') || h.includes('Adet')) th.className = 'text-right';
+        if (h === 'Tüketim / Frekans') th.style.minWidth = '190px';
         trHead.appendChild(th);
     });
     thead.appendChild(trHead);
@@ -3027,10 +3022,13 @@ function renderStationTable(headers) {
                 }
 
             } else if (h === 'Tüketim / Frekans') {
+                td.style.whiteSpace = 'nowrap';
+                td.style.minWidth = '190px';
+                
                 // Üretim listesindeki usageBadge mantığının aynısı
                 const ulRow = uretimListesiRows.find(r => r.kod === code);
                 if (ulRow) {
-                    const calc = determinePartClassification(ulRow);
+                    const calc = calculateEmpiricalBatchQty(ulRow);
                     const machineCount = calc.machineCount || 1;
                     
                     if (calc.isExcluded) {
